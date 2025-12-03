@@ -10,7 +10,7 @@ export default defineNuxtConfig({
     '@nuxt/fonts',
     '@nuxt/icon',
     '@nuxt/image',
-
+    '@nuxtjs/supabase', // <--- importante
   ],
   css: ['~/assets/css/tailwind.css'],
   typescript: {
@@ -25,6 +25,9 @@ export default defineNuxtConfig({
       tailwindcss: {},
       autoprefixer: {},
     },
+  },
+  supabase: {
+    redirect: false, // vamos controlar o redirect no front
   },
   app: {
     head: {
