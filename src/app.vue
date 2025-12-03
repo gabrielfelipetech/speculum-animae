@@ -6,6 +6,18 @@
     <SiteHeader
       :theme="theme"
       @toggle-theme="toggleTheme"
+      @open-auth="isAuthOpen = true"
+      @logout="handleLogout"
+    />
+
+    <AuthModal
+      :open="isAuthOpen"
+      :loading="authLoading"
+      :error-message="authError"
+      @update:open="(v) => (isAuthOpen = v)"
+      @close="isAuthOpen = false"
+      @submit-email="handleEmailAuth"
+      @google-auth="handleGoogleAuth"
     />
 
     <main class="mx-auto max-w-5xl px-4 py-6">
@@ -15,12 +27,21 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, watch } from 'vue';
+import { onMounted, watch, ref, computed } from 'vue';
 import SiteHeader from '~/components/layout/SiteHeader.vue';
+import AuthModal from '~/components/auth/AuthModal.vue';
+import { useAuth } from '~/composables/useAuth';
 
 type Theme = 'light' | 'dark';
 
 const theme = useState<Theme>('theme', () => 'light');
+const isAuthOpen = ref(false);
+
+const { signInWithEmail, signUpWithEmail, signInWithGoogle, signOut, loading, errorMessage } =
+  useAuth();
+
+const authLoading = computed(() => loading.value);
+const authError = computed(() => errorMessage.value ?? null);
 
 function applyThemeClass(value: Theme): void {
   if (process.client) {
@@ -56,5 +77,40 @@ watch(
 
 function toggleTheme(): void {
   theme.value = theme.value === 'light' ? 'dark' : 'light';
+}
+
+async function handleEmailAuth(payload: {
+  mode: 'signin' | 'signup';
+  email: string;
+  password: string;
+  name?: string;
+  gender?: 'male' | 'female';
+}) {
+  if (payload.mode === 'signin') {
+    const user = await signInWithEmail(payload.email, payload.password);
+    if (user) isAuthOpen.value = false;
+  } else {
+    if (!payload.name || !payload.gender) {
+      return;
+    }
+    const user = await signUpWithEmail({
+      email: payload.email,
+      password: payload.password,
+      fullName: payload.name,
+      gender: payload.gender,
+    });
+    if (user) {
+      isAuthOpen.value = false;
+    }
+  }
+}
+
+async function handleGoogleAuth() {
+  await signInWithGoogle();
+  // redirecionamento vem do próprio Supabase
+}
+
+async function handleLogout() {
+  await signOut();
 }
 </script>
