@@ -1,9 +1,20 @@
 // server/api/results.post.ts
+import { serverSupabaseClient, serverSupabaseUser } from '#supabase/server';
+
+type ResultItem = {
+  groupId: string;
+  name: string;
+  average: number;
+};
 
 export interface StoredResult {
-  id: string; // sessionId usado na rota /resultados/:id
+  id: string; 
   slug: 'twelve-layers' | 'temperaments';
-  results: { groupId: string; name: string; average: number }[];
+
+  userId?: string | null;
+  email?: string | null;
+
+  results: ResultItem[];
   topSummaries?: {
     groupId: string;
     name: string;
@@ -22,9 +33,9 @@ export interface StoredResult {
 export default defineEventHandler(async (event) => {
   const body = await readBody<{
     sessionId: string;
-    clientId: string; // mantido só por compatibilidade, mesmo sem uso aqui
+    clientId: string;
     category: 'twelveLayers' | 'temperaments';
-    results: { groupId: string; name: string; average: number }[];
+    results: ResultItem[];
     topSummaries?: StoredResult['topSummaries'];
     meta?: StoredResult['meta'];
   }>(event);
@@ -33,13 +44,15 @@ export default defineEventHandler(async (event) => {
   const key = 'items';
 
   const slug: StoredResult['slug'] =
-    body.category === 'twelveLayers'
-      ? 'twelve-layers'
-      : 'temperaments';
+    body.category === 'twelveLayers' ? 'twelve-layers' : 'temperaments';
+
+  const user = await serverSupabaseUser(event).catch(() => null);
 
   const entry: StoredResult = {
     id: body.sessionId,
     slug,
+    userId: user?.id ?? null,
+    email: user?.email ?? null,
     results: body.results,
     topSummaries: body.topSummaries ?? undefined,
     meta: body.meta ?? undefined,
@@ -50,6 +63,30 @@ export default defineEventHandler(async (event) => {
   current.push(entry);
   await storage.setItem(key, current);
 
-  // o front espera { id: sessionId }
+  try {
+    if (user) {
+      const client = serverSupabaseClient(event);
+
+      const { error } = await client.from('test_results').insert({
+        session_id: body.sessionId,
+        user_id: user.id,
+        client_id: body.clientId ?? null,
+        slug,
+        results: body.results,
+        top_summaries: body.topSummaries ?? null,
+        meta: body.meta ?? null,
+      });
+
+      if (error) {
+        console.error('[Supabase] erro ao inserir test_results', error);
+      }
+    }
+  } catch (err) {
+    console.error(
+      '[Supabase] erro inesperado ao sincronizar resultados',
+      err,
+    );
+  }
+
   return { id: entry.id };
 });

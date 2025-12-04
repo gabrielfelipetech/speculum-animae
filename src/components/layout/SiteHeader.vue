@@ -29,11 +29,12 @@
         <div class="flex items-center gap-2">
           <!-- Logado -->
           <template v-if="user">
-            <span
-              class="hidden max-w-[160px] truncate text-xs text-slate-700 dark:text-slate-200 sm:inline"
+            <NuxtLink
+              to="/testes/historico"
+              class="hidden max-w-[160px] truncate text-xs text-slate-700 underline-offset-2 hover:underline dark:text-slate-200 sm:inline"
             >
               {{ displayName }}
-            </span>
+            </NuxtLink>
 
             <button
               type="button"
