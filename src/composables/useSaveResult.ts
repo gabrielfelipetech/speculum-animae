@@ -39,27 +39,27 @@ export function useSaveResult() {
         }
       }
 
-      const category = args.config.category; // 'twelveLayers' | 'temperaments'
+      // Normaliza categoria em só 2 tipos
+      const category: 'twelveLayers' | 'temperaments' =
+        args.config.category === 'temperaments'
+          ? 'temperaments'
+          : 'twelveLayers';
 
-      const response = await $fetch<{ id: string }>(
-        '/api/results',
-        {
-          method: 'POST',
-          body: {
-            sessionId,
-            clientId,
-            category,
-            results: args.results,
-            topSummaries: args.topSummaries,
-            meta: {
-              title: args.config.title,
-              subtitle: args.config.subtitle,
-              groupsLabel:
-                args.config.groupsLabel ?? 'Camada',
-            },
+      const response = await $fetch<{ id: string }>('/api/results', {
+        method: 'POST',
+        body: {
+          sessionId,
+          clientId,
+          category,
+          results: args.results,
+          topSummaries: args.topSummaries,
+          meta: {
+            title: args.config.title,
+            subtitle: args.config.subtitle,
+            groupsLabel: args.config.groupsLabel ?? 'Camada',
           },
         },
-      );
+      });
 
       return response?.id ?? null;
     } catch (error) {
