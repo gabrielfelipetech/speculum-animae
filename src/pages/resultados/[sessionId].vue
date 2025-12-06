@@ -1,21 +1,3 @@
-<!-- src/pages/resultados/[sessionId].vue -->
-<template>
-  <section
-    v-if="twelveReport || temperamentReport"
-    class="min-h-screen bg-slate-50/70 dark:bg-slate-950"
-  >
-    <TwelveLayersResultsView
-      v-if="twelveReport"
-      :report="twelveReport"
-    />
-
-    <TemperamentsResultsView
-      v-else-if="temperamentReport"
-      :report="temperamentReport"
-    />
-  </section>
-</template>
-
 <script setup lang="ts">
 import { computed } from 'vue';
 import { useRoute, useAsyncData } from '#app';
@@ -30,11 +12,11 @@ import TwelveLayersResultsView from '../../components/results/TwelveLayersResult
 import TemperamentsResultsView from '../../components/results/TemperamentsResultView.vue';
 
 const route = useRoute();
-const sessionId = route.params.sessionId as string;
+const sessionId = computed(() => route.params.sessionId as string);
 
 const { data, error } = await useAsyncData<AnyReport>(
-  `results-${sessionId}`,
-  () => $fetch(`/api/results/${sessionId}`)
+  `results-${sessionId.value}`,
+  () => $fetch(`/api/results/${sessionId.value}`),
 );
 
 if (error.value) {
@@ -63,3 +45,21 @@ const temperamentReport = computed<TemperamentReport | null>(() => {
     : null;
 });
 </script>
+
+<template>
+  <section
+    v-if="twelveReport || temperamentReport"
+    class="min-h-screen bg-slate-50/70 dark:bg-slate-950"
+  >
+    <TwelveLayersResultsView
+      v-if="twelveReport"
+      :report="twelveReport"
+    />
+
+    <TemperamentsResultsView
+      v-else-if="temperamentReport"
+      :report="temperamentReport"
+      :session-id="sessionId"
+    />
+  </section>
+</template>

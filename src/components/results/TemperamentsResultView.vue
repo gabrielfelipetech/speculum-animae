@@ -99,11 +99,12 @@
           família e vida afetiva.
         </p>
         <button
-          type="button"
-          class="mt-4 inline-flex items-center rounded-full bg-emerald-500 px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-emerald-50 shadow-sm ring-1 ring-emerald-300/70 transition hover:bg-emerald-600 hover:ring-emerald-400"
-        >
-          Baixar relatório completo (PDF)
-        </button>
+        type="button"
+        class="mt-4 inline-flex items-center rounded-full bg-emerald-500 px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-emerald-50 shadow-sm ring-1 ring-emerald-300/70 transition hover:bg-emerald-600 hover:ring-emerald-400"
+        @click="downloadPdf"
+      >
+        Baixar relatório completo (PDF)
+      </button>
       </div>
     </div>
 
@@ -152,6 +153,7 @@
   </section>
 </template>
 
+<!-- src/components/results/TemperamentsResultsView.vue -->
 <script setup lang="ts">
 import { computed } from 'vue';
 import type { TemperamentReport, GraphPoint } from '~/types/results';
@@ -160,18 +162,22 @@ import ResultsSidebarLink from '~/components/results/ResultsSidebarLink.vue';
 
 const props = defineProps<{
   report: TemperamentReport;
+  sessionId: string;          // <<< ADICIONAR ESTA PROP
 }>();
 
 const report = props.report;
 
-// monta gráfico a partir das médias (primary + secondary + outros se vierem)
-const graphPoints = computed<GraphPoint[]>(() => {
-  const internal: GraphPoint[] = [];
+function downloadPdf() {
+  if (process.client) {
+    // agora props.sessionId é uma string válida
+    window.location.href = `/api/results/${props.sessionId}/pdf`;
+  }
+}
 
+// monta gráfico a partir das médias
+const graphPoints = computed<GraphPoint[]>(() => {
   const all: { label: string; value: number }[] = [];
 
-  // o backend pode mandar só primary/secondary em temperament.results;
-  // então usamos os scores do próprio StoredResult se quiser depois.
   all.push({
     label: report.temperament.primary.name,
     value: report.temperament.primary.average,
@@ -190,3 +196,4 @@ const graphPoints = computed<GraphPoint[]>(() => {
   }));
 });
 </script>
+
