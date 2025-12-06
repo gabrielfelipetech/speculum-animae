@@ -1,5 +1,8 @@
 // server/api/results.post.ts
-import { serverSupabaseUser } from '#supabase/server';
+import {
+  serverSupabaseClient,
+  serverSupabaseUser,
+} from '#supabase/server';
 
 export interface StoredResult {
   id: string; // sessionId
@@ -38,6 +41,7 @@ export default defineEventHandler(async (event) => {
 
   const user = await serverSupabaseUser(event).catch(() => null);
 
+  // 1) Sempre salvar localmente como fallback
   const storage = useStorage<StoredResult[]>('results');
   const key = 'items';
 
@@ -57,6 +61,29 @@ export default defineEventHandler(async (event) => {
   current.push(entry);
   await storage.setItem(key, current);
 
-  // o front espera { id: sessionId }
+  // 2) Tentar sincronizar com Supabase (apenas se estiver logado)
+  try {
+    if (user) {
+      const supabase = await serverSupabaseClient(event);
+
+      const { error } = await supabase.from('test_results').insert({
+        id: crypto.randomUUID(),          // opcional, pode deixar o default da tabela
+        session_id: body.sessionId,
+        user_id: user.id,                 // manda explícito, fica mais claro
+        client_id: body.clientId ?? null,
+        slug,
+        results: body.results,
+        top_summaries: body.topSummaries ?? null,
+        meta: body.meta ?? null,
+      });
+
+      if (error) {
+        console.error('[Supabase] erro ao inserir test_results', error);
+      }
+    }
+  } catch (err) {
+    console.error('[Supabase] erro inesperado ao sincronizar resultados', err);
+  }
+
   return { id: entry.id };
 });
