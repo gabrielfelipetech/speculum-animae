@@ -64,19 +64,17 @@
             </div>
 
             <LikertScaleQuestion
-  :model-value="
-    answers[fieldKey(question.groupId, question.questionId)] ?? null
-  "
-  :name="fieldKey(question.groupId, question.questionId)"
-  :min-label="config.scaleMinLabel"
-  :max-label="config.scaleMaxLabel"
-  @update:modelValue="(value) => {
-    answers[fieldKey(question.groupId, question.questionId)] = value;
-  }"
-  @answered="handleQuestionAnswered(questionIndex)"
-/>
-
-
+              :model-value="
+                answers[fieldKey(question.groupId, question.questionId)] ?? null
+              "
+              :name="fieldKey(question.groupId, question.questionId)"
+              :min-label="config.scaleMinLabel"
+              :max-label="config.scaleMaxLabel"
+              @update:modelValue="(value) => {
+                answers[fieldKey(question.groupId, question.questionId)] = value;
+              }"
+              @answered="handleQuestionAnswered(questionIndex)"
+            />
 
             <p
               v-if="
@@ -127,7 +125,6 @@
   </section>
 </template>
 
-<!-- src/components/tests/LikertTestView.vue -->
 <script setup lang="ts">
 import {
   ref,
@@ -135,6 +132,7 @@ import {
   watch,
   type ComponentPublicInstance,
 } from 'vue';
+import { useRoute, useRouter } from '#app';
 
 import BaseButton from '~/components/base/BaseButton.vue';
 import LikertScaleQuestion from '~/components/tests/LikertScaleQuestion.vue';
@@ -147,16 +145,13 @@ import LikertTestPremiumTeaser from '~/components/tests/LikertTestPremiumTeaser.
 import type { LikertTestConfig } from '~/types/tests';
 import { useLikertTestRunner } from '~/composables/useLikertTestRunner';
 
-// se você não estiver usando auto-import do Nuxt, descomente:
-// import { useRouter } from '#app';
-
 const props = defineProps<{
   config: LikertTestConfig;
 }>();
 
 const { config } = toRefs(props);
 
-// router do Nuxt 3
+const route = useRoute();
 const router = useRouter();
 
 // engine reutilizável
@@ -165,7 +160,7 @@ const {
   currentGroupIndex,
   submittedCurrentStep,
   results,
-  lastResultId,              // <-- PEGAR o id salvo
+  lastResultId,
 
   totalGroups,
   currentGroup,
@@ -185,6 +180,33 @@ const {
   goNext,
 } = useLikertTestRunner(config);
 
+// ------- RESET QUANDO vier com ?fresh=1 --------
+function resetTestRun() {
+  // limpa respostas
+  Object.keys(answers).forEach((k) => {
+    // @ts-expect-error - answers é objeto reativo
+    delete answers[k];
+  });
+
+  currentGroupIndex.value = 0;
+  submittedCurrentStep.value = false;
+  results.value = [];
+  lastResultId.value = null;
+  topSummaries.value = [];
+}
+
+if (process.client && route.query.fresh === '1') {
+  resetTestRun();
+
+  // remove o query da URL pra não ficar resetando em navegações internas
+  router.replace({
+    path: route.path,
+    query: Object.fromEntries(
+      Object.entries(route.query).filter(([key]) => key !== 'fresh'),
+    ),
+  });
+}
+// ------------------------------------------------
 
 // refs de perguntas (para scroll + foco)
 const questionRefs = ref<HTMLElement[]>([]);
@@ -217,6 +239,8 @@ watch(currentGroupIndex, () => {
     }
   });
 });
+
+// quando o resultado é salvo, redireciona para /resultados/:id
 watch(lastResultId, (id) => {
   if (!id) return;
   router.push(`/resultados/${id}`);
