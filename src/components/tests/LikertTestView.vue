@@ -1,10 +1,7 @@
-<!-- src/components/tests/LikertTestView.vue -->
 <template>
   <section class="space-y-6">
-    <!-- Cabeçalho do teste -->
     <LikertTestHeader :config="config" />
 
-    <!-- Info de progresso geral -->
     <LikertTestProgress
       :answered-count="answeredCount"
       :total-questions="totalQuestions"
@@ -13,14 +10,12 @@
       :overall-progress-percent="overallProgressPercent"
     />
 
-    <!-- Formulário (etapa atual) -->
     <form class="space-y-6" @submit.prevent="handleNextClick">
       <div
         v-if="currentGroup"
         data-test-step-container
         class="rounded-2xl border border-slate-200/80 bg-white/90 p-4 dark:border-slate-800 dark:bg-slate-900/80"
       >
-        <!-- Cabeçalho da etapa (neutro) -->
         <div class="mb-3 flex items-start justify-between gap-3">
           <div>
             <h3 class="text-sm font-semibold leading-tight">
@@ -36,7 +31,6 @@
           </span>
         </div>
 
-        <!-- Lista de perguntas da etapa -->
         <div class="space-y-4">
           <div
             v-for="(question, questionIndex) in currentGroup.questions"
@@ -58,7 +52,6 @@
               {{ question.text }}
             </p>
 
-            <!-- mini-indicador local -->
             <div class="text-[0.7rem] text-slate-500 dark:text-slate-400">
               Afirmação {{ questionIndex + 1 }} de {{ currentGroupTotalQuestions }}
             </div>
@@ -71,7 +64,8 @@
               :min-label="config.scaleMinLabel"
               :max-label="config.scaleMaxLabel"
               @update:modelValue="(value) => {
-                answers[fieldKey(question.groupId, question.questionId)] = value;
+                answers[fieldKey(question.groupId, question.questionId)] =
+                  value;
               }"
               @answered="handleQuestionAnswered(questionIndex)"
             />
@@ -89,7 +83,6 @@
         </div>
       </div>
 
-      <!-- Navegação entre etapas -->
       <div class="flex flex-wrap items-center justify-between gap-3">
         <BaseButton
           type="button"
@@ -107,20 +100,17 @@
       </div>
     </form>
 
-    <!-- RESULTADOS: CAMADAS / VIRTUDES / ETC (não temperamentos) -->
     <LikertTestResultsGeneric
       v-if="results && results.length && config.category !== 'temperaments'"
       :results="results"
       :top-summaries="topSummaries"
     />
 
-    <!-- RESULTADOS: TEMPERAMENTOS -->
     <LikertTestResultsTemperaments
       v-if="results && results.length && config.category === 'temperaments'"
       :results="results"
     />
 
-    <!-- Bloco de monetização / relatório premium -->
     <LikertTestPremiumTeaser v-if="config.hasPremiumReport" />
   </section>
 </template>
@@ -132,7 +122,7 @@ import {
   watch,
   type ComponentPublicInstance,
 } from 'vue';
-import { useRoute, useRouter } from '#app';
+import { useRouter } from '#app';
 
 import BaseButton from '~/components/base/BaseButton.vue';
 import LikertScaleQuestion from '~/components/tests/LikertScaleQuestion.vue';
@@ -147,21 +137,18 @@ import { useLikertTestRunner } from '~/composables/useLikertTestRunner';
 
 const props = defineProps<{
   config: LikertTestConfig;
+  fresh?: boolean;
 }>();
 
 const { config } = toRefs(props);
-
-const route = useRoute();
 const router = useRouter();
 
-// engine reutilizável
 const {
   answers,
   currentGroupIndex,
   submittedCurrentStep,
   results,
   lastResultId,
-
   totalGroups,
   currentGroup,
   currentGroupNumber,
@@ -174,42 +161,13 @@ const {
   canGoNext,
   overallProgressPercent,
   topSummaries,
-
   fieldKey,
   goPrevious,
   goNext,
-} = useLikertTestRunner(config);
+} = useLikertTestRunner(config, { fresh: props.fresh === true });
 
-// ------- RESET QUANDO vier com ?fresh=1 --------
-function resetTestRun() {
-  // limpa respostas
-  Object.keys(answers).forEach((k) => {
-    // @ts-expect-error - answers é objeto reativo
-    delete answers[k];
-  });
-
-  currentGroupIndex.value = 0;
-  submittedCurrentStep.value = false;
-  results.value = [];
-  lastResultId.value = null;
-  topSummaries.value = [];
-}
-
-if (process.client && route.query.fresh === '1') {
-  resetTestRun();
-
-  // remove o query da URL pra não ficar resetando em navegações internas
-  router.replace({
-    path: route.path,
-    query: Object.fromEntries(
-      Object.entries(route.query).filter(([key]) => key !== 'fresh'),
-    ),
-  });
-}
-// ------------------------------------------------
-
-// refs de perguntas (para scroll + foco)
 const questionRefs = ref<HTMLElement[]>([]);
+const shouldRedirectOnComplete = ref(false);
 
 function setQuestionRef(
   el: Element | ComponentPublicInstance | null,
@@ -220,7 +178,6 @@ function setQuestionRef(
   }
 }
 
-// quando muda de etapa, reseta refs e faz scroll suave
 watch(currentGroupIndex, () => {
   questionRefs.value = [];
   submittedCurrentStep.value = false;
@@ -240,17 +197,21 @@ watch(currentGroupIndex, () => {
   });
 });
 
-// quando o resultado é salvo, redireciona para /resultados/:id
 watch(lastResultId, (id) => {
-  if (!id) return;
+  if (!id || !shouldRedirectOnComplete.value) return;
+
+  shouldRedirectOnComplete.value = false;
   router.push(`/resultados/${id}`);
 });
 
 function handleNextClick(): void {
+  if (isLastGroup.value) {
+    shouldRedirectOnComplete.value = true;
+  }
+
   goNext();
 }
 
-// scroll suave para próxima pergunta ao responder
 function handleQuestionAnswered(questionIndex: number): void {
   if (!process.client) return;
 
@@ -265,7 +226,6 @@ function handleQuestionAnswered(questionIndex: number): void {
   }
 }
 
-// navegação por teclado dentro da pergunta
 function handleQuestionKeydown(
   event: KeyboardEvent,
   questionIndex: number,
@@ -276,13 +236,12 @@ function handleQuestionKeydown(
   const field = fieldKey(groupId, questionId);
   const current = answers[field];
 
-  // esquerda/direita = mudar opção
   if (key === 'ArrowLeft' || key === 'ArrowRight') {
     event.preventDefault();
 
     let next: number;
     if (typeof current !== 'number') {
-      next = 4; // neutro
+      next = 4;
     } else {
       next = key === 'ArrowLeft' ? current - 1 : current + 1;
       next = Math.min(7, Math.max(1, next));
@@ -299,7 +258,6 @@ function handleQuestionKeydown(
     return;
   }
 
-  // cima/baixo = navegar entre perguntas desta etapa
   if (key === 'ArrowUp' || key === 'ArrowDown') {
     event.preventDefault();
     const group = currentGroup.value;
@@ -323,3 +281,4 @@ function handleQuestionKeydown(
   }
 }
 </script>
+

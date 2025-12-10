@@ -14,11 +14,7 @@
     </div>
 
     <div v-else>
-      <LikertTestView
-        :key="likertKey"
-        :config="likertConfig"
-        :fresh="isFreshRun"
-      />
+      <LikertTestView :config="likertConfig" :fresh="isFresh" />
     </div>
   </main>
 </template>
@@ -35,16 +31,9 @@ const router = useRouter();
 
 const slug = computed(() => route.params.slug as string);
 
-// flag vinda do query ?fresh=1
-const isFreshRun = computed(() => route.query.fresh === '1');
+const isFresh = computed(() => route.query.fresh === '1');
 
-// config do teste
 const likertConfig = computed(() => getLikertTestBySlug(slug.value));
-
-// key muda quando é um fresh run → força remount
-const likertKey = computed(() =>
-  isFreshRun.value ? `${slug.value}-fresh-${Date.now()}` : slug.value,
-);
 
 useHead(() => ({
   title: likertConfig.value

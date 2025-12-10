@@ -1,4 +1,3 @@
-// src/composables/useLikertTestRunner.ts
 import {
   computed,
   isRef,
@@ -35,7 +34,6 @@ function fieldKeyInternal(groupId: string, questionId: string): string {
 }
 
 function chooseStepSize(total: number): number {
-  // tenta 5, depois 4, depois 6 – sempre sem resto
   const candidates = [5, 4, 6];
   const found = candidates.find((size) => total > 0 && total % size === 0);
   return found ?? 5;
@@ -52,19 +50,21 @@ function shuffleArray<T>(input: T[]): T[] {
 
 export function useLikertTestRunner(
   config: Ref<LikertTestConfig> | LikertTestConfig,
+  options?: { fresh?: boolean },
 ) {
   const cfg = isRef(config) ? config : ref(config);
+  const isFreshStart = !!options?.fresh;
 
   const answers = reactive<Record<string, number | null>>({});
-  const currentGroupIndex = ref(0); // agora é índice da "etapa"
+  const currentGroupIndex = ref(0);
   const submittedCurrentStep = ref(false);
   const results = ref<GroupResult[] | null>(null);
   const lastResultId = ref<string | null>(null);
 
-  // Grupos conceituais (camadas, temperamentos, virtudes...) – usados só para pontuação
+  // grupos conceituais (camadas / temperamentos etc.)
   const conceptualGroups = computed(() => cfg.value.groups);
 
-  // Todas as perguntas com marcação de grupo (camada/temperamento)
+  // perguntas achatadas
   const flatQuestions = computed<FlatQuestion[]>(() => {
     const items: FlatQuestion[] = [];
     for (const group of conceptualGroups.value) {
@@ -80,13 +80,11 @@ export function useLikertTestRunner(
     return items;
   });
 
-  // Ordem efetiva das perguntas (embaralhada)
+  // ordem embaralhada
   const orderedQuestions = ref<FlatQuestion[]>([]);
 
-  // Tamanho de cada etapa (4, 5 ou 6, sem resto)
   const stepSize = computed(() => chooseStepSize(flatQuestions.value.length));
 
-  // Etapas (steps) de exibição – cada step tem 4/5/6 perguntas misturadas de vários grupos
   const steps = computed<StepGroup[]>(() => {
     const base =
       orderedQuestions.value.length > 0
@@ -106,7 +104,6 @@ export function useLikertTestRunner(
     return chunks;
   });
 
-  // A partir daqui, "groups" significa "etapas"
   const groups = computed(() => steps.value);
   const totalGroups = computed(() => groups.value.length);
   const groupLabel = computed(() => cfg.value.groupsLabel ?? 'Etapa');
@@ -205,46 +202,56 @@ export function useLikertTestRunner(
     }
   }
 
-  // --- ciclo de vida: montar, carregar respostas, gerar ordem aleatória, posicionar na primeira etapa incompleta ---
-
+  // ---------------- onMounted: agora respeitando "fresh" ----------------
   onMounted(() => {
     if (typeof window === 'undefined') return;
 
-    // 1) gera ordem aleatória das perguntas
+    // sempre gera ordem aleatória
     orderedQuestions.value = shuffleArray(flatQuestions.value);
 
-    // 2) restaura respostas do localStorage
-    const raw = window.localStorage.getItem(storageKey.value);
-    if (raw) {
-      try {
-        const parsed = JSON.parse(raw) as Record<string, number>;
-        const validKeys = new Set(
-          flatQuestions.value.map((q) =>
-            fieldKeyInternal(q.groupId, q.questionId),
-          ),
-        );
-
-        for (const [key, value] of Object.entries(parsed)) {
-          if (!validKeys.has(key)) continue;
-          if (typeof value !== 'number') continue;
-          answers[key] = value;
-        }
-      } catch (error) {
-        console.error('Failed to load saved answers:', error);
+    if (isFreshStart) {
+      // 1) zera tudo
+      for (const key of Object.keys(answers)) {
+        delete answers[key];
       }
-    }
+      currentGroupIndex.value = 0;
+      submittedCurrentStep.value = false;
 
-    // 3) encontra a primeira etapa incompleta
-    const firstIncompleteIndex = steps.value.findIndex(
-      (step) => !isStepComplete(step),
-    );
-
-    if (firstIncompleteIndex === -1) {
-      // tudo completo → vai para última etapa e calcula resultado
-      currentGroupIndex.value = Math.max(0, totalGroups.value - 1);
-      void computeResults();
+      // 2) apaga qualquer coisa salva
+      window.localStorage.removeItem(storageKey.value);
     } else {
-      currentGroupIndex.value = firstIncompleteIndex;
+      // fluxo antigo: restaurar respostas do localStorage
+      const raw = window.localStorage.getItem(storageKey.value);
+      if (raw) {
+        try {
+          const parsed = JSON.parse(raw) as Record<string, number>;
+          const validKeys = new Set(
+            flatQuestions.value.map((q) =>
+              fieldKeyInternal(q.groupId, q.questionId),
+            ),
+          );
+
+          for (const [key, value] of Object.entries(parsed)) {
+            if (!validKeys.has(key)) continue;
+            if (typeof value !== 'number') continue;
+            answers[key] = value;
+          }
+        } catch (error) {
+          console.error('Failed to load saved answers:', error);
+        }
+      }
+
+      // posiciona na primeira etapa incompleta
+      const firstIncompleteIndex = steps.value.findIndex(
+        (step) => !isStepComplete(step),
+      );
+
+      if (firstIncompleteIndex === -1) {
+        currentGroupIndex.value = Math.max(0, totalGroups.value - 1);
+        void computeResults();
+      } else {
+        currentGroupIndex.value = firstIncompleteIndex;
+      }
     }
 
     window.addEventListener('beforeunload', handleBeforeUnload);
@@ -276,7 +283,7 @@ export function useLikertTestRunner(
     { deep: true },
   );
 
-  // --- regras de resumo e topSummaries (igual antes) ---
+  // ---------------- regras de resumo ----------------
 
   function getSummaryRule(score: number): SummaryRule | null {
     const rules = cfg.value.scoring.summaryRules;
@@ -330,7 +337,6 @@ export function useLikertTestRunner(
       return;
     }
 
-    // resultado por "grupo conceitual" (camada, temperamento, etc.)
     const groupResults: GroupResult[] = conceptualGroups.value.map(
       (group) => {
         const scores = group.questions.map((q) => {
@@ -394,7 +400,7 @@ export function useLikertTestRunner(
     results,
     lastResultId,
 
-    groups, // agora são etapas (steps)
+    groups,
     totalGroups,
     groupLabel,
     currentGroup,
