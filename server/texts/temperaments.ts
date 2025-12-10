@@ -1,20 +1,32 @@
 // server/texts/temperaments.ts
-import type { ResultBlock } from '~/types/results';
+import type { ResultBlock, TemperamentScore } from './temperaments.shared';
+import { intensityLabel } from './temperaments.shared';
 
-export interface TemperamentScore {
-  groupId: string;
-  name: string;
-  average: number;
-}
+import {
+  buildCholericIntro,
+  buildCholericTraits,
+  buildCholericCareer,
+  buildCholericGrowth,
+  buildCholericRelationships,
+} from './temperaments.choleric';
 
-function intensityLabel(score: number): string {
-  if (score >= 6) return 'muito alta';
-  if (score >= 5) return 'alta';
-  if (score >= 4) return 'moderada';
-  if (score >= 3) return 'equilibrada';
-  if (score >= 2) return 'baixa';
-  return 'muito baixa';
-}
+import {
+  buildSanguineIntro,
+  buildSanguineTraits,
+  buildSanguineCareer,
+  buildSanguineGrowth,
+  buildSanguineRelationships,
+} from './temperaments.sanguine';
+
+import {
+  buildPhlegmaticIntro,
+  buildPhlegmaticTraits,
+  buildPhlegmaticCareer,
+  buildPhlegmaticGrowth,
+  buildPhlegmaticRelationships,
+} from './temperaments.phlegmatic';
+
+export type { TemperamentScore } from './temperaments.shared';
 
 export const TEMPERAMENT_TEXTS = {
   detectTemperament(results: TemperamentScore[]) {
@@ -26,9 +38,11 @@ export const TEMPERAMENT_TEXTS = {
 
   buildTitle(primary: TemperamentScore, secondary?: TemperamentScore) {
     if (!primary) return 'Seu perfil de temperamento';
+
     if (secondary) {
       return `Seu perfil de temperamento: ${primary.name} com traços de ${secondary.name}`;
     }
+
     return `Seu perfil de temperamento: ${primary.name}`;
   },
 
@@ -36,6 +50,7 @@ export const TEMPERAMENT_TEXTS = {
     if (!primary) {
       return 'Retrato de temperamento construído a partir das suas respostas.';
     }
+
     if (secondary) {
       return (
         `Este retrato foi construído a partir do teste de temperamentos, ` +
@@ -43,18 +58,45 @@ export const TEMPERAMENT_TEXTS = {
         `aparece na forma como você sente, decide e se relaciona.`
       );
     }
+
     return (
       `Este retrato foi construído a partir do teste de temperamentos, ` +
       `mostrando como o temperamento ${primary.name} influencia seu modo de agir, reagir e se relacionar.`
     );
   },
 
+  // -------------------------------------------------------------------------
+  // INTRO / OVERVIEW
+  // -------------------------------------------------------------------------
   buildIntro(
     primary: TemperamentScore,
     secondary?: TemperamentScore,
   ): ResultBlock[] {
-    const blocks: ResultBlock[] = [];
+    if (!primary) {
+      return [
+        {
+          id: 'temp-overview-generic',
+          access: 'free',
+          title: 'Seu perfil de temperamento',
+          body:
+            'Retrato de temperamento construído a partir das suas respostas, indicando tendências estáveis de reação, ' +
+            'ritmo, sensibilidade e modo de buscar segurança.',
+        },
+      ];
+    }
 
+    switch (primary.groupId) {
+      case 'choleric':
+        return buildCholericIntro(primary, secondary);
+      case 'sanguine':
+        return buildSanguineIntro(primary, secondary);
+      case 'phlegmatic':
+        return buildPhlegmaticIntro(primary, secondary);
+      default:
+        break;
+    }
+
+    const blocks: ResultBlock[] = [];
     const comboText = secondary
       ? `Seu temperamento predominante é ${primary.name}, com influência significativa de ${secondary.name}.`
       : `Seu temperamento predominante é ${primary.name}.`;
@@ -98,10 +140,26 @@ export const TEMPERAMENT_TEXTS = {
     return blocks;
   },
 
+  // -------------------------------------------------------------------------
+  // TRAÇOS / PERSONALIDADE
+  // -------------------------------------------------------------------------
   buildTraits(
     primary: TemperamentScore,
     secondary?: TemperamentScore,
   ): ResultBlock[] {
+    if (!primary) return [];
+
+    switch (primary.groupId) {
+      case 'choleric':
+        return buildCholericTraits(primary, secondary);
+      case 'sanguine':
+        return buildSanguineTraits(primary, secondary);
+      case 'phlegmatic':
+        return buildPhlegmaticTraits(primary, secondary);
+      default:
+        break;
+    }
+
     const blocks: ResultBlock[] = [];
 
     blocks.push({
@@ -141,10 +199,26 @@ export const TEMPERAMENT_TEXTS = {
     return blocks;
   },
 
+  // -------------------------------------------------------------------------
+  // CARREIRA / TRABALHO
+  // -------------------------------------------------------------------------
   buildCareer(
     primary: TemperamentScore,
     secondary?: TemperamentScore,
   ): ResultBlock[] {
+    if (!primary) return [];
+
+    switch (primary.groupId) {
+      case 'choleric':
+        return buildCholericCareer(primary, secondary);
+      case 'sanguine':
+        return buildSanguineCareer(primary, secondary);
+      case 'phlegmatic':
+        return buildPhlegmaticCareer(primary, secondary);
+      default:
+        break;
+    }
+
     const blocks: ResultBlock[] = [];
 
     blocks.push({
@@ -194,10 +268,26 @@ export const TEMPERAMENT_TEXTS = {
     return blocks;
   },
 
+  // -------------------------------------------------------------------------
+  // CRESCIMENTO / VIRTUDES
+  // -------------------------------------------------------------------------
   buildGrowth(
     primary: TemperamentScore,
     secondary?: TemperamentScore,
   ): ResultBlock[] {
+    if (!primary) return [];
+
+    switch (primary.groupId) {
+      case 'choleric':
+        return buildCholericGrowth(primary, secondary);
+      case 'sanguine':
+        return buildSanguineGrowth(primary, secondary);
+      case 'phlegmatic':
+        return buildPhlegmaticGrowth(primary, secondary);
+      default:
+        break;
+    }
+
     const blocks: ResultBlock[] = [];
 
     blocks.push({
@@ -246,10 +336,26 @@ export const TEMPERAMENT_TEXTS = {
     return blocks;
   },
 
+  // -------------------------------------------------------------------------
+  // RELACIONAMENTOS
+  // -------------------------------------------------------------------------
   buildRelationships(
     primary: TemperamentScore,
     secondary?: TemperamentScore,
   ): ResultBlock[] {
+    if (!primary) return [];
+
+    switch (primary.groupId) {
+      case 'choleric':
+        return buildCholericRelationships(primary, secondary);
+      case 'sanguine':
+        return buildSanguineRelationships(primary, secondary);
+      case 'phlegmatic':
+        return buildPhlegmaticRelationships(primary, secondary);
+      default:
+        break;
+    }
+
     const blocks: ResultBlock[] = [];
 
     blocks.push({
