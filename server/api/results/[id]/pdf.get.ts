@@ -5,7 +5,6 @@ import {
 } from '#supabase/server';
 import { sendStream, type H3Event } from 'h3';
 import PDFDocument from 'pdfkit';
-import type PDFKit from 'pdfkit';
 import type { StoredResult } from '../../results.post';
 import { buildTemperamentsPdfContent } from '../../report-builders/temperamentsPdf';
 

@@ -1,0 +1,94 @@
+Esta é uma abordagem excelente e sistêmica. Manter o temperamento primário como o "cenário base" e o secundário como o "modificador de ação" garantirá a coesão visual que você busca para o seu SaaS.
+
+Abaixo estão os prompts para as 12 combinações de temperamentos.
+
+**Instrução de Uso:**
+Para cada prompt, você deve substituir o trecho final `[INSERIR AQUI: wide landscape shot PARA DESKTOP OU vertical portrait shot PARA MOBILE]` pela instrução específica da IA geradora de imagens que você está usando (ex: no Midjourney seria `--ar 16:9` para desktop ou `--ar 2:3` para mobile).
+
+---
+
+### 1. GRUPO COLÉRICO (BASE: FOGO, LIDERANÇA, INTENSIDADE)
+*Cenários: Fortalezas, campos de batalha, salas de guerra, vulcões.*
+
+#### 1.1. Colérico Puro (O Guerreiro Implacável)
+**Prompt:**
+A medieval fantasy cartoon illustration in a gamified RPG style, showing a male and a female character representing the Pure Choleric temperament. The setting is a chaotic battlefield at sunset with fiery explosions in the background. The male character is a berserker knight in spiked red armor, yelling fiercely while charging forward with a massive flaming sword. The female character is a warrior queen on a ridge, holding a banner with a fist emblem and pointing imperiously towards the enemy line, shouting orders. Both look aggressive, powerful, and unstoppable. The art style is dynamic, intense, and detailed suitable for a video game UI. [INSERIR AQUI: wide landscape shot PARA DESKTOP OU vertical portrait shot PARA MOBILE].
+
+#### 1.2. Colérico-Sanguíneo (O Comandante Carismático)
+**Prompt:**
+A medieval fantasy cartoon illustration in a gamified RPG style, showing a male and a female character representing the Choleric-Sanguine temperament. The setting is the courtyard of a large castle before a battle, bright daylight. The male character is a gleaming paladin in shining gold and red armor, raising his sword high with a confident, charismatic grin, rallying cheering troops. The female character is a dynamic leader on horseback, wearing colorful, ornate armor, gesturing enthusiastically with a spear, inspiring enthusiasm rather than fear. Both look energetic, commanding, and optimistic. The art style is bright, heroic, and expressive. [INSERIR AQUI: wide landscape shot PARA DESKTOP OU vertical portrait shot PARA MOBILE].
+
+#### 1.3. Colérico-Melancólico (O General Estrategista)
+*(Este é o seu exemplo, padronizado aqui)*
+**Prompt:**
+A medieval fantasy cartoon illustration in a gamified RPG style, showing a male and a female character representing the Choleric-Melancholic temperament. The setting is a war room inside a stone fortress at night, lit by torches. The male character is a stern general in dark, heavy crimson and iron armor, frowning thoughtfully over a large strategic map covered in miniature troops. The female character is a disciplined commander in functional plate armor, holding a scroll and a quill, analyzing a thick book of tactics with a critical eye. Both look determined but deeply serious and analytical. The art style is clean, expressive, and detailed suitable for a video game UI. [INSERIR AQUI: wide landscape shot PARA DESKTOP OU vertical portrait shot PARA MOBILE].
+
+#### 1.4. Colérico-Fleumático (O Administrador de Ferro)
+**Prompt:**
+A medieval fantasy cartoon illustration in a gamified RPG style, showing a male and a female character representing the Choleric-Phlegmatic temperament. The setting is a large, organized castle throne room made of heavy grey stone. The male character is a king in heavy, practical iron armor, sitting on a blocky throne, giving a calm, absolute command with a steady hand gesture. The female character is a high-ranking official in structured, austere robes, calmly reviewing a long logistics scroll with an unshakeable, serious expression. Both look solid, immovable, authoritarian, yet calm. The art style is grounded, heavy, and clean. [INSERIR AQUI: wide landscape shot PARA DESKTOP OU vertical portrait shot PARA MOBILE].
+
+---
+
+### 2. GRUPO SANGUÍNEO (BASE: AR, ALEGRIA, SOCIAL)
+*Cenários: Tavernas, festivais, portos vibrantes, jardins ensolarados.*
+
+#### 2.1. Sanguíneo Puro (O Folião Incansável)
+**Prompt:**
+A medieval fantasy cartoon illustration in a gamified RPG style, showing a male and a female character representing the Pure Sanguine temperament. The setting is a crowded, chaotic medieval tavern during a loud feast with confetti flying. The male character is a jester in bright motley clothes, juggling chickens while balancing on a table and laughing hysterically. The female character is a dancing bard in flowing, rainbow-colored silks, spinning wildly in the center of a crowd, playing a tambourine with pure joy. Both look ecstatic, chaotic, and full of life. The art style is vibrant, energetic, and playful. [INSERIR AQUI: wide landscape shot PARA DESKTOP OU vertical portrait shot PARA MOBILE].
+
+#### 2.2. Sanguíneo-Colérico (O Capitão Aventureiro)
+*(Este é o seu exemplo, padronizado aqui)*
+**Prompt:**
+A medieval fantasy cartoon illustration in a gamified RPG style, showing a male and a female character representing the Sanguine-Choleric temperament. The setting is the deck of a fantasy expedition ship arriving at a new, vibrant port, sunny day. The male character is a dashing, smiling captain in bright blue and gold attire with a feathered hat, but he holds a sword confidently and points forward actively, leading his crew. The female character is an adventurous noblewoman in colorful yet practical travel gear, laughing while energetically directing crewmates to unload treasure chests. Both look outgoing, energetic, and take-charge. The art style is vibrant and heroic. [INSERIR AQUI: wide landscape shot PARA DESKTOP OU vertical portrait shot PARA MOBILE].
+
+#### 2.3. Sanguíneo-Melancólico (O Artista Performático)
+**Prompt:**
+A medieval fantasy cartoon illustration in a gamified RPG style, showing a male and a female character representing the Sanguine-Melancholic temperament. The setting is an outdoor amphitheater stage during a twilight performance, decorated with flowers. The male character is an actor in expressive velvet costume, performing a dramatic monologue with a theatrical mask in hand, eyes wide with emotion. The female character is playing a beautiful harp, looking wistful and deeply feeling, but surrounded by an adoring audience. Both look expressive, artistic, yet sensitive. The art style is whimsical, colorful, but with emotional depth. [INSERIR AQUI: wide landscape shot PARA DESKTOP OU vertical portrait shot PARA MOBILE].
+
+#### 2.4. Sanguíneo-Fleumático (O Amigo Despreocupado)
+**Prompt:**
+A medieval fantasy cartoon illustration in a gamified RPG style, showing a male and a female character representing the Sanguine-Phlegmatic temperament. The setting is a sunny, peaceful meadow picnic near a castle. The male character is lounging comfortably on a blanket, wearing loose, bright clothes, lazily telling a joke to friends with a relaxed smile, holding a bunch of grapes. The female character is sitting happily, weaving flower crowns, chatting amicably but very relaxed, surrounded by friendly small animals. Both look cheerful, easygoing, and low-energy comfortable. The art style is soft, sunny, and friendly. [INSERIR AQUI: wide landscape shot PARA DESKTOP OU vertical portrait shot PARA MOBILE].
+
+---
+
+### 3. GRUPO MELANCÓLICO (BASE: TERRA, ANÁLISE, PROFUNDIDADE)
+*Cenários: Bibliotecas antigas, torres de mago, ruínas, laboratórios alquímicos.*
+
+#### 3.1. Melancólico Puro (O Sábio Solitário)
+**Prompt:**
+A medieval fantasy cartoon illustration in a gamified RPG style, showing a male and a female character representing the Pure Melancholic temperament. The setting is a dusty, ancient observatory tower at night, filled with cobwebs. The male character is an old wizard peering intensely through a telescope, surrounded by complex star charts and glowing runes, looking troubled. The female character is a scholar buried under a pile of ancient, crumbling books, writing furiously in a journal with ink stains on her hands, completely focused. Both look intense, solitary, and deeply analytical. The art style is moody, detailed, and atmospheric. [INSERIR AQUI: wide landscape shot PARA DESKTOP OU vertical portrait shot PARA MOBILE].
+
+#### 3.2. Melancólico-Colérico (O Arquiteto Visionário)
+**Prompt:**
+A medieval fantasy cartoon illustration in a gamified RPG style, showing a male and a female character representing the Melancholic-Choleric temperament. The setting is a high-fantasy alchemist's laboratory filled with bubbling contraptions. The male character is a powerful mage with furrowed brows, controlling volatile magical energy in a complex experiment, looking ambitious and critical. The female character is a master architect drawing complex blueprints for a massive magical construct, looking determined and perfectionist. Both look intellectual, ambitious, and very serious. The art style is sharp, magical, and detailed. [INSERIR AQUI: wide landscape shot PARA DESKTOP OU vertical portrait shot PARA MOBILE].
+
+#### 3.3. Melancólico-Sanguíneo (O Poeta Trágico)
+*(Este é o seu exemplo, padronizado aqui)*
+**Prompt:**
+A medieval fantasy cartoon illustration in a gamified RPG style, showing a male and a female character representing the Melancholic-Sanguine temperament. The setting is a beautiful but slightly overgrown gothic garden set within ancient ruins at twilight. The male character is a sensitive bard in dark velvet clothes, sitting on a broken column, playing a lute with a deeply emotional, tearful expression. The female character is a painter in elegant, flowing robes, standing before an easel, passionately painting a dramatic, moody landscape with large brushstrokes, looking wistful. Both look artistic, deep feeling, and expressive to the outside world. The art style is atmospheric and moody but colorful. [INSERIR AQUI: wide landscape shot PARA DESKTOP OU vertical portrait shot PARA MOBILE].
+
+#### 3.4. Melancólico-Fleumático (O Historiador Silencioso)
+**Prompt:**
+A medieval fantasy cartoon illustration in a gamified RPG style, showing a male and a female character representing the Melancholic-Phlegmatic temperament. The setting is a very quiet monastery scriptorium or archive, dimly lit. The male character is a monk slowly and incredibly carefully illuminating a manuscript with gold leaf, showing immense patience and detail. The female character is an apothecary calmly sorting dried herbs into many small jars, consulting a thick reference book with a serene, focused look. Both look quiet, methodical, patient, and perfectionist. The art style is calm, detailed, and serene. [INSERIR AQUI: wide landscape shot PARA DESKTOP OU vertical portrait shot PARA MOBILE].
+
+---
+
+### 4. GRUPO FLEUMÁTICO (BASE: ÁGUA, CALMA, ESTABILIDADE)
+*Cenários: Vilas pacíficas, fazendas, beira de rio, oficinas tranquilas.*
+
+#### 4.1. Fleumático Puro (O Aldeão Pacífico)
+**Prompt:**
+A medieval fantasy cartoon illustration in a gamified RPG style, showing a male and a female character representing the Pure Phlegmatic temperament. The setting is a sleepy riverside village on a calm day. The male character is a villager in simple brown clothes, fishing off a small dock with his hat pulled over his eyes, almost asleep, line in the water. The female character is sitting on a porch swing, slowly churning butter, looking content and serene, watching clouds go by. Both look incredibly calm, slow-paced, and peaceful. The art style is soft, slow, and relaxing. [INSERIR AQUI: wide landscape shot PARA DESKTOP OU vertical portrait shot PARA MOBILE].
+
+#### 4.2. Fleumático-Colérico (O Supervisor Constante)
+*(Este é o seu exemplo, padronizado aqui)*
+**Prompt:**
+A medieval fantasy cartoon illustration in a gamified RPG style, showing a male and a female character representing the Phlegmatic-Choleric temperament. The setting is a bustling, well-organized medieval construction site of a new village wall. The male character is a sturdy foreman in practical brown leather tunics, standing calmly with arms crossed, observing the work with a steady, unshakeable gaze, holding a hammer. The female character is a focused architect or head villager in simple, neat clothes, calmly reviewing blueprints while firmly pointing out a direction to workers. Both look extremely stable, reliable, efficient, and unemotional. The art style is grounded and clean. [INSERIR AQUI: wide landscape shot PARA DESKTOP OU vertical portrait shot PARA MOBILE].
+
+#### 4.3. Fleumático-Sanguíneo (O Vizinho Amigável)
+**Prompt:**
+A medieval fantasy cartoon illustration in a gamified RPG style, showing a male and a female character representing the Phlegmatic-Sanguine temperament. The setting is a community village garden and market stall on a pleasant day. The male character is slowly tending to giant pumpkins, but smiling broadly and waving in a friendly, easygoing way to a passerby. The female character is baking bread in an outdoor oven, chatting happily and laughing with a neighbor while working at a slow, comfortable pace. Both look pleasant, neighborly, and relaxed. The art style is sunny, friendly, and inviting. [INSERIR AQUI: wide landscape shot PARA DESKTOP OU vertical portrait shot PARA MOBILE].
+
+#### 4.4. Fleumático-Melancólico (O Artesão Meticuloso)
+**Prompt:**
+A medieval fantasy cartoon illustration in a gamified RPG style, showing a male and a female character representing the Phlegmatic-Melancholic temperament. The setting is a quiet, tidy artisan workshop (blacksmith and tailor area). The male character is a blacksmith carefully polishing a finished piece of armor, checking for minuscule flaws with immense patience and a calm expression. The female character is a tailor doing intricate needlework on a tapestry, focused, calm, and meticulous about every stitch. Both look steady, patient, quality-focused, and quiet. The art style is clean, detailed, and calm. [INSERIR AQUI: wide landscape shot PARA DESKTOP OU vertical portrait shot PARA MOBILE].
