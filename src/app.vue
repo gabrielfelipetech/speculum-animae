@@ -1,7 +1,7 @@
 <!-- src/app.vue -->
 <template>
   <div
-    class="min-h-screen bg-slate-50 text-slate-900 transition-colors dark:bg-slate-950 dark:text-slate-50"
+    class="min-h-screen bg-slate-50 text-slate-900 transition-colors dark:bg-slate-950 dark:text-slate-50 pt-8"
   >
     <SiteHeader
       :theme="theme"
@@ -23,6 +23,7 @@
     <main class="mx-auto max-w-5xl px-4 py-6">
       <NuxtPage />
     </main>
+    <SiteFooter />
   </div>
 </template>
 
@@ -31,7 +32,7 @@ import { onMounted, watch, ref, computed } from 'vue';
 import SiteHeader from '~/components/layout/SiteHeader.vue';
 import AuthModal from '~/components/auth/AuthModal.vue';
 import { useAuth } from '~/composables/useAuth';
-
+import SiteFooter from '~/components/layout/SiteFooter.vue';
 type Theme = 'light' | 'dark';
 
 const theme = useState<Theme>('theme', () => 'light');

@@ -34,6 +34,7 @@ export const defaultSummaryRules: SummaryRule[] = [
 
 // -----------------------------------------------------------------------------
 // TESTE DE TEMPERAMENTOS – 32 PERGUNTAS (8 POR TEMPERAMENTO)
+// AGORA: 40 PERGUNTAS (10 POR TEMPERAMENTO)
 // -----------------------------------------------------------------------------
 
 export const temperamentsClassicTest: LikertTestConfig = {
@@ -96,6 +97,14 @@ export const temperamentsClassicTest: LikertTestConfig = {
           id: 'q8',
           text: 'Tenho dificuldade em aceitar quando outra pessoa assume o controle da situação.',
         },
+        {
+          id: 'q9',
+          text: 'Em debates ou discussões, não tenho receio de confrontar diretamente ideias com as quais discordo.',
+        },
+        {
+          id: 'q10',
+          text: 'Costumo assumir responsabilidade por decisões difíceis, mesmo quando isso pode me tornar impopular.',
+        },
       ],
     },
 
@@ -139,6 +148,14 @@ export const temperamentsClassicTest: LikertTestConfig = {
         {
           id: 'q8',
           text: 'Quando algo não sai como planejei, é difícil não me culpar.',
+        },
+        {
+          id: 'q9',
+          text: 'Geralmente percebo nuances e sentimentos que passam despercebidos para a maioria das pessoas.',
+        },
+        {
+          id: 'q10',
+          text: 'Tenho tendência a antecipar problemas e preocupações, pensando bastante nos possíveis riscos.',
         },
       ],
     },
@@ -184,6 +201,14 @@ export const temperamentsClassicTest: LikertTestConfig = {
           id: 'q8',
           text: 'Fico entediado quando preciso seguir rotinas muito rígidas.',
         },
+        {
+          id: 'q9',
+          text: 'Frequentemente falo mais do que escuto quando estou animado em uma conversa.',
+        },
+        {
+          id: 'q10',
+          text: 'Costumo aceitar convites e fazer planos sem avaliar se realmente terei tempo ou energia para cumpri-los.',
+        },
       ],
     },
 
@@ -227,6 +252,14 @@ export const temperamentsClassicTest: LikertTestConfig = {
         {
           id: 'q8',
           text: 'Sou capaz de trabalhar por muito tempo na mesma tarefa, desde que o ambiente seja tranquilo.',
+        },
+        {
+          id: 'q9',
+          text: 'Prefiro tarefas previsíveis e estáveis a projetos cheios de urgência e adrenalina.',
+        },
+        {
+          id: 'q10',
+          text: 'Mesmo quando estou incomodado, evito demonstrar irritação para não criar um clima ruim.',
         },
       ],
     },

@@ -79,26 +79,7 @@ export const likertTests: LikertTestConfig[] = [
             id: 'q5',
             text: 'Quando estou fisicamente desconfortável, acho difícil me concentrar em tarefas ou problemas abstratos.',
           },
-          {
-            id: 'q6',
-            text: 'A forma como cuido do meu corpo (alimentação, sono, saúde) afeta significativamente meu humor e disposição.',
-          },
-          {
-            id: 'q7',
-            text: 'Sinto realização pessoal quando consigo disciplinar meu corpo – por exemplo, exercitando-me ou cumprindo uma dieta saudável.',
-          },
-          {
-            id: 'q8',
-            text: 'Percebo que meu estado físico (energias, dores, vitalidade) influencia minhas decisões e atitudes diárias.',
-          },
-          {
-            id: 'q9',
-            text: 'Busco regularmente maneiras de melhorar meu conforto físico ou minha saúde, pois isso me dá segurança.',
-          },
-          {
-            id: 'q10',
-            text: 'Eu diria que o meu corpo é a base da minha identidade – quando estou bem fisicamente, sinto-me mais eu mesmo(a).',
-          },
+          
         ],
       },
       {
@@ -126,26 +107,6 @@ export const likertTests: LikertTestConfig[] = [
           {
             id: 'q5',
             text: 'Acredito que uma parte das minhas escolhas de vida é influenciada por predisposições com as quais já nasci.',
-          },
-          {
-            id: 'q6',
-            text: 'Tenho um temperamento bem definido (por exemplo, sou naturalmente mais calmo(a) ou mais agitado(a)), e poucas coisas mudam isso.',
-          },
-          {
-            id: 'q7',
-            text: 'Reconheço que algumas reações minhas ocorrem sem reflexão consciente, quase de forma instintiva.',
-          },
-          {
-            id: 'q8',
-            text: 'Creio que características inatas minhas orientam, em grande medida, minhas motivações básicas e o que busco evitar.',
-          },
-          {
-            id: 'q9',
-            text: 'Às vezes me pego repetindo histórias ou padrões de comportamento que já vi na minha família.',
-          },
-          {
-            id: 'q10',
-            text: 'Ao tomar decisões espontâneas, percebo que elas seguem um jeito muito meu, que provavelmente sempre fez parte de quem eu sou.',
           },
         ],
       },
@@ -175,26 +136,6 @@ export const likertTests: LikertTestConfig[] = [
             id: 'q5',
             text: 'Fico entusiasmado(a) quando preciso resolver um problema ou descobrir informações por conta própria.',
           },
-          {
-            id: 'q6',
-            text: 'Entender regras, padrões ou sistemas (jogos, línguas, ferramentas) me traz satisfação pessoal.',
-          },
-          {
-            id: 'q7',
-            text: 'A capacidade de compreender novas ideias ou desenvolver novas habilidades me motiva mais do que benefícios materiais.',
-          },
-          {
-            id: 'q8',
-            text: 'Meus olhos se iluminam diante de um quebra-cabeça ou desafio intelectual, mesmo que seja algo simples.',
-          },
-          {
-            id: 'q9',
-            text: 'Ao enfrentar uma situação desconhecida, sinto mais excitação em aprender do que medo de cometer erros.',
-          },
-          {
-            id: 'q10',
-            text: 'Percebo que continuo a crescer como pessoa quando amplio meus conhecimentos e compreendo novas perspectivas sobre a realidade.',
-          },
         ],
       },
       {
@@ -222,26 +163,6 @@ export const likertTests: LikertTestConfig[] = [
           {
             id: 'q5',
             text: 'Costumo sonhar acordado(a) com um futuro melhor ou com conquistas que me trariam muita felicidade.',
-          },
-          {
-            id: 'q6',
-            text: 'Quando relembro o meu passado, são as memórias felizes ou dolorosas que mais definem como me sinto no presente.',
-          },
-          {
-            id: 'q7',
-            text: 'Tenho medo de ficar sozinho(a) ou de não ter ninguém que realmente se importe comigo.',
-          },
-          {
-            id: 'q8',
-            text: 'Minhas decisões muitas vezes são guiadas pelo desejo de evitar sofrimento emocional ou de reviver sentimentos bons.',
-          },
-          {
-            id: 'q9',
-            text: 'Procuro ativamente situações estimulantes (diversão, aventura, novidades) para sentir-me vivo(a) e feliz.',
-          },
-          {
-            id: 'q10',
-            text: 'Sinto que minha vida tem sentido quando estou feliz e de bem com a vida; quando estou triste ou insatisfeito(a), tudo parece perder o brilho.',
           },
         ],
       },
@@ -271,26 +192,6 @@ export const likertTests: LikertTestConfig[] = [
             id: 'q5',
             text: 'Quando fracasso em alguma meta importante, isso abala profundamente minha confiança em mim mesmo(a).',
           },
-          {
-            id: 'q6',
-            text: 'Procuro controlar minhas emoções se acho que elas podem atrapalhar meu desempenho ou meus objetivos.',
-          },
-          {
-            id: 'q7',
-            text: 'Estou sempre tentando melhorar minhas habilidades e conhecimentos para me tornar mais competente e autossuficiente.',
-          },
-          {
-            id: 'q8',
-            text: 'A opinião que tenho de mim mesmo(a) depende principalmente de atingir os padrões que eu mesmo(a) estabeleço para mim.',
-          },
-          {
-            id: 'q9',
-            text: 'Encaro obstáculos como testes da minha força pessoal e fico motivado(a) a vencê-los.',
-          },
-          {
-            id: 'q10',
-            text: 'Preciso sentir que estou no comando da minha própria vida e destino para me sentir realmente realizado(a).',
-          },
         ],
       },
       {
@@ -318,26 +219,6 @@ export const likertTests: LikertTestConfig[] = [
           {
             id: 'q5',
             text: 'Creio que é fundamental ser prático(a) e fazer o que precisa ser feito para garantir estabilidade e sucesso na vida.',
-          },
-          {
-            id: 'q6',
-            text: 'Estou disposto(a) a sacrificar um pouco do meu conforto ou interesses pessoais em prol de cumprir um objetivo maior ou uma obrigação.',
-          },
-          {
-            id: 'q7',
-            text: 'Eu meço meu sucesso pelo quanto consigo realizar de fato, e não apenas pelas intenções ou planos que tenho.',
-          },
-          {
-            id: 'q8',
-            text: 'Valorizo a disciplina e a eficiência na execução das minhas atividades diárias.',
-          },
-          {
-            id: 'q9',
-            text: 'Encaro meu dia a dia quase como uma lista de tarefas a completar, focando em concluir cada item com eficiência.',
-          },
-          {
-            id: 'q10',
-            text: 'Quando assumo um compromisso, faço de tudo para entregar o que foi prometido, mesmo que isso exija esforço extra ou enfrentar dificuldades pessoais.',
           },
         ],
       },
@@ -367,26 +248,6 @@ export const likertTests: LikertTestConfig[] = [
             id: 'q5',
             text: 'Prezo muito a lealdade entre colegas, amigos ou familiares e ajo de maneira leal ao meu grupo.',
           },
-          {
-            id: 'q6',
-            text: 'Tenho satisfação em colaborar com outras pessoas em projetos ou causas coletivas, mais do que trabalhar sozinho(a) visando ganho próprio.',
-          },
-          {
-            id: 'q7',
-            text: 'Cumprir regras e acordos sociais me dá uma sensação de pertencimento e segurança no meio em que vivo.',
-          },
-          {
-            id: 'q8',
-            text: 'Evito atitudes que possam fazer com que eu perca a confiança ou o respeito das pessoas ao meu redor.',
-          },
-          {
-            id: 'q9',
-            text: 'Quando desempenho um papel social (no trabalho, na família, na comunidade), esforço-me para corresponder ao que esperam de mim.',
-          },
-          {
-            id: 'q10',
-            text: 'Sinto culpa se deixo de cumprir alguma responsabilidade importante que outras pessoas estavam contando que eu cumprisse.',
-          },
         ],
       },
       {
@@ -414,26 +275,6 @@ export const likertTests: LikertTestConfig[] = [
           {
             id: 'q5',
             text: 'Avalio criticamente as escolhas que fiz na vida para entender se elas me aproximaram do que considero uma vida bem-sucedida ou significativa.',
-          },
-          {
-            id: 'q6',
-            text: 'Tenho consciência do tipo de legado ou marca pessoal que estou construindo com minhas ações ao longo dos anos.',
-          },
-          {
-            id: 'q7',
-            text: 'É importante para mim saber se estou realizando meu potencial ou se estou desperdiçando oportunidades importantes.',
-          },
-          {
-            id: 'q8',
-            text: 'Às vezes penso em como seria minha vida se eu tivesse tomado decisões diferentes e o que isso revela sobre meus valores atuais.',
-          },
-          {
-            id: 'q9',
-            text: 'Vejo a mim mesmo(a) como responsável pelo rumo da minha vida, e isso me leva a julgar minhas próprias atitudes com honestidade.',
-          },
-          {
-            id: 'q10',
-            text: 'Mais do que as opiniões alheias, é minha própria consciência que uso para medir se estou vivendo a vida que eu deveria viver.',
           },
         ],
       },
@@ -463,26 +304,6 @@ export const likertTests: LikertTestConfig[] = [
             id: 'q5',
             text: 'Quando algo significativo me acontece, penso no significado disso num contexto mais amplo, e não apenas de forma individual.',
           },
-          {
-            id: 'q6',
-            text: 'Prefiro buscar a verdade ou compreender profundamente um assunto do que simplesmente aceitar explicações fáceis ou convenientes.',
-          },
-          {
-            id: 'q7',
-            text: 'Sinto-me realizado(a) ao criar algo intelectual ou artístico que expressa ideias importantes para a sociedade ou para a compreensão humana.',
-          },
-          {
-            id: 'q8',
-            text: 'Dedico tempo regularmente à leitura, reflexão ou produção de conhecimento, pois isso atende a uma necessidade interior minha.',
-          },
-          {
-            id: 'q9',
-            text: 'Acredito que compartilhar ideias e descobertas é tão importante quanto buscar benefícios pessoais ou imediatos.',
-          },
-          {
-            id: 'q10',
-            text: 'Valorizo quando consigo enxergar meus sentimentos ou experiências como parte de um panorama humano muito maior, conectando-me a toda a humanidade.',
-          },
         ],
       },
       {
@@ -511,26 +332,6 @@ export const likertTests: LikertTestConfig[] = [
             id: 'q5',
             text: 'Sinto-me pessoalmente responsável pelo impacto moral que minhas ações possam ter no mundo ou na vida de outras pessoas.',
           },
-          {
-            id: 'q6',
-            text: 'Antes de agir, considero se eu gostaria que qualquer pessoa agisse da mesma forma nas mesmas circunstâncias.',
-          },
-          {
-            id: 'q7',
-            text: 'Procuro me colocar no lugar do ser humano em geral ao julgar minhas atitudes, pensando no que seria correto fazer independentemente de quem eu seja.',
-          },
-          {
-            id: 'q8',
-            text: 'Acredito que existem verdades ou leis morais objetivas que devo respeitar acima das conveniências do momento ou dos costumes do meu meio.',
-          },
-          {
-            id: 'q9',
-            text: 'Cumprir um dever por princípio me traz mais paz de espírito do que obter um ganho que vá contra meus valores.',
-          },
-          {
-            id: 'q10',
-            text: 'Prefiro enfrentar consequências negativas a trair meus valores ou fazer algo que considero moralmente errado.',
-          },
         ],
       },
       {
@@ -557,26 +358,6 @@ export const likertTests: LikertTestConfig[] = [
           {
             id: 'q5',
             text: 'Sinto que faço parte da continuidade da história humana e tento atuar de forma consciente desse fato nos projetos que empreendo.',
-          },
-          {
-            id: 'q6',
-            text: 'Estou disposto(a) a assumir grandes responsabilidades se acreditar que podem levar a mudanças benéficas para muitas pessoas.',
-          },
-          {
-            id: 'q7',
-            text: 'Vejo meu trabalho e minhas escolhas como parte de algo maior, que vai além da minha vida pessoal e do meu tempo de vida.',
-          },
-          {
-            id: 'q8',
-            text: 'Busco entender em que contexto maior (social, histórico) minha vida se insere e ajo de acordo com essa compreensão mais ampla.',
-          },
-          {
-            id: 'q9',
-            text: 'Sentir que estou contribuindo para o progresso ou para o bem comum da sociedade é uma das maiores satisfações que posso ter.',
-          },
-          {
-            id: 'q10',
-            text: 'Tenho clareza dos meus objetivos de longo prazo e de como eles podem impactar positivamente outras pessoas ou o futuro da comunidade.',
           },
         ],
       },
@@ -605,26 +386,6 @@ export const likertTests: LikertTestConfig[] = [
           {
             id: 'q5',
             text: 'Frequentemente reflito sobre o sentido último da vida e busco alinhar minhas ações cotidianas a esse sentido que considero verdadeiro.',
-          },
-          {
-            id: 'q6',
-            text: 'A pergunta “Isto agrada a Deus (ou ao bem maior)?” passa pela minha mente ao avaliar o que faço ou planejo fazer.',
-          },
-          {
-            id: 'q7',
-            text: 'Sinto-me conectado(a) a algo sagrado ou eterno que dá direção e significado às minhas escolhas diárias.',
-          },
-          {
-            id: 'q8',
-            text: 'Meu objetivo principal é viver de acordo com valores espirituais profundos, mesmo que isso às vezes seja incompreendido pelas outras pessoas.',
-          },
-          {
-            id: 'q9',
-            text: 'Encaro cada situação difícil como uma oportunidade de cumprir o que acredito ser minha missão dada por Deus ou pelo destino.',
-          },
-          {
-            id: 'q10',
-            text: 'Para mim, o verdadeiro sucesso é cumprir um chamado espiritual ou ético, e não apenas atingir metas terrenas de riqueza, poder ou fama.',
           },
         ],
       },

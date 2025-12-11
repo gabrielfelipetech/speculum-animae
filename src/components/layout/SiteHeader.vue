@@ -1,6 +1,7 @@
+<!-- src/components/layout/SiteHeader.vue -->
 <template>
   <header
-    class="border-b border-slate-200/80 bg-white/80 backdrop-blur dark:border-slate-800 dark:bg-slate-900/80"
+    class="fixed inset-x-0 top-0 z-40 border-b border-slate-200/80 bg-white/80 backdrop-blur dark:border-slate-800 dark:bg-slate-900/80"
   >
     <div
       class="mx-auto flex max-w-5xl items-center justify-between gap-4 px-4 py-3"

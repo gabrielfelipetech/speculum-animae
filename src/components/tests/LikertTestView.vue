@@ -111,7 +111,6 @@
       :results="results"
     />
 
-    <LikertTestPremiumTeaser v-if="config.hasPremiumReport" />
   </section>
 </template>
 
@@ -130,7 +129,6 @@ import LikertTestHeader from '~/components/tests/LikertTestHeader.vue';
 import LikertTestProgress from '~/components/tests/LikertTestProgress.vue';
 import LikertTestResultsGeneric from '~/components/tests/LikertTestResultsGeneric.vue';
 import LikertTestResultsTemperaments from '~/components/tests/LikertTestResultsTemperaments.vue';
-import LikertTestPremiumTeaser from '~/components/tests/LikertTestPremiumTeaser.vue';
 
 import type { LikertTestConfig } from '~/types/tests';
 import { useLikertTestRunner } from '~/composables/useLikertTestRunner';
