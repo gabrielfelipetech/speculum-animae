@@ -23,7 +23,7 @@
         </p>
       </header>
 
-      <!-- Gráfico dos temperamentos -->
+      <!-- Gráfico dos temperamentos (barras 0–10) -->
       <div
         class="rounded-2xl border border-slate-200/80 bg-white/90 p-5 text-sm shadow-sm dark:border-slate-800 dark:bg-slate-900/80"
       >
@@ -31,7 +31,8 @@
           Intensidade dos temperamentos
         </h2>
         <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">
-          Cada barra mostra o quanto cada temperamento aparece em você (média na escala de 1 a 7).
+          Cada barra mostra o quanto cada temperamento aparece em você. Os
+          valores foram convertidos para uma escala de 0 a 10.
         </p>
 
         <div class="mt-4 space-y-3">
@@ -45,7 +46,7 @@
                 {{ score.label }}
               </span>
               <span class="text-slate-500 dark:text-slate-400">
-                {{ score.value.toFixed(2) }} / 7
+                {{ score.value.toFixed(1) }} / 10
               </span>
             </div>
             <div
@@ -53,7 +54,7 @@
             >
               <div
                 class="h-2 rounded-full bg-emerald-500 dark:bg-emerald-400"
-                :style="{ width: `${(score.value / 7) * 100}%` }"
+                :style="{ width: `${(score.value / 10) * 100}%` }"
               />
             </div>
           </div>
@@ -99,12 +100,12 @@
           família e vida afetiva.
         </p>
         <button
-        type="button"
-        class="mt-4 inline-flex items-center rounded-full bg-emerald-500 px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-emerald-50 shadow-sm ring-1 ring-emerald-300/70 transition hover:bg-emerald-600 hover:ring-emerald-400"
-        @click="downloadPdf"
-      >
-        Baixar relatório completo (PDF)
-      </button>
+          type="button"
+          class="mt-4 inline-flex items-center rounded-full bg-emerald-500 px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-emerald-50 shadow-sm ring-1 ring-emerald-300/70 transition hover:bg-emerald-600 hover:ring-emerald-400"
+          @click="downloadPdf"
+        >
+          Baixar relatório completo (PDF)
+        </button>
       </div>
     </div>
 
@@ -153,7 +154,6 @@
   </section>
 </template>
 
-<!-- src/components/results/TemperamentsResultsView.vue -->
 <script setup lang="ts">
 import { computed } from 'vue';
 import type { TemperamentReport, GraphPoint } from '~/types/results';
@@ -162,19 +162,31 @@ import ResultsSidebarLink from '~/components/results/ResultsSidebarLink.vue';
 
 const props = defineProps<{
   report: TemperamentReport;
-  sessionId: string;          // <<< ADICIONAR ESTA PROP
+  sessionId: string;
 }>();
 
 const report = props.report;
 
 function downloadPdf() {
   if (process.client) {
-    // agora props.sessionId é uma string válida
     window.location.href = `/api/results/${props.sessionId}/pdf`;
   }
 }
 
-// monta gráfico a partir das médias
+function toZeroTenScale(value: number): number {
+  // a média sempre está entre 1 e 7
+  const clamped = Math.max(1, Math.min(value, 7));
+
+  // mapeia [1, 7] -> [0, 1]
+  const normalized = (clamped - 1) / (7 - 1);
+
+  // agora [0, 1] -> [0, 10]
+  const converted = normalized * 10;
+
+  return Number(converted.toFixed(1));
+}
+
+// barras para temperamento principal + secundário (quando existir)
 const graphPoints = computed<GraphPoint[]>(() => {
   const all: { label: string; value: number }[] = [];
 
@@ -192,8 +204,7 @@ const graphPoints = computed<GraphPoint[]>(() => {
 
   return all.map((item) => ({
     label: item.label,
-    value: Number(item.value.toFixed(2)),
+    value: toZeroTenScale(item.value),
   }));
 });
 </script>
-

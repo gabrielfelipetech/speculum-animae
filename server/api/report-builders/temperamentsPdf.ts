@@ -5,6 +5,30 @@ import { buildSanguinePdfProfile } from './temperamentsPdf.sanguine';
 import { buildMelancholicPdfProfile } from './temperamentsPdf.melancholic';
 
 export type TemperamentId = 'choleric' | 'melancholic' | 'sanguine' | 'phlegmatic';
+export type GrowthHorizon = 'week' | 'month' | 'quarter';
+
+export type GrowthStep = {
+  id: string;
+  title: string;       
+  horizon: GrowthHorizon;
+  actions: string[];    
+};
+
+export type CaseStudyDomain = 'work' | 'family' | 'relationships';
+
+export type CaseStudy = {
+  id: string;
+  domain: CaseStudyDomain;
+  title: string;        
+  body: string;         
+};
+
+export type SpiritualPractice = {
+  id: string;
+  title: string;        
+  steps: string[];      
+  readings?: string[];  
+};
 
 export interface TemperamentProfile {
   label: string;
@@ -15,7 +39,13 @@ export interface TemperamentProfile {
   relationships: string[];
   family: string[];
   spiritual: string[];
+  growthSteps?: GrowthStep[];                
+  examen?: string[];                         
+  caseStudies?: CaseStudy[];                 
+  spiritualPractices?: SpiritualPractice[];  
 }
+
+
 
 export interface TemperamentsBuilderContext {
   main: { id: TemperamentId; average: number };

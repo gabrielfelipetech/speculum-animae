@@ -1,17 +1,37 @@
 // src/types/results.ts
 
 export type AccessLevel = 'free' | 'premium';
+export type ResultBlockUi = {
+  variant?: 'text' | 'list' | 'twoColumnCards';
+  icon?: 'check' | 'warning' | 'energy' | 'guide' | 'neutral';
+  group?: string;
+  column?: 1 | 2;
+};
 
+export type ResultPoint = {
+  label: string;
+  description: string;
+};
+
+export type ResultSection = {
+  title: string;
+  bullets: string[];
+};
+export type ResultBlockContent =
+  | { kind: 'bullets'; bullets: string[] } 
+  | { kind: 'sections'; sections: ResultSection[] }
+  | { kind: 'points'; points: ResultPoint[] };
 export type ResultBlock = {
   id: string;
   title?: string;
   body: string;
   access: AccessLevel;
+  content?: ResultBlockContent;
+  ui?: ResultBlockUi;
 };
-
 export type GraphPoint = {
   label: string;
-  value: number; // 1–7 em geral
+  value: number; 
 };
 
 /* ---------- 12 Camadas ---------- */
@@ -65,6 +85,5 @@ export interface TemperamentReport {
   relationships: { blocks: ResultBlock[] };
 }
 
-/* ---------- União ---------- */
 
 export type AnyReport = TwelveLayersReport | TemperamentReport;

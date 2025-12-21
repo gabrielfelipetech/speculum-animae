@@ -11,8 +11,9 @@
       <label
         v-for="(option, index) in options"
         :key="option"
-        class="relative flex h-11 w-11 cursor-pointer items-center justify-center rounded-full border-2 text-[0.65rem] font-medium transition focus-within:ring-2 focus-within:ring-brand-500 focus-within:ring-offset-2 focus-within:ring-offset-slate-50 dark:focus-within:ring-offset-slate-950"
+        class="relative flex cursor-pointer items-center justify-center rounded-full border-2 text-[0.65rem] font-medium transition focus-within:ring-2 focus-within:ring-brand-500 focus-within:ring-offset-2 focus-within:ring-offset-slate-50 dark:focus-within:ring-offset-slate-950"
         :class="outerCircleClass(index, option === internalValue)"
+        :style="outerSizeStyle(index)"
       >
         <span class="sr-only">
           {{ name }} – opção {{ option }}
@@ -28,8 +29,9 @@
         />
 
         <span
-          class="block h-5 w-5 rounded-full transition"
+          class="block rounded-full transition"
           :class="innerDotClass(index, option === internalValue)"
+          :style="innerSizeStyle(index)"
         />
       </label>
     </div>
@@ -59,7 +61,6 @@ const props = defineProps({
   },
 });
 
-
 const emit = defineEmits<{
   (e: 'update:modelValue', value: number): void;
   (e: 'answered'): void; // dispara quando a pergunta for respondida pela primeira vez
@@ -77,6 +78,37 @@ const minLabelComputed = computed(
 const maxLabelComputed = computed(
   () => props.maxLabel ?? 'Concordo totalmente',
 );
+
+// índice central (valor 4)
+const CENTER_INDEX = Math.floor(options.length / 2); // 3
+const OUTER_BASE_SIZE = 38; // px para o central
+const OUTER_STEP = 6; // px de incremento em cada "anel"
+const INNER_BASE_SIZE = 10; // px para o central (pode ajustar)
+const INNER_STEP = 2; // px de incremento para o dot
+
+function distanceFromCenter(index: number): number {
+  return Math.abs(index - CENTER_INDEX);
+}
+
+// tamanhos do círculo externo (label)
+function outerSizeStyle(index: number): Record<string, string> {
+  const distance = distanceFromCenter(index);
+  const size = OUTER_BASE_SIZE + OUTER_STEP * distance;
+  return {
+    width: `${size}px`,
+    height: `${size}px`,
+  };
+}
+
+// tamanhos do círculo interno (dot)
+function innerSizeStyle(index: number): Record<string, string> {
+  const distance = distanceFromCenter(index);
+  const size = INNER_BASE_SIZE + INNER_STEP * distance;
+  return {
+    width: `${size}px`,
+    height: `${size}px`,
+  };
+}
 
 // AGORA: esquerda = disagree (vermelho), direita = agree (verde)
 function zoneFromIndex(index: number): 'disagree' | 'neutral' | 'agree' {
