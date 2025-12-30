@@ -1,3 +1,4 @@
+
 <template>
   <section class="space-y-6">
     <LikertTestHeader :config="config" />
@@ -18,9 +19,7 @@
       >
         <div class="mb-3 flex items-start justify-between gap-3">
           <div>
-            <h3 class="text-sm font-semibold leading-tight">
-              Afirmações
-            </h3>
+            <h3 class="text-sm font-semibold leading-tight">Afirmações</h3>
             <p class="text-xs text-slate-500 dark:text-slate-400">
               Responda com sinceridade; não há respostas certas ou erradas.
             </p>
@@ -57,24 +56,18 @@
             </div>
 
             <LikertScaleQuestion
-              :model-value="
-                answers[fieldKey(question.groupId, question.questionId)] ?? null
-              "
+              :model-value="answers[fieldKey(question.groupId, question.questionId)] ?? null"
               :name="fieldKey(question.groupId, question.questionId)"
               :min-label="config.scaleMinLabel"
               :max-label="config.scaleMaxLabel"
               @update:modelValue="(value) => {
-                answers[fieldKey(question.groupId, question.questionId)] =
-                  value;
+                answers[fieldKey(question.groupId, question.questionId)] = value
               }"
               @answered="handleQuestionAnswered(questionIndex)"
             />
 
             <p
-              v-if="
-                submittedCurrentStep &&
-                !answers[fieldKey(question.groupId, question.questionId)]
-              "
+              v-if="submittedCurrentStep && !answers[fieldKey(question.groupId, question.questionId)]"
               class="text-[0.7rem] text-red-500"
             >
               Responda esta afirmação.
@@ -93,7 +86,7 @@
           Voltar
         </BaseButton>
 
-        <BaseButton type="submit" :disabled="!canGoNext">
+        <BaseButton type="submit" :disabled="!canGoNext" :variant="isLastGroup ? 'gradient' : 'gradient'">
           <span v-if="!isLastGroup">Continuar</span>
           <span v-else>Ver resultado</span>
         </BaseButton>
@@ -110,36 +103,30 @@
       v-if="results && results.length && config.category === 'temperaments'"
       :results="results"
     />
-
   </section>
 </template>
 
 <script setup lang="ts">
-import {
-  ref,
-  toRefs,
-  watch,
-  type ComponentPublicInstance,
-} from 'vue';
-import { useRouter } from '#app';
+import { ref, toRefs, watch, type ComponentPublicInstance } from 'vue'
+import { useRouter } from '#app'
 
-import BaseButton from '~/components/base/BaseButton.vue';
-import LikertScaleQuestion from '~/components/tests/LikertScaleQuestion.vue';
-import LikertTestHeader from '~/components/tests/LikertTestHeader.vue';
-import LikertTestProgress from '~/components/tests/LikertTestProgress.vue';
-import LikertTestResultsGeneric from '~/components/tests/LikertTestResultsGeneric.vue';
-import LikertTestResultsTemperaments from '~/components/tests/LikertTestResultsTemperaments.vue';
+import BaseButton from '~/components/base/BaseButton.vue'
+import LikertScaleQuestion from '~/components/tests/LikertScaleQuestion.vue'
+import LikertTestHeader from '~/components/tests/LikertTestHeader.vue'
+import LikertTestProgress from '~/components/tests/LikertTestProgress.vue'
+import LikertTestResultsGeneric from '~/components/tests/LikertTestResultsGeneric.vue'
+import LikertTestResultsTemperaments from '~/components/tests/LikertTestResultsTemperaments.vue'
 
-import type { LikertTestConfig } from '~/types/tests';
-import { useLikertTestRunner } from '~/composables/useLikertTestRunner';
+import type { LikertTestConfig } from '~/types/tests'
+import { useLikertTestRunner } from '~/composables/useLikertTestRunner'
 
 const props = defineProps<{
-  config: LikertTestConfig;
-  fresh?: boolean;
-}>();
+  config: LikertTestConfig
+  fresh?: boolean
+}>()
 
-const { config } = toRefs(props);
-const router = useRouter();
+const { config } = toRefs(props)
+const router = useRouter()
 
 const {
   answers,
@@ -162,65 +149,52 @@ const {
   fieldKey,
   goPrevious,
   goNext,
-} = useLikertTestRunner(config, { fresh: props.fresh === true });
+} = useLikertTestRunner(config, { fresh: props.fresh === true })
 
-const questionRefs = ref<HTMLElement[]>([]);
-const shouldRedirectOnComplete = ref(false);
+const questionRefs = ref<HTMLElement[]>([])
+const shouldRedirectOnComplete = ref(false)
 
-function setQuestionRef(
-  el: Element | ComponentPublicInstance | null,
-  index: number,
-): void {
+function setQuestionRef(el: Element | ComponentPublicInstance | null, index: number): void {
   if (el instanceof HTMLElement) {
-    questionRefs.value[index] = el;
+    questionRefs.value[index] = el
   }
 }
 
 watch(currentGroupIndex, () => {
-  questionRefs.value = [];
-  submittedCurrentStep.value = false;
+  questionRefs.value = []
+  submittedCurrentStep.value = false
 
-  if (!process.client) return;
+  if (!process.client) return
 
   requestAnimationFrame(() => {
-    const container = document.querySelector(
-      '[data-test-step-container]',
-    );
+    const container = document.querySelector('[data-test-step-container]')
     if (container instanceof HTMLElement) {
-      container.scrollIntoView({
-        behavior: 'smooth',
-        block: 'start',
-      });
+      container.scrollIntoView({ behavior: 'smooth', block: 'start' })
     }
-  });
-});
+  })
+})
 
 watch(lastResultId, (id) => {
-  if (!id || !shouldRedirectOnComplete.value) return;
-
-  shouldRedirectOnComplete.value = false;
-  router.push(`/resultados/${id}`);
-});
+  if (!id || !shouldRedirectOnComplete.value) return
+  shouldRedirectOnComplete.value = false
+  router.push(`/resultados/${id}`)
+})
 
 function handleNextClick(): void {
   if (isLastGroup.value) {
-    shouldRedirectOnComplete.value = true;
+    shouldRedirectOnComplete.value = true
   }
-
-  goNext();
+  goNext()
 }
 
 function handleQuestionAnswered(questionIndex: number): void {
-  if (!process.client) return;
+  if (!process.client) return
 
-  const nextIndex = questionIndex + 1;
-  const nextEl = questionRefs.value[nextIndex];
+  const nextIndex = questionIndex + 1
+  const nextEl = questionRefs.value[nextIndex]
 
   if (nextEl?.scrollIntoView) {
-    nextEl.scrollIntoView({
-      behavior: 'smooth',
-      block: 'center',
-    });
+    nextEl.scrollIntoView({ behavior: 'smooth', block: 'center' })
   }
 }
 
@@ -230,53 +204,44 @@ function handleQuestionKeydown(
   groupId: string,
   questionId: string,
 ): void {
-  const key = event.key;
-  const field = fieldKey(groupId, questionId);
-  const current = answers[field];
+  const key = event.key
+  const field = fieldKey(groupId, questionId)
+  const current = answers[field]
 
   if (key === 'ArrowLeft' || key === 'ArrowRight') {
-    event.preventDefault();
+    event.preventDefault()
 
-    let next: number;
+    let next: number
     if (typeof current !== 'number') {
-      next = 4;
+      next = 4
     } else {
-      next = key === 'ArrowLeft' ? current - 1 : current + 1;
-      next = Math.min(7, Math.max(1, next));
+      next = key === 'ArrowLeft' ? current - 1 : current + 1
+      next = Math.min(7, Math.max(1, next))
     }
 
     if (answers[field] !== next) {
-      const wasEmpty = answers[field] == null;
-      answers[field] = next;
-      if (wasEmpty) {
-        handleQuestionAnswered(questionIndex);
-      }
+      const wasEmpty = answers[field] == null
+      answers[field] = next
+      if (wasEmpty) handleQuestionAnswered(questionIndex)
     }
-
-    return;
+    return
   }
 
   if (key === 'ArrowUp' || key === 'ArrowDown') {
-    event.preventDefault();
-    const group = currentGroup.value;
-    if (!group) return;
+    event.preventDefault()
+    const group = currentGroup.value
+    if (!group) return
 
-    const direction = key === 'ArrowUp' ? -1 : 1;
-    const targetIndex = questionIndex + direction;
+    const direction = key === 'ArrowUp' ? -1 : 1
+    const targetIndex = questionIndex + direction
 
-    if (targetIndex < 0 || targetIndex >= group.questions.length) {
-      return;
-    }
+    if (targetIndex < 0 || targetIndex >= group.questions.length) return
 
-    const targetEl = questionRefs.value[targetIndex];
+    const targetEl = questionRefs.value[targetIndex]
     if (targetEl) {
-      targetEl.focus();
-      targetEl.scrollIntoView({
-        behavior: 'smooth',
-        block: 'center',
-      });
+      targetEl.focus()
+      targetEl.scrollIntoView({ behavior: 'smooth', block: 'center' })
     }
   }
 }
 </script>
-

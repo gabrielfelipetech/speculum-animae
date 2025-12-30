@@ -4,13 +4,16 @@
     class="fixed inset-x-0 top-0 z-40 border-b border-slate-200/80 bg-white/80 backdrop-blur dark:border-slate-800 dark:bg-slate-900/80"
   >
     <div
-      class="mx-auto flex max-w-5xl items-center justify-between gap-4 px-4 py-3"
+      class="mx-auto flex max-w-5xl items-center justify-between gap-4 px-4 py-2"
     >
       <NuxtLink
         to="/"
-        class="text-sm font-semibold tracking-tight text-slate-900 dark:text-slate-50"
+        class="flex items-center w-60 gap-4 text-xl font-semibold tracking-tight text-slate-900 dark:text-slate-50"
       >
-        Speculum Animae
+       <img src="/logo-512.png" alt="Speculum Animae" class="h-14 w-14 rounded-full" />
+  <span class="text-xl font-semibold tracking-tight text-slate-900 dark:text-slate-50">
+    Speculum Animae
+  </span>
       </NuxtLink>
 
       <div class="flex items-center gap-3">
