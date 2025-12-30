@@ -1,5 +1,5 @@
 // nuxt.config.ts
-import { defineNuxtConfig } from 'nuxt/config';
+import { defineNuxtConfig } from 'nuxt/config'
 
 export default defineNuxtConfig({
   srcDir: 'src/',
@@ -11,27 +11,21 @@ export default defineNuxtConfig({
     '@nuxt/icon',
     '@nuxt/image',
     '@nuxtjs/supabase',
+    '@nuxtjs/sitemap',
   ],
+
   css: ['~/assets/css/tailwind.css'],
-  typescript: {
-    strict: true,
-    typeCheck: false,
+
+  site: {
+    url: process.env.NUXT_SITE_URL ?? 'https://speculumanimae.com.br',
+    name: 'Speculum Animae',
   },
-  tailwindcss: {
-    viewer: false,
-  },
-  postcss: {
-    plugins: {
-      tailwindcss: {},
-      autoprefixer: {},
-    },
-  },
-  supabase: {
-    redirect: false,
-  },
+
   runtimeConfig: {
     supabaseServiceRoleKey: process.env.SUPABASE_SERVICE_ROLE_KEY,
     public: {
+      siteUrl: process.env.NUXT_SITE_URL ?? 'https://speculumanimae.com.br',
+
       supabaseUrl: process.env.NUXT_PUBLIC_SUPABASE_URL ?? process.env.SUPABASE_URL,
       supabaseAnonKey:
         process.env.NUXT_PUBLIC_SUPABASE_ANON_KEY ??
@@ -39,16 +33,55 @@ export default defineNuxtConfig({
         process.env.SUPABASE_KEY,
     },
   },
+
+  // Evita indexar páginas privadas/sensíveis via header
+  routeRules: {
+    '/resultados/**': { headers: { 'x-robots-tag': 'noindex, nofollow' } },
+    '/testes/historico': { headers: { 'x-robots-tag': 'noindex, nofollow' } },
+    '/auth/**': { headers: { 'x-robots-tag': 'noindex, nofollow' } },
+    '/api/**': { headers: { 'x-robots-tag': 'noindex, nofollow' } },
+  },
+
+  sitemap: {
+    exclude: ['/resultados/**', '/testes/historico', '/auth/**', '/api/**'],
+  },
+
+  typescript: {
+    strict: true,
+    typeCheck: false,
+  },
+
+  tailwindcss: {
+    viewer: false,
+  },
+
+  postcss: {
+    plugins: {
+      tailwindcss: {},
+      autoprefixer: {},
+    },
+  },
+
+  supabase: {
+    redirect: false,
+  },
+
   app: {
     head: {
-      title: 'Speculum Animae',
+      htmlAttrs: { lang: 'pt-BR' },
       meta: [
+        { name: 'viewport', content: 'width=device-width, initial-scale=1' },
         {
           name: 'description',
-          content:
-            'Plataforma de testes de personalidade, temperamento e virtudes.',
+          content: 'Plataforma de testes de personalidade, temperamento e virtudes.',
         },
+        { name: 'theme-color', content: '#0f172a' },
+      ],
+      link: [
+        { rel: 'icon', href: '/favicon.ico' },
+        { rel: 'icon', type: 'image/png', sizes: '48x48', href: '/favicon-48.png' },
+        { rel: 'apple-touch-icon', sizes: '180x180', href: '/apple-touch-icon.png' },
       ],
     },
   },
-});
+})

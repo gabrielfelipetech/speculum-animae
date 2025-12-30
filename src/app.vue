@@ -28,90 +28,131 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, watch, ref, computed } from 'vue';
-import SiteHeader from '~/components/layout/SiteHeader.vue';
-import AuthModal from '~/components/auth/AuthModal.vue';
-import { useAuth } from '~/composables/useAuth';
-import SiteFooter from '~/components/layout/SiteFooter.vue';
-type Theme = 'light' | 'dark';
+import { onMounted, watch, ref, computed } from 'vue'
+import { useHead, useSeoMeta, useRoute, useRuntimeConfig } from '#imports'
 
-const theme = useState<Theme>('theme', () => 'light');
-const isAuthOpen = ref(false);
+import SiteHeader from '~/components/layout/SiteHeader.vue'
+import AuthModal from '~/components/auth/AuthModal.vue'
+import { useAuth } from '~/composables/useAuth'
+import SiteFooter from '~/components/layout/SiteFooter.vue'
+
+type Theme = 'light' | 'dark'
+
+const theme = useState<Theme>('theme', () => 'light')
+const isAuthOpen = ref(false)
 
 const { signInWithEmail, signUpWithEmail, signInWithGoogle, signOut, loading, errorMessage } =
-  useAuth();
+  useAuth()
 
-const authLoading = computed(() => loading.value);
-const authError = computed(() => errorMessage.value ?? null);
+const authLoading = computed(() => loading.value)
+const authError = computed(() => errorMessage.value ?? null)
 
+// --- SEO GLOBAL ---
+const route = useRoute()
+const runtime = useRuntimeConfig()
+const siteUrl = String(runtime.public.siteUrl).replace(/\/$/, '')
+
+// canonical SEM querystring (evita duplicar /?fresh=1 etc.)
+const canonical = computed(() => `${siteUrl}${route.path}`)
+
+useSeoMeta({
+  titleTemplate: (t) => (t ? `${t} · Speculum Animae` : 'Speculum Animae'),
+  description: 'Testes de personalidade, temperamento e virtudes em um só lugar.',
+  ogType: 'website',
+  ogSiteName: 'Speculum Animae',
+  ogUrl: canonical,
+  ogImage: `${siteUrl}/logo-512.png`,
+  twitterCard: 'summary_large_image',
+})
+
+useHead({
+  link: [{ rel: 'canonical', href: canonical.value }],
+  script: [
+    {
+      type: 'application/ld+json',
+      children: JSON.stringify({
+        '@context': 'https://schema.org',
+        '@type': 'Organization',
+        name: 'Speculum Animae',
+        url: siteUrl,
+        logo: `${siteUrl}/logo-512.png`,
+      }),
+    },
+    {
+      type: 'application/ld+json',
+      children: JSON.stringify({
+        '@context': 'https://schema.org',
+        '@type': 'WebSite',
+        name: 'Speculum Animae',
+        url: siteUrl,
+      }),
+    },
+  ],
+})
+
+// --- THEME ---
 function applyThemeClass(value: Theme): void {
   if (process.client) {
-    const root = document.documentElement;
-    root.classList.toggle('dark', value === 'dark');
+    const root = document.documentElement
+    root.classList.toggle('dark', value === 'dark')
   }
 }
 
 onMounted(() => {
-  if (!process.client) return;
+  if (!process.client) return
 
-  const saved = window.localStorage.getItem('theme');
+  const saved = window.localStorage.getItem('theme')
   if (saved === 'dark' || saved === 'light') {
-    theme.value = saved as Theme;
+    theme.value = saved as Theme
   } else {
-    const prefersDark = window.matchMedia(
-      '(prefers-color-scheme: dark)',
-    ).matches;
-    theme.value = prefersDark ? 'dark' : 'light';
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
+    theme.value = prefersDark ? 'dark' : 'light'
   }
-  applyThemeClass(theme.value);
-});
+  applyThemeClass(theme.value)
+})
 
 watch(
   theme,
   (value) => {
-    if (!process.client) return;
-    window.localStorage.setItem('theme', value);
-    applyThemeClass(value);
+    if (!process.client) return
+    window.localStorage.setItem('theme', value)
+    applyThemeClass(value)
   },
   { immediate: false },
-);
+)
 
 function toggleTheme(): void {
-  theme.value = theme.value === 'light' ? 'dark' : 'light';
+  theme.value = theme.value === 'light' ? 'dark' : 'light'
 }
 
 async function handleEmailAuth(payload: {
-  mode: 'signin' | 'signup';
-  email: string;
-  password: string;
-  name?: string;
-  gender?: 'male' | 'female';
+  mode: 'signin' | 'signup'
+  email: string
+  password: string
+  name?: string
+  gender?: 'male' | 'female'
 }) {
   if (payload.mode === 'signin') {
-    const user = await signInWithEmail(payload.email, payload.password);
-    if (user) isAuthOpen.value = false;
+    const user = await signInWithEmail(payload.email, payload.password)
+    if (user) isAuthOpen.value = false
   } else {
-    if (!payload.name || !payload.gender) {
-      return;
-    }
+    if (!payload.name || !payload.gender) return
     const user = await signUpWithEmail({
       email: payload.email,
       password: payload.password,
       fullName: payload.name,
       gender: payload.gender,
-    });
-    if (user) {
-      isAuthOpen.value = false;
-    }
+    })
+    if (user) isAuthOpen.value = false
   }
 }
 
 async function handleGoogleAuth() {
-  await signInWithGoogle();
-  // redirecionamento vem do próprio Supabase
+  await signInWithGoogle()
 }
 
 async function handleLogout() {
-  await signOut();
+  await signOut()
 }
 </script>
+
