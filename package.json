@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "build": "nuxt build",
-    "dev": "nuxt dev",
+    "dev": "nuxt dev --port 5171",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare"
@@ -13,7 +13,7 @@
     "@nuxt/content": "^3.8.2",
     "@nuxt/eslint": "^1.10.0",
     "@nuxt/fonts": "^0.12.1",
-    "@nuxt/icon": "^2.1.0",
+    "@nuxt/icon": "^2.1.1",
     "@nuxt/image": "^2.0.0",
     "@nuxt/scripts": "^0.13.0",
     "@nuxt/test-utils": "^3.20.1",

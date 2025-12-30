@@ -14,10 +14,7 @@
       </NuxtLink>
 
       <div class="flex items-center gap-3">
-        <ThemeToggle
-          :theme="props.theme"
-          @toggle="emit('toggle-theme')"
-        />
+        
         <div class="flex items-center gap-2">
           <template v-if="user">
             <NuxtLink
@@ -45,6 +42,10 @@
             </button>
           </template>
         </div>
+        <ThemeToggle
+          :theme="props.theme"
+          @toggle="emit('toggle-theme')"
+        />
       </div>
     </div>
   </header>
