@@ -1,4 +1,4 @@
-<!-- src/app.vue -->
+﻿<!-- src/app.vue -->
 <template>
   <div
     class="min-h-screen bg-slate-50 text-slate-900 transition-colors dark:bg-slate-950 dark:text-slate-50 pt-8"
@@ -50,22 +50,22 @@ const authError = computed(() => errorMessage.value ?? null)
 // --- SEO GLOBAL ---
 const route = useRoute()
 const runtime = useRuntimeConfig()
-const siteUrl = String(runtime.public.siteUrl).replace(/\/$/, '')
+const siteUrl = String(runtime.public.siteUrl || 'https://speculumanimae.com.br').replace(/\/$/, '')
 
 // canonical SEM querystring (evita duplicar /?fresh=1 etc.)
 const canonical = computed(() => `${siteUrl}${route.path}`)
 
-useSeoMeta({
-  titleTemplate: (t) => (t ? `${t} · Speculum Animae` : 'Speculum Animae'),
+useSeoMeta(() => ({
+  titleTemplate: (t) => (t ? `${t} | Speculum Animae` : 'Speculum Animae'),
   description: 'Testes de personalidade, temperamento e virtudes em um só lugar.',
   ogType: 'website',
   ogSiteName: 'Speculum Animae',
-  ogUrl: canonical,
+  ogUrl: canonical.value,
   ogImage: `${siteUrl}/logo-512.png`,
   twitterCard: 'summary_large_image',
-})
+}))
 
-useHead({
+useHead(() => ({
   link: [{ rel: 'canonical', href: canonical.value }],
   script: [
     {
@@ -88,7 +88,7 @@ useHead({
       }),
     },
   ],
-})
+}))
 
 // --- THEME ---
 function applyThemeClass(value: Theme): void {

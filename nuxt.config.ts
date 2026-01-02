@@ -24,7 +24,7 @@ export default defineNuxtConfig({
   runtimeConfig: {
     supabaseServiceRoleKey: process.env.SUPABASE_SERVICE_ROLE_KEY,
     public: {
-      siteUrl: process.env.NUXT_SITE_URL ?? 'https://speculumanimae.com.br',
+      siteUrl: process.env.NUXT_SITE_URL,
 
       supabaseUrl: process.env.NUXT_PUBLIC_SUPABASE_URL ?? process.env.SUPABASE_URL,
       supabaseAnonKey:
@@ -43,6 +43,8 @@ export default defineNuxtConfig({
   },
 
   sitemap: {
+    includeAppSources: false,
+    urls: ['/', '/testes/12-camadas', '/testes/temperamentos-classicos'],
     exclude: ['/resultados/**', '/testes/historico', '/auth/**', '/api/**'],
   },
 

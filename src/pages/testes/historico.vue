@@ -1,8 +1,10 @@
-<template>
+﻿<template>
   <section class="min-h-screen bg-slate-50/70 py-8 dark:bg-slate-950">
     <div class="mx-auto max-w-5xl space-y-6 px-4">
       <header class="space-y-1">
-        <p class="text-[0.7rem] font-semibold uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">
+        <p
+          class="text-[0.7rem] font-semibold uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400"
+        >
           Meus testes
         </p>
         <h1 class="text-2xl font-semibold tracking-tight">
@@ -17,11 +19,17 @@
         Carregando histórico...
       </div>
 
-      <div v-else-if="error" class="rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-xs text-rose-700 dark:border-rose-800/80 dark:bg-rose-950/40 dark:text-rose-200">
+      <div
+        v-else-if="error"
+        class="rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-xs text-rose-700 dark:border-rose-800/80 dark:bg-rose-950/40 dark:text-rose-200"
+      >
         {{ errorMessage }}
       </div>
 
-      <div v-else-if="!items.length" class="rounded-lg border border-slate-200 bg-white px-4 py-3 text-xs text-slate-500 shadow-sm dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300">
+      <div
+        v-else-if="!items.length"
+        class="rounded-lg border border-slate-200 bg-white px-4 py-3 text-xs text-slate-500 shadow-sm dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300"
+      >
         Você ainda não possui testes salvos com sua conta.
         Faça um dos testes e ele aparecerá aqui.
       </div>
@@ -62,7 +70,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue';
-import { useAsyncData } from '#app';
+import { useAsyncData, useSeoMeta } from '#app';
 
 type Slug = 'twelve-layers' | 'temperaments';
 
@@ -76,6 +84,11 @@ interface HistoryItem {
     groupsLabel?: string;
   };
 }
+
+useSeoMeta({
+  robots: 'noindex, nofollow',
+  title: 'Histórico de testes',
+});
 
 const { data, pending, error } = await useAsyncData<{ items: HistoryItem[] }>(
   'my-results',

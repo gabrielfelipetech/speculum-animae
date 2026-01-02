@@ -1,4 +1,4 @@
-<!-- src/pages/auth/callback.vue -->
+﻿<!-- src/pages/auth/callback.vue -->
 <template>
   <main class="flex min-h-screen items-center justify-center bg-slate-50 dark:bg-slate-950">
     <p class="text-sm text-slate-700 dark:text-slate-200">
@@ -10,7 +10,12 @@
 <script setup lang="ts">
 import { onMounted } from 'vue';
 import { useRouter } from 'vue-router';
-import { useSupabaseUser } from '#imports';
+import { useSeoMeta, useSupabaseUser } from '#imports';
+
+useSeoMeta({
+  robots: 'noindex, nofollow',
+  title: 'Conectando conta',
+});
 
 const router = useRouter();
 const user = useSupabaseUser();

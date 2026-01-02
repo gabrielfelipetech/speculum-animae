@@ -1,6 +1,6 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 import { computed } from 'vue';
-import { useRoute, useAsyncData } from '#app';
+import { useRoute, useAsyncData, useSeoMeta } from '#app';
 
 import type {
   AnyReport,
@@ -10,6 +10,11 @@ import type {
 
 import TwelveLayersResultsView from '../../components/results/TwelveLayersResultView.vue';
 import TemperamentsResultsView from '../../components/results/TemperamentsResultView.vue';
+
+useSeoMeta({
+  robots: 'noindex, nofollow',
+  title: 'Resultados',
+});
 
 const route = useRoute();
 const sessionId = computed(() => route.params.sessionId as string);

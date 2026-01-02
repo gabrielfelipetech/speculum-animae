@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <main class="mx-auto max-w-5xl space-y-10 px-4 py-8">
     <header class="space-y-3">
       <p
@@ -49,9 +49,16 @@
 
 <script setup lang="ts">
 import { computed } from 'vue';
+import { useSeoMeta } from '#imports';
 import { allTests } from '~/config/tests';
 import type { LikertTestConfig } from '~/types/tests';
 import TestCard from '~/components/tests/TestCard.vue';
+
+useSeoMeta({
+  title: 'Testes de personalidade',
+  description:
+    'Teste suas camadas de personalidade e temperamentos clássicos em uma experiência guiada.',
+});
 
 const allLikertTests = allTests.likert as LikertTestConfig[];
 
