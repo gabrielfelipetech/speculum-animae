@@ -1,139 +1,137 @@
 // src/composables/useAuth.ts
-import { ref, computed } from 'vue';
-import { useSupabaseClient, useSupabaseUser } from '#imports';
+import { ref, computed } from 'vue'
+import { useSupabaseClient, useSupabaseUser } from '#imports'
 
-export type Gender = 'male' | 'female';
+export type Gender = 'male' | 'female'
 
-interface SignUpPayload {
-  email: string;
-  password: string;
-  fullName: string;
-  gender: Gender;
-}
+type SignUpPayload = Readonly<{
+  email: string
+  password: string
+  fullName: string
+  gender: Gender
+}>
 
 export function useAuth() {
-  const supabase = useSupabaseClient();
-  const user = useSupabaseUser();
+  const supabase = useSupabaseClient()
+  const user = useSupabaseUser()
 
-  const loading = ref(false);
-  const errorMessage = ref<string | null>(null);
+  const loading = ref(false)
+  const errorMessage = ref<string | null>(null)
 
-  const isLoggedIn = computed(() => !!user.value);
+  const isLoggedIn = computed(() => !!user.value)
 
-  function resetError() {
-    errorMessage.value = null;
+  function resetError(): void {
+    errorMessage.value = null
   }
 
   function mapAuthErrorMessage(code?: string, message?: string): string {
     switch (code) {
       case 'invalid_login_credentials':
       case 'invalid_credentials':
-        return 'E-mail ou senha incorretos.';
+        return 'E-mail ou senha incorretos.'
       case 'email_not_confirmed':
-        return 'Confirme seu e-mail antes de entrar.';
+        return 'Confirme seu e-mail antes de entrar.'
       case 'user_already_exists':
-        return 'Já existe uma conta com este e-mail.';
+        return 'Já existe uma conta com este e-mail.'
       default:
-        return message || 'Ocorreu um erro ao autenticar. Tente novamente.';
+        return message || 'Ocorreu um erro ao autenticar. Tente novamente.'
     }
   }
 
   async function signInWithEmail(email: string, password: string) {
-    if (!email || !password) return null;
+    if (!email || !password) return null
 
-    loading.value = true;
-    resetError();
+    loading.value = true
+    resetError()
 
     try {
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
-      });
+      })
 
       if (error) {
-        errorMessage.value = mapAuthErrorMessage(error.code, error.message);
-        return null;
+        errorMessage.value = mapAuthErrorMessage(error.code, error.message)
+        return null
       }
 
-      return data.user ?? null;
+      return data.user ?? null
     } finally {
-      loading.value = false;
+      loading.value = false
     }
   }
 
   async function signUpWithEmail(payload: SignUpPayload) {
-    const { email, password, fullName, gender } = payload;
+    const { email, password, fullName, gender } = payload
 
-    loading.value = true;
-    resetError();
+    loading.value = true
+    resetError()
 
     try {
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
-          data: {
-            full_name: fullName,
-            gender,
-          },
+          data: { full_name: fullName, gender },
+          // opcional: se você quiser mandar pra callback também após signup OAuth-like
+          // emailRedirectTo: import.meta.client ? `${window.location.origin}/auth/callback` : undefined,
         },
-      });
+      })
 
       if (error) {
-        errorMessage.value = mapAuthErrorMessage(error.code, error.message);
-        return null;
+        errorMessage.value = mapAuthErrorMessage(error.code, error.message)
+        return null
       }
 
-      // se tiver confirmação de e-mail, aqui talvez ainda não logue automaticamente
-      return data.user ?? null;
+      return data.user ?? null
     } finally {
-      loading.value = false;
+      loading.value = false
     }
   }
 
-  async function signInWithGoogle() {
-    loading.value = true;
-    resetError();
+  async function signInWithGoogle(): Promise<void> {
+    loading.value = true
+    resetError()
 
     try {
-      const redirectTo =
-        import.meta.client
-          ? `${window.location.origin}/auth/callback`
-          : undefined;
+      if (!import.meta.client) return
 
-      const { data, error } = await supabase.auth.signInWithOAuth({
+      const origin = window.location.origin
+      const redirectTo = `${origin}/auth/callback`
+
+      const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
-        options: { redirectTo },
-      });
+        options: {
+          redirectTo,
+          // opcional: força consentimento sempre
+          // queryParams: { prompt: 'consent' },
+        },
+      })
 
       if (error) {
-        errorMessage.value = mapAuthErrorMessage(error.code, error.message);
-        return null;
+        errorMessage.value = mapAuthErrorMessage(error.code, error.message)
       }
 
-      if (import.meta.client && data?.url) {
-        window.location.href = data.url;
-      }
-
-      return null;
+      // não precisa window.location.href = data.url
+      // o supabase-js geralmente já redireciona no browser
     } finally {
-      loading.value = false;
+      loading.value = false
     }
   }
 
   async function signOut() {
-    loading.value = true;
-    resetError();
+    loading.value = true
+    resetError()
 
     try {
-      const { error } = await supabase.auth.signOut();
+      const { error } = await supabase.auth.signOut()
       if (error) {
-        errorMessage.value = mapAuthErrorMessage(error.code, error.message);
-        return false;
+        errorMessage.value = mapAuthErrorMessage(error.code, error.message)
+        return false
       }
-      return true;
+      return true
     } finally {
-      loading.value = false;
+      loading.value = false
     }
   }
 
@@ -146,5 +144,5 @@ export function useAuth() {
     signUpWithEmail,
     signInWithGoogle,
     signOut,
-  };
+  }
 }
