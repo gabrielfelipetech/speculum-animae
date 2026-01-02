@@ -13,16 +13,35 @@
       </BaseButton>
     </div>
 
-    <div v-else>
+    <div v-else class="space-y-10">
       <LikertTestView :config="likertConfig" :fresh="isFresh" />
+
+      <RelatedArticles
+        v-if="relatedArticles.length"
+        title="Artigos relacionados"
+        :articles="relatedArticles"
+        description="Leituras alinhadas ao tema deste teste."
+      />
+
+      <FaqSection
+        v-if="faqItems.length"
+        title="Perguntas frequentes"
+        :items="faqItems"
+        description="Respostas rapidas para as duvidas mais comuns sobre este teste."
+      />
     </div>
   </main>
 </template>
 
 <script setup lang="ts">
 import { computed } from 'vue';
-import { useRoute, useRouter, useSeoMeta } from '#imports';
+import { useHead, useRoute, useRouter, useSeoMeta } from '#imports';
 import { getLikertTestBySlug } from '~/config/tests';
+import { getAllArticles } from '~/data/articles';
+import { getFaqByTestSlug } from '~/data/faq';
+import { buildFaqSchema } from '~/utils/seo/faqSchema';
+import RelatedArticles from '~/components/articles/RelatedArticles.vue';
+import FaqSection from '~/components/faq/FaqSection.vue';
 import LikertTestView from '~/components/tests/LikertTestView.vue';
 import BaseButton from '~/components/base/BaseButton.vue';
 
@@ -46,6 +65,11 @@ const SEO_BY_SLUG: Record<PublicSlug, SeoPayload> = {
   },
 };
 
+const TEST_CATEGORY_BY_SLUG: Record<PublicSlug, string> = {
+  '12-camadas': 'personalidade',
+  'temperamentos-classicos': 'temperamentos',
+};
+
 const route = useRoute();
 const router = useRouter();
 
@@ -54,6 +78,12 @@ const slug = computed(() => String(route.params.slug || ''));
 const isFresh = computed(() => route.query.fresh === '1');
 
 const likertConfig = computed(() => getLikertTestBySlug(slug.value));
+const faqItems = computed(() => getFaqByTestSlug(slug.value));
+const relatedArticles = computed(() => {
+  if (!isPublicSlug(slug.value)) return [];
+  const category = TEST_CATEGORY_BY_SLUG[slug.value];
+  return getAllArticles().filter((article) => article.category === category).slice(0, 4);
+});
 
 const seoData = computed<SeoPayload>(() => {
   if (isPublicSlug(slug.value)) return SEO_BY_SLUG[slug.value];
@@ -73,6 +103,18 @@ useSeoMeta(() => ({
   title: seoData.value.title,
   description: seoData.value.description,
 }));
+
+useHead(() => {
+  if (!faqItems.value.length) return {};
+  return {
+    script: [
+      {
+        type: 'application/ld+json',
+        children: JSON.stringify(buildFaqSchema(faqItems.value)),
+      },
+    ],
+  };
+});
 
 function isPublicSlug(value: string): value is PublicSlug {
   return value === '12-camadas' || value === 'temperamentos-classicos';

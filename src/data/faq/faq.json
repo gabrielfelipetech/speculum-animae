@@ -1,0 +1,98 @@
+﻿{
+  "global": [
+    {
+      "q": "O que e o Speculum Animae?",
+      "a": "E uma plataforma de testes de autoconhecimento com foco em personalidade, temperamentos e virtudes."
+    },
+    {
+      "q": "Os testes sao diagnosticos clinicos?",
+      "a": "Nao. Os testes sao informativos e nao substituem avaliacao profissional."
+    },
+    {
+      "q": "Preciso criar conta para usar?",
+      "a": "Voce pode iniciar sem conta, mas recursos de historico e salvamento exigem login."
+    },
+    {
+      "q": "Meus dados ficam salvos?",
+      "a": "Se voce estiver logado, o sistema pode salvar seu historico. Dados nao sao vendidos."
+    },
+    {
+      "q": "Posso refazer um teste?",
+      "a": "Sim. Voce pode refazer quando quiser para comparar resultados."
+    },
+    {
+      "q": "Quanto tempo leva cada teste?",
+      "a": "Em media de 5 a 15 minutos, dependendo do numero de afirmacoes."
+    },
+    {
+      "q": "Como interpretar os resultados?",
+      "a": "Use como ponto de partida. Leia as descricoes e reflita sobre exemplos reais do seu dia."
+    },
+    {
+      "q": "Existe opcao de PDF?",
+      "a": "Quando um teste oferecer relatorio em PDF, o botao aparecera no resultado."
+    },
+    {
+      "q": "Os dados sao privados?",
+      "a": "Sim. Usamos boas praticas de seguranca e nao compartilhamos dados sem consentimento."
+    },
+    {
+      "q": "Havera novos testes?",
+      "a": "Sim. A plataforma e evolutiva e novos instrumentos serao adicionados."
+    }
+  ],
+  "byTest": {
+    "temperamentos-classicos": [
+      {
+        "q": "Temperamento e o mesmo que personalidade?",
+        "a": "Nao. Temperamento descreve tendencias basicas; personalidade inclui historia, escolhas e contexto."
+      },
+      {
+        "q": "Posso ter mais de um temperamento forte?",
+        "a": "Sim. Combinacoes sao comuns e ajudam a explicar variacoes no comportamento."
+      },
+      {
+        "q": "O resultado muda com o tempo?",
+        "a": "Pode mudar com experiencias, habitos e maturidade emocional."
+      },
+      {
+        "q": "Como usar o resultado no dia a dia?",
+        "a": "Observe gatilhos, identifique excessos e pratique ajustes pequenos e constantes."
+      },
+      {
+        "q": "Qual a diferenca entre colerico e sanguineo?",
+        "a": "O colerico tende a ser mais diretivo e focado em metas; o sanguineo e mais sociavel e espontaneo."
+      },
+      {
+        "q": "Este teste define quem eu sou?",
+        "a": "Nao. E um retrato do momento, util para reflexao, nao um rotulo fixo."
+      }
+    ],
+    "12-camadas": [
+      {
+        "q": "O que sao as 12 camadas?",
+        "a": "Sao niveis que organizam aspectos internos para ajudar na autoobservacao."
+      },
+      {
+        "q": "Preciso responder tudo de uma vez?",
+        "a": "O ideal e responder em uma sessao para manter consistencia."
+      },
+      {
+        "q": "Como o teste calcula os resultados?",
+        "a": "Ele usa a media das afirmacoes dentro de cada grupo de camadas."
+      },
+      {
+        "q": "Por que algumas perguntas parecem parecidas?",
+        "a": "Isso ajuda a validar o tema e captar nuances de percepcao."
+      },
+      {
+        "q": "Como usar o resultado na pratica?",
+        "a": "Compare as camadas mais altas e mais baixas e observe onde ajustar habitos."
+      },
+      {
+        "q": "Posso refazer para acompanhar mudancas?",
+        "a": "Sim. Repetir o teste ajuda a acompanhar evolucao pessoal."
+      }
+    ]
+  }
+}

@@ -1,5 +1,18 @@
 // nuxt.config.ts
+import { readFileSync } from 'node:fs'
 import { defineNuxtConfig } from 'nuxt/config'
+
+type ArticleManifest = {
+  articles: Array<{ slug: string }>
+}
+
+const manifestRaw = readFileSync(
+  new URL('./src/data/articles/articles/index.json', import.meta.url),
+  'utf-8',
+).replace(/^\uFEFF/, '')
+
+const manifest = JSON.parse(manifestRaw) as ArticleManifest
+const articleUrls = manifest.articles.map((article) => `/artigos/${article.slug}`)
 
 export default defineNuxtConfig({
   srcDir: 'src/',
@@ -44,7 +57,7 @@ export default defineNuxtConfig({
 
   sitemap: {
     includeAppSources: false,
-    urls: ['/', '/testes/12-camadas', '/testes/temperamentos-classicos'],
+    urls: ['/', '/testes/12-camadas', '/testes/temperamentos-classicos', '/artigos', ...articleUrls],
     exclude: ['/resultados/**', '/testes/historico', '/auth/**', '/api/**'],
   },
 

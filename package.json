@@ -7,7 +7,8 @@
     "dev": "nuxt dev --port 5171",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
-    "postinstall": "nuxt prepare"
+    "postinstall": "nuxt prepare",
+    "articles:split": "node --experimental-strip-types scripts/split-articles-json.ts"
   },
   "dependencies": {
     "@nuxt/content": "^3.8.2",

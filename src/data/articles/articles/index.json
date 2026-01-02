@@ -1,0 +1,148 @@
+{
+  "articles": [
+    {
+      "slug": "temperamento-colerico-tracos-virtudes-riscos",
+      "title": "Temperamento colerico: tracos, virtudes e riscos",
+      "description": "Entenda o colerico: pontos fortes, desafios e como equilibrar impulsividade.",
+      "category": "temperamentos",
+      "tags": [
+        "temperamentos",
+        "colerico",
+        "autoconhecimento"
+      ],
+      "publishedAt": "2026-01-01",
+      "updatedAt": "2026-01-03",
+      
+      
+      "relatedTestSlugs": [
+        "temperamentos-classicos"
+      ],
+      "file": "temperamento-colerico-tracos-virtudes-riscos.json"
+    },
+    {
+      "slug": "temperamento-melancolico-forcas-sensibilidade-equilibrio",
+      "title": "Temperamento melancolico: forcas, sensibilidade e equilibrio",
+      "description": "Como o melancolico percebe o mundo e o que ajuda a manter o equilibrio.",
+      "category": "temperamentos",
+      "tags": [
+        "temperamentos",
+        "melancolico",
+        "sensibilidade"
+      ],
+      "publishedAt": "2026-01-02",
+      "updatedAt": "2026-01-04",
+      
+      
+      "relatedTestSlugs": [
+        "temperamentos-classicos"
+      ],
+      "file": "temperamento-melancolico-forcas-sensibilidade-equilibrio.json"
+    },
+    {
+      "slug": "12-camadas-mapa-de-autoconhecimento",
+      "title": "12 camadas: um mapa pratico de autoconhecimento",
+      "description": "Veja como as camadas se conectam e por que elas ajudam a organizar sua jornada.",
+      "category": "personalidade",
+      "tags": [
+        "personalidade",
+        "12-camadas",
+        "autoconhecimento"
+      ],
+      "publishedAt": "2026-01-05",
+      "updatedAt": "2026-01-06",
+      
+      
+      "relatedTestSlugs": [
+        "12-camadas"
+      ],
+      "file": "12-camadas-mapa-de-autoconhecimento.json"
+    },
+    {
+      "slug": "tracos-de-personalidade-observar-sem-rotulos",
+      "title": "Tracos de personalidade: observar sem rotulos",
+      "description": "Um guia curto para observar tracos sem cair em rotulos rigidos.",
+      "category": "personalidade",
+      "tags": [
+        "personalidade",
+        "tracos",
+        "autoobservacao"
+      ],
+      "publishedAt": "2026-01-07",
+      "updatedAt": "2026-01-07",
+      
+      
+      "relatedTestSlugs": [
+        "12-camadas"
+      ],
+      "file": "tracos-de-personalidade-observar-sem-rotulos.json"
+    },
+    {
+      "slug": "habitos-diarios-para-mais-clareza-mental",
+      "title": "Habitos diarios para mais clareza mental",
+      "description": "Micro rotinas que ajudam a ter foco, calma e constancia.",
+      "category": "virtudes-habitos",
+      "tags": [
+        "habitos",
+        "clareza",
+        "foco"
+      ],
+      "publishedAt": "2026-01-08",
+      "updatedAt": "2026-01-09",
+      
+      
+      "relatedTestSlugs": [],
+      "file": "habitos-diarios-para-mais-clareza-mental.json"
+    },
+    {
+      "slug": "virtudes-praticas-para-equilibrio-emocional",
+      "title": "Virtudes praticas para equilibrio emocional",
+      "description": "Pequenas virtudes aplicadas ao cotidiano para lidar melhor com conflitos.",
+      "category": "virtudes-habitos",
+      "tags": [
+        "virtudes",
+        "emocao",
+        "equilibrio"
+      ],
+      "publishedAt": "2026-01-09",
+      "updatedAt": "2026-01-10",
+      
+      
+      "relatedTestSlugs": [],
+      "file": "virtudes-praticas-para-equilibrio-emocional.json"
+    },
+    {
+      "slug": "linguagens-do-amor-como-identificar-no-dia-a-dia",
+      "title": "Linguagens do amor: como identificar no dia a dia",
+      "description": "Sinais simples para reconhecer como voce e o outro demonstram afeto.",
+      "category": "relacionamentos",
+      "tags": [
+        "relacionamentos",
+        "linguagens-do-amor",
+        "comunicacao"
+      ],
+      "publishedAt": "2026-01-10",
+      "updatedAt": "2026-01-11",
+      
+      
+      "relatedTestSlugs": [],
+      "file": "linguagens-do-amor-como-identificar-no-dia-a-dia.json"
+    },
+    {
+      "slug": "conversas-dificeis-com-empatia-e-limites",
+      "title": "Conversas dificeis com empatia e limites",
+      "description": "Um roteiro simples para dialogos delicados sem perder a firmeza.",
+      "category": "relacionamentos",
+      "tags": [
+        "relacionamentos",
+        "empatia",
+        "dialogo"
+      ],
+      "publishedAt": "2026-01-11",
+      "updatedAt": "2026-01-12",
+      
+      
+      "relatedTestSlugs": [],
+      "file": "conversas-dificeis-com-empatia-e-limites.json"
+    }
+  ]
+}

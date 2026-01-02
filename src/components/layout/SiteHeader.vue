@@ -16,6 +16,15 @@
   </span>
       </NuxtLink>
 
+      <nav class="hidden items-center gap-4 text-xs font-semibold uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400 md:flex">
+        <NuxtLink
+          to="/artigos"
+          class="transition hover:text-indigo-600 dark:hover:text-amber-300"
+        >
+          Artigos
+        </NuxtLink>
+      </nav>
+
       <div class="flex items-center gap-3">
         
         <div class="flex items-center gap-2">
