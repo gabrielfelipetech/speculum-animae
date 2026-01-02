@@ -1,4 +1,4 @@
-<!-- src/components/results/PremiumBlock.vue -->
+﻿<!-- src/components/results/PremiumBlock.vue -->
 <template>
   <div class="relative mt-4">
     <!-- texto borrado de fundo + espaçador para garantir altura -->
@@ -32,24 +32,30 @@
 
         <BaseButton
           type="button"
-          :disabled="!sessionId"
+          :disabled="!sessionId || isDownloading"
           variant="gradient"
           class="mt-4 rounded-full"
           @click="handleUnlock"
         >
-          Desbloquear relatório
+          <span v-if="isDownloading">Gerando PDF...</span>
+          <span v-else>Desbloquear relatório</span>
         </BaseButton>
+
+        <SkeletonBlock v-if="isDownloading" class="mx-auto mt-3 h-3 w-2/3" />
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { useRoute } from '#imports'
 import BaseButton from '~/components/base/BaseButton.vue'
+import SkeletonBlock from '~/components/base/SkeletonBlock.vue'
 
 const route = useRoute()
+
+const isDownloading = ref(false)
 
 const sessionId = computed(() => {
   const raw = route.params.sessionId
@@ -59,12 +65,17 @@ const sessionId = computed(() => {
 })
 
 function handleUnlock(): void {
+  if (isDownloading.value) return
   if (!process.client) return
   if (!sessionId.value) {
     console.warn('[PremiumBlock] sessionId não encontrado na rota /resultados/:sessionId')
     return
   }
 
+  isDownloading.value = true
   window.location.href = `/api/results/${sessionId.value}/pdf`
+  setTimeout(() => {
+    isDownloading.value = false
+  }, 8000)
 }
 </script>

@@ -1,11 +1,19 @@
-<!-- src/components/auth/AuthModal.vue -->
+﻿<!-- src/components/auth/AuthModal.vue -->
 <template>
   <BaseModal
     :model-value="internalOpen"
     @update:model-value="(v) => emit('update:open', v)"
     @close="emit('close')"
   >
-    <div class="space-y-5">
+    <div class="relative space-y-5">
+      <div v-if="loading" class="absolute inset-0 z-10 rounded-2xl bg-white/70 p-4 dark:bg-slate-900/70">
+        <div class="flex h-full flex-col gap-3">
+          <SkeletonBlock class="h-4 w-20" />
+          <SkeletonBlock class="h-6 w-2/3" />
+          <SkeletonBlock class="h-4 w-full" />
+          <SkeletonBlock class="h-10 w-full rounded-lg" />
+        </div>
+      </div>
       <!-- Cabeçalho -->
       <header class="space-y-1">
         <p class="text-[0.7rem] font-semibold uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">
@@ -225,6 +233,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
 import BaseModal from '~/components/base/BaseModal.vue';
+import SkeletonBlock from '~/components/base/SkeletonBlock.vue';
 
 const props = defineProps<{
   open: boolean;
@@ -290,7 +299,7 @@ const passwordStrengthLabel = computed(() => {
     case 3:
       return 'Forte';
     default:
-      return '—';
+      return '-';
   }
 });
 

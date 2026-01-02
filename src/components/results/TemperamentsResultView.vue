@@ -1,4 +1,4 @@
-<!-- src/components/results/TemperamentsResultsView.vue -->
+﻿<!-- src/components/results/TemperamentsResultsView.vue -->
 <template>
   <section class="mx-auto flex max-w-6xl gap-8 px-4 py-10">
     <!-- Coluna principal -->
@@ -19,7 +19,7 @@
         </p>
       </header>
 
-      <!-- Gráfico dos temperamentos (barras 0–10) -->
+      <!-- Gráfico dos temperamentos (barras 0-10) -->
       <div
         class="rounded-2xl border border-slate-200/80 bg-white/90 p-5 text-sm shadow-sm dark:border-slate-800 dark:bg-slate-900/80"
       >
@@ -94,10 +94,14 @@
           type="button"
           variant="gradient"
           class="mt-4 rounded-full"
+          :disabled="isDownloading"
           @click="downloadPdf"
         >
-          Baixar relatório completo (PDF)
+          <span v-if="isDownloading">Gerando PDF...</span>
+          <span v-else>Baixar relatório completo (PDF)</span>
         </BaseButton>
+
+        <SkeletonBlock v-if="isDownloading" class="mt-3 h-3 w-2/3" />
       </div>
     </div>
 
@@ -121,11 +125,12 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import type { TemperamentReport, GraphPoint } from '~/types/results'
 import ResultsSection from '~/components/results/ResultsSection.vue'
 import ResultsSidebarLink from '~/components/results/ResultsSidebarLink.vue'
 import BaseButton from '~/components/base/BaseButton.vue'
+import SkeletonBlock from '~/components/base/SkeletonBlock.vue'
 
 const props = defineProps<{
   report: TemperamentReport
@@ -133,10 +138,16 @@ const props = defineProps<{
 }>()
 
 const report = props.report
+const isDownloading = ref(false)
 
 function downloadPdf(): void {
+  if (isDownloading.value) return
   if (process.client) {
+    isDownloading.value = true
     window.location.href = `/api/results/${props.sessionId}/pdf`
+    setTimeout(() => {
+      isDownloading.value = false
+    }, 8000)
   }
 }
 

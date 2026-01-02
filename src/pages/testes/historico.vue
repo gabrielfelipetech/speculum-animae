@@ -15,8 +15,8 @@
         </p>
       </header>
 
-      <div v-if="pending" class="text-xs text-slate-500 dark:text-slate-400">
-        Carregando histórico...
+      <div v-if="pending" class="space-y-3">
+        <SkeletonBlock v-for="n in 4" :key="n" class="h-20 rounded-xl" />
       </div>
 
       <div
@@ -69,8 +69,11 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 import { useAsyncData, useSeoMeta } from '#app';
+import { useSupabaseUser } from '#imports';
+import { getOrCreateClientId } from '~/utils/clientId';
+import SkeletonBlock from '~/components/base/SkeletonBlock.vue';
 
 type Slug = 'twelve-layers' | 'temperaments';
 
@@ -90,9 +93,39 @@ useSeoMeta({
   title: 'Histórico de testes',
 });
 
-const { data, pending, error } = await useAsyncData<{ items: HistoryItem[] }>(
+const supabaseUser = useSupabaseUser();
+const clientId = ref<string | null>(
+  import.meta.client ? getOrCreateClientId() : null,
+);
+const userId = computed(() => {
+  const raw = supabaseUser.value?.id;
+  return typeof raw === 'string' && /^[0-9a-f-]{36}$/i.test(raw)
+    ? raw
+    : null;
+});
+
+const { data, pending, error } = useAsyncData<{ items: HistoryItem[] }>(
   'my-results',
-  () => $fetch('/api/my-results'),
+  () => {
+    const query: Record<string, string> = {};
+    if (userId.value) {
+      query.userId = userId.value;
+    }
+
+    if (clientId.value) {
+      query.clientId = clientId.value;
+    }
+
+    return $fetch('/api/my-results', {
+      query: Object.keys(query).length ? query : undefined,
+    });
+  },
+  {
+    server: false,
+    watch: [userId, clientId],
+    getCachedData: () => undefined,
+    default: () => ({ items: [] }),
+  },
 );
 
 const items = computed(() => data.value?.items ?? []);
@@ -104,7 +137,9 @@ const errorMessage = computed(() => {
 });
 
 function labelBySlug(slug: Slug): string {
-  return slug === 'twelve-layers' ? '12 camadas da personalidade' : 'Temperamentos clássicos';
+  return slug === 'twelve-layers'
+    ? '12 camadas da personalidade'
+    : 'Temperamentos clássicos';
 }
 
 function defaultTitle(slug: Slug): string {

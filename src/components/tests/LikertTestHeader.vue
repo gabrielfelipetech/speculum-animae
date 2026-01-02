@@ -1,11 +1,11 @@
 <!-- src/components/tests/LikertTestHeader.vue -->
 <template>
   <header class="space-y-2">
-    <p
+    <h1
       class="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400"
     >
       {{ config.title }}
-    </p>
+    </h1>
     <h2 class="font-display text-2xl tracking-tight md:text-3xl">
       {{ config.subtitle }}
     </h2>

@@ -1,7 +1,8 @@
-// src/composables/useSaveResult.ts
+﻿// src/composables/useSaveResult.ts
 import { ref } from 'vue';
+import { useSupabaseUser } from '#imports';
 import type { LikertTestConfig } from '~/types/tests';
-import { getOrCreateClientId } from '../utils/clientId.ts';
+import { getOrCreateClientId } from '../utils/clientId';
 
 interface SaveLikertResultArgs {
   config: LikertTestConfig;
@@ -19,6 +20,7 @@ interface SaveLikertResultArgs {
 export function useSaveResult() {
   const isSaving = ref(false);
   const lastError = ref<Error | null>(null);
+  const supabaseUser = useSupabaseUser();
 
   async function saveLikertResult(
     args: SaveLikertResultArgs,
@@ -31,6 +33,11 @@ export function useSaveResult() {
     try {
       const clientId = getOrCreateClientId();
       const sessionId = crypto.randomUUID();
+      const rawUserId = supabaseUser.value?.id;
+      const userId =
+        typeof rawUserId === 'string' && /^[0-9a-f-]{36}$/i.test(rawUserId)
+          ? rawUserId
+          : null;
 
       const compactAnswers: Record<string, number> = {};
       for (const [key, value] of Object.entries(args.answers)) {
@@ -39,7 +46,7 @@ export function useSaveResult() {
         }
       }
 
-      // Normaliza categoria em só 2 tipos
+      // Normaliza categoria em so 2 tipos
       const category: 'twelveLayers' | 'temperaments' =
         args.config.category === 'temperaments'
           ? 'temperaments'
@@ -51,6 +58,7 @@ export function useSaveResult() {
           sessionId,
           clientId,
           category,
+          userId,
           results: args.results,
           topSummaries: args.topSummaries,
           meta: {
@@ -81,3 +89,6 @@ export function useSaveResult() {
     lastError,
   };
 }
+
+
+

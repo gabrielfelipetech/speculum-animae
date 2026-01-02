@@ -1,5 +1,4 @@
-
-<template>
+﻿<template>
   <section class="space-y-6">
     <LikertTestHeader :config="config" />
 
@@ -86,12 +85,18 @@
           Voltar
         </BaseButton>
 
-        <BaseButton type="submit" :disabled="!canGoNext" :variant="isLastGroup ? 'gradient' : 'gradient'">
+        <BaseButton type="submit" :disabled="!canGoNext || isSaving" :variant="isLastGroup ? 'gradient' : 'gradient'">
           <span v-if="!isLastGroup">Continuar</span>
           <span v-else>Ver resultado</span>
         </BaseButton>
       </div>
     </form>
+
+    <div v-if="isSaving" class="space-y-3">
+      <SkeletonBlock class="h-6 w-1/3" />
+      <SkeletonBlock class="h-24 w-full rounded-2xl" />
+      <SkeletonBlock class="h-24 w-full rounded-2xl" />
+    </div>
 
     <LikertTestResultsGeneric
       v-if="results && results.length && config.category !== 'temperaments'"
@@ -111,6 +116,7 @@ import { ref, toRefs, watch, type ComponentPublicInstance } from 'vue'
 import { useRouter } from '#app'
 
 import BaseButton from '~/components/base/BaseButton.vue'
+import SkeletonBlock from '~/components/base/SkeletonBlock.vue'
 import LikertScaleQuestion from '~/components/tests/LikertScaleQuestion.vue'
 import LikertTestHeader from '~/components/tests/LikertTestHeader.vue'
 import LikertTestProgress from '~/components/tests/LikertTestProgress.vue'
@@ -134,6 +140,7 @@ const {
   submittedCurrentStep,
   results,
   lastResultId,
+  isSaving,
   totalGroups,
   currentGroup,
   currentGroupNumber,

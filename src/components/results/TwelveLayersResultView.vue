@@ -1,4 +1,4 @@
-<!-- src/components/results/TwelveLayersResultsView.vue -->
+﻿<!-- src/components/results/TwelveLayersResultsView.vue -->
 <template>
   <section class="mx-auto flex max-w-6xl gap-8 px-4 py-10">
     <!-- Coluna principal -->

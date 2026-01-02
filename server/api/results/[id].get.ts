@@ -1,4 +1,4 @@
-// server/api/results/[id].get.ts
+﻿// server/api/results/[id].get.ts
 import {
   serverSupabaseClient,
   serverSupabaseUser,
@@ -25,13 +25,27 @@ export default defineEventHandler(async (event) => {
   if (!id) {
     throw createError({
       statusCode: 400,
-      message: 'ID de sessão não informado',
+      message: 'ID de sessao nao informado',
     });
   }
 
+  const query = getQuery(event);
+  const clientId = typeof query.clientId === 'string' ? query.clientId : null;
+
   const user = await serverSupabaseUser(event).catch(() => null);
+  const userId =
+    typeof user?.id === 'string' && /^[0-9a-f-]{36}$/i.test(user.id)
+      ? user.id
+      : null;
 
   let entry: StoredResult | null = null;
+
+  const canAccess = (storedUserId?: string | null, storedClientId?: string | null): boolean => {
+    if (!storedUserId) return true;
+    if (userId && storedUserId === userId) return true;
+    if (clientId && storedClientId && clientId === storedClientId) return true;
+    return false;
+  };
 
   // 1) Supabase
   try {
@@ -44,10 +58,10 @@ export default defineEventHandler(async (event) => {
       .maybeSingle<StoredResultRow>();
 
     if (!error && data) {
-      if (data.user_id && (!user || user.id !== data.user_id)) {
+      if (!canAccess(data.user_id, data.client_id)) {
         throw createError({
           statusCode: 403,
-          message: 'Você não tem permissão para ver estes resultados.',
+          message: 'Voce nao tem permissao para ver estes resultados.',
         });
       }
 
@@ -82,10 +96,10 @@ export default defineEventHandler(async (event) => {
     const fromStorage = all.find((item) => item.id === id);
 
     if (fromStorage) {
-      if (fromStorage.userId && (!user || user.id !== fromStorage.userId)) {
+      if (!canAccess(fromStorage.userId, fromStorage.clientId)) {
         throw createError({
           statusCode: 403,
-          message: 'Você não tem permissão para ver estes resultados.',
+          message: 'Voce nao tem permissao para ver estes resultados.',
         });
       }
 
@@ -96,7 +110,7 @@ export default defineEventHandler(async (event) => {
   if (!entry) {
     throw createError({
       statusCode: 404,
-      message: 'Resultados não encontrados',
+      message: 'Resultados nao encontrados',
     });
   }
 

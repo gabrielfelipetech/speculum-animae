@@ -1,4 +1,4 @@
-import {
+﻿import {
   computed,
   isRef,
   onBeforeUnmount,
@@ -206,7 +206,7 @@ export function useLikertTestRunner(
   onMounted(() => {
     if (typeof window === 'undefined') return;
 
-    // sempre gera ordem aleatória
+    // sempre gera ordem aleatoria
     orderedQuestions.value = shuffleArray(flatQuestions.value);
 
     if (isFreshStart) {
@@ -262,7 +262,7 @@ export function useLikertTestRunner(
     window.removeEventListener('beforeunload', handleBeforeUnload);
   });
 
-  // Persistência das respostas
+  // Persistencia das respostas
   watch(
     () => ({ ...answers }),
     (value) => {
@@ -328,7 +328,7 @@ export function useLikertTestRunner(
       );
   });
 
-  const { saveLikertResult } = useSaveResult();
+  const { saveLikertResult, isSaving } = useSaveResult();
 
   async function computeResults(): Promise<void> {
     const allComplete = isTestComplete();
@@ -399,6 +399,7 @@ export function useLikertTestRunner(
     submittedCurrentStep,
     results,
     lastResultId,
+    isSaving,
 
     groups,
     totalGroups,
@@ -420,3 +421,7 @@ export function useLikertTestRunner(
     goNext,
   };
 }
+
+
+
+
