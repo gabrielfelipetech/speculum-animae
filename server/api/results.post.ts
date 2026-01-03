@@ -1,8 +1,6 @@
 ﻿// server/api/results.post.ts
-import {
-  serverSupabaseClient,
-  serverSupabaseUser,
-} from '#supabase/server';
+import { serverSupabaseClient } from '#supabase/server';
+import { resolveAuthUser } from '../utils/authUser';
 
 export interface StoredResult {
   id: string; // sessionId
@@ -29,9 +27,8 @@ export interface StoredResult {
 export default defineEventHandler(async (event) => {
   const body = await readBody<{
     sessionId: string;
-    clientId: string;
+    clientId?: string | null;
     category: 'twelveLayers' | 'temperaments';
-    userId?: string | null;
     results: { groupId: string; name: string; average: number }[];
     topSummaries?: StoredResult['topSummaries'];
     meta?: StoredResult['meta'];
@@ -40,16 +37,17 @@ export default defineEventHandler(async (event) => {
   const slug: StoredResult['slug'] =
     body.category === 'twelveLayers' ? 'twelve-layers' : 'temperaments';
 
-  const user = await serverSupabaseUser(event).catch(() => null);
-  const userId =
-    typeof user?.id === 'string' && /^[0-9a-f-]{36}$/i.test(user.id)
-      ? user.id
-      : null;
-  const bodyUserId =
-    typeof body.userId === 'string' && /^[0-9a-f-]{36}$/i.test(body.userId)
-      ? body.userId
-      : null;
-  const effectiveUserId = userId ?? bodyUserId;
+  const authUser = await resolveAuthUser(event);
+  const userId = authUser?.id ?? null;
+  const clientId =
+    userId === null && typeof body.clientId === 'string' ? body.clientId : null;
+
+  if (!userId && !clientId) {
+    throw createError({
+      statusCode: 400,
+      message: 'clientId nao informado',
+    });
+  }
 
   // 1) Sempre salvar localmente como fallback
   const storage = useStorage<StoredResult[]>('results');
@@ -58,9 +56,9 @@ export default defineEventHandler(async (event) => {
   const entry: StoredResult = {
     id: body.sessionId,
     slug,
-    userId: effectiveUserId ?? null,
-    email: user?.email ?? null,
-    clientId: body.clientId ?? null,
+    userId: userId ?? null,
+    email: null,
+    clientId: userId ? null : clientId,
     results: body.results,
     topSummaries: body.topSummaries ?? undefined,
     meta: body.meta ?? undefined,
@@ -80,7 +78,7 @@ export default defineEventHandler(async (event) => {
         id: crypto.randomUUID(),
         session_id: body.sessionId,
         user_id: userId,
-        client_id: body.clientId ?? null,
+        client_id: null,
         slug,
         results: body.results,
         top_summaries: body.topSummaries ?? null,

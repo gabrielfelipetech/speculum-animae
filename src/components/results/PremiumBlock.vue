@@ -49,13 +49,19 @@
 
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import { useRoute } from '#imports'
+import { useRoute, useSupabaseUser } from '#imports'
 import BaseButton from '~/components/base/BaseButton.vue'
 import SkeletonBlock from '~/components/base/SkeletonBlock.vue'
+import { getOrCreateClientId } from '~/utils/clientId'
 
 const route = useRoute()
+const supabaseUser = useSupabaseUser()
 
 const isDownloading = ref(false)
+const isLoggedIn = computed(() => {
+  const raw = supabaseUser.value?.id
+  return typeof raw === 'string' && /^[0-9a-f-]{36}$/i.test(raw)
+})
 
 const sessionId = computed(() => {
   const raw = route.params.sessionId
@@ -73,7 +79,13 @@ function handleUnlock(): void {
   }
 
   isDownloading.value = true
-  window.location.href = `/api/results/${sessionId.value}/pdf`
+  const clientId = !isLoggedIn.value ? getOrCreateClientId() : null
+  if (!isLoggedIn.value && !clientId) {
+    isDownloading.value = false
+    return
+  }
+  const query = clientId ? `?clientId=${encodeURIComponent(clientId)}` : ''
+  window.location.href = `/api/results/${sessionId.value}/pdf${query}`
   setTimeout(() => {
     isDownloading.value = false
   }, 8000)

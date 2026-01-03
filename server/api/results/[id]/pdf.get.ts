@@ -1,12 +1,10 @@
 // server/api/results/[id]/pdf.get.ts
-import {
-  serverSupabaseClient,
-  serverSupabaseUser,
-} from '#supabase/server';
+import { serverSupabaseClient } from '#supabase/server';
 import { sendStream, type H3Event } from 'h3';
 import PDFDocument from 'pdfkit';
 import type { StoredResult } from '../../results.post';
 import { buildTemperamentsPdfContent } from '../../report-builders/temperamentsPdf';
+import { resolveUserId } from '../../../utils/resolveUserId';
 
 interface StoredResultRow {
   session_id: string;
@@ -24,7 +22,26 @@ async function loadStoredResult(
   id: string,
 ): Promise<StoredResult | null> {
   // usuário logado (pode ser null)
-  const user = await serverSupabaseUser(event).catch(() => null);
+  const userId = await resolveUserId(event);
+  const query = getQuery(event);
+  const clientId = typeof query.clientId === 'string' ? query.clientId : null;
+
+  if (!userId && !clientId) {
+    throw createError({
+      statusCode: 400,
+      message: 'clientId nao informado',
+    });
+  }
+
+  const canAccess = (storedUserId?: string | null, storedClientId?: string | null): boolean => {
+    if (storedUserId) {
+      return Boolean(userId && storedUserId === userId);
+    }
+    if (userId) {
+      return false;
+    }
+    return Boolean(clientId && storedClientId && storedClientId === clientId);
+  };
 
   // 1) tenta pelo Supabase
   try {
@@ -37,7 +54,7 @@ async function loadStoredResult(
       .maybeSingle<StoredResultRow>();
 
     if (!error && data) {
-      if (data.user_id && (!user || user.id !== data.user_id)) {
+      if (!canAccess(data.user_id, data.client_id)) {
         throw createError({
           statusCode: 403,
           message: 'Você não tem permissão para ver estes resultados.',
@@ -77,7 +94,7 @@ async function loadStoredResult(
 
   if (!entry) return null;
 
-  if (entry.userId && (!user || user.id !== entry.userId)) {
+  if (!canAccess(entry.userId, entry.clientId)) {
     throw createError({
       statusCode: 403,
       message: 'Você não tem permissão para ver estes resultados.',
@@ -263,3 +280,6 @@ export default defineEventHandler(async (event) => {
 
   return sendStream(event, stream);
 });
+
+
+

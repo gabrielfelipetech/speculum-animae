@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <section class="min-h-screen bg-slate-50/70 py-8 dark:bg-slate-950">
     <div class="mx-auto max-w-5xl space-y-6 px-4">
       <header class="space-y-1">
@@ -69,10 +69,9 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue';
-import { useAsyncData, useSeoMeta } from '#app';
-import { useSupabaseUser } from '#imports';
-import { getOrCreateClientId } from '~/utils/clientId';
+import { computed, onMounted } from 'vue';
+import { useLazyAsyncData, useSeoMeta } from '#app';
+import { getSupabaseAccessToken } from '~/utils/authToken';
 import SkeletonBlock from '~/components/base/SkeletonBlock.vue';
 
 type Slug = 'twelve-layers' | 'temperaments';
@@ -88,64 +87,62 @@ interface HistoryItem {
   };
 }
 
+type MyResultsResponse = { items: HistoryItem[] };
+
 useSeoMeta({
   robots: 'noindex, nofollow',
-  title: 'Histórico de testes',
+  title: 'Historico de testes',
 });
 
-const supabaseUser = useSupabaseUser();
-const clientId = ref<string | null>(
-  import.meta.client ? getOrCreateClientId() : null,
-);
-const userId = computed(() => {
-  const raw = supabaseUser.value?.id;
-  return typeof raw === 'string' && /^[0-9a-f-]{36}$/i.test(raw)
-    ? raw
-    : null;
+definePageMeta({
+  middleware: ['require-auth'],
 });
 
-const { data, pending, error } = useAsyncData<{ items: HistoryItem[] }>(
+const { data, pending, error, refresh } = useLazyAsyncData<MyResultsResponse>(
   'my-results',
-  () => {
-    const query: Record<string, string> = {};
-    if (userId.value) {
-      query.userId = userId.value;
+  async () => {
+    const token = await getSupabaseAccessToken();
+    if (!token) {
+      // middleware deveria impedir isso, mas mantém defensivo
+      return { items: [] };
     }
 
-    if (clientId.value) {
-      query.clientId = clientId.value;
-    }
-
-    return $fetch('/api/my-results', {
-      query: Object.keys(query).length ? query : undefined,
+    return await $fetch<MyResultsResponse>('/api/my-results', {
+      credentials: 'include',
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
     });
   },
   {
     server: false,
-    watch: [userId, clientId],
-    getCachedData: () => undefined,
     default: () => ({ items: [] }),
+    getCachedData: () => undefined,
   },
 );
+
+onMounted(() => {
+  void refresh();
+});
 
 const items = computed(() => data.value?.items ?? []);
 
 const errorMessage = computed(() => {
   if (!error.value) return '';
-  // @ts-expect-error - nitro error tipagem simples aqui
-  return error.value?.data?.message ?? 'Erro ao carregar o histórico.';
+  const payload = error.value as { data?: { message?: string } };
+  return payload.data?.message ?? 'Erro ao carregar o historico.';
 });
 
 function labelBySlug(slug: Slug): string {
   return slug === 'twelve-layers'
     ? '12 camadas da personalidade'
-    : 'Temperamentos clássicos';
+    : 'Temperamentos classicos';
 }
 
 function defaultTitle(slug: Slug): string {
   return slug === 'twelve-layers'
-    ? 'Relatório das 12 camadas'
-    : 'Relatório de temperamentos';
+    ? 'Relatorio das 12 camadas'
+    : 'Relatorio de temperamentos';
 }
 
 function formatDate(iso: string): string {

@@ -1,6 +1,7 @@
 ﻿<script setup lang="ts">
 import { computed } from 'vue';
 import { useRoute, useLazyAsyncData, useSeoMeta } from '#app';
+import { getSupabaseAccessToken } from '~/utils/authToken';
 import { getOrCreateClientId } from '~/utils/clientId';
 
 import type {
@@ -19,7 +20,8 @@ useSeoMeta({
 });
 
 const route = useRoute();
-const sessionId = computed(() => route.params.sessionId as string);
+
+const sessionId = computed(() => String(route.params.sessionId ?? ''));
 const testSlug = computed(() => {
   const value = route.query.t;
   if (Array.isArray(value)) return value[0] ?? null;
@@ -27,12 +29,30 @@ const testSlug = computed(() => {
 });
 
 const { data, error, pending } = useLazyAsyncData<AnyReport>(
-  `results-${sessionId.value}`,
-  () => {
-    const clientId = import.meta.client ? getOrCreateClientId() : null;
+  () => `results-${sessionId.value}`,
+  async () => {
+    const headers: Record<string, string> = {};
+    const query: Record<string, string> = {};
+
+    const token = await getSupabaseAccessToken();
+
+    if (token) {
+      headers.Authorization = `Bearer ${token}`;
+    } else {
+      const clientId = import.meta.client ? getOrCreateClientId() : null;
+      if (clientId) {
+        query.clientId = clientId;
+      }
+    }
+
     return $fetch(`/api/results/${sessionId.value}`, {
-      query: clientId ? { clientId } : undefined,
+      headers: Object.keys(headers).length ? headers : undefined,
+      query: Object.keys(query).length ? query : undefined,
     });
+  },
+  {
+    server: false,
+    watch: [sessionId],
   },
 );
 

@@ -2,6 +2,7 @@
 import { ref } from 'vue';
 import { useSupabaseUser } from '#imports';
 import type { LikertTestConfig } from '~/types/tests';
+import { getSupabaseAccessToken } from '~/utils/authToken';
 import { getOrCreateClientId } from '../utils/clientId';
 
 interface SaveLikertResultArgs {
@@ -31,13 +32,16 @@ export function useSaveResult() {
     lastError.value = null;
 
     try {
-      const clientId = getOrCreateClientId();
       const sessionId = crypto.randomUUID();
       const rawUserId = supabaseUser.value?.id;
       const userId =
         typeof rawUserId === 'string' && /^[0-9a-f-]{36}$/i.test(rawUserId)
           ? rawUserId
           : null;
+      const clientId = userId ? null : getOrCreateClientId();
+      if (!userId && !clientId) {
+        return null;
+      }
 
       const compactAnswers: Record<string, number> = {};
       for (const [key, value] of Object.entries(args.answers)) {
@@ -52,13 +56,20 @@ export function useSaveResult() {
           ? 'temperaments'
           : 'twelveLayers';
 
+      const token = userId ? await getSupabaseAccessToken() : null;
+      const headers: Record<string, string> = {};
+      if (token) {
+        headers.Authorization = `Bearer ${token}`;
+      }
+
       const response = await $fetch<{ id: string }>('/api/results', {
         method: 'POST',
+        credentials: 'include',
+        headers: Object.keys(headers).length ? headers : undefined,
         body: {
           sessionId,
-          clientId,
+          clientId: clientId ?? null,
           category,
-          userId,
           results: args.results,
           topSummaries: args.topSummaries,
           meta: {

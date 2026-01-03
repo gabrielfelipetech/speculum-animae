@@ -1,12 +1,12 @@
 ﻿// server/api/results/[id].get.ts
 import {
   serverSupabaseClient,
-  serverSupabaseUser,
 } from '#supabase/server';
 import type { AnyReport } from '~/types/results';
 import { buildTwelveLayersReport } from '../report-builders/twelveLayers';
 import { buildTemperamentsReport } from '../report-builders/temperaments';
 import type { StoredResult } from '../results.post';
+import { resolveUserId } from '../../utils/resolveUserId';
 
 interface StoredResultRow {
   session_id: string;
@@ -31,20 +31,25 @@ export default defineEventHandler(async (event) => {
 
   const query = getQuery(event);
   const clientId = typeof query.clientId === 'string' ? query.clientId : null;
+  const userId = await resolveUserId(event);
 
-  const user = await serverSupabaseUser(event).catch(() => null);
-  const userId =
-    typeof user?.id === 'string' && /^[0-9a-f-]{36}$/i.test(user.id)
-      ? user.id
-      : null;
+  if (!userId && !clientId) {
+    throw createError({
+      statusCode: 400,
+      message: 'clientId nao informado',
+    });
+  }
 
   let entry: StoredResult | null = null;
 
   const canAccess = (storedUserId?: string | null, storedClientId?: string | null): boolean => {
-    if (!storedUserId) return true;
-    if (userId && storedUserId === userId) return true;
-    if (clientId && storedClientId && clientId === storedClientId) return true;
-    return false;
+    if (storedUserId) {
+      return Boolean(userId && storedUserId === userId);
+    }
+    if (userId) {
+      return false;
+    }
+    return Boolean(clientId && storedClientId && clientId === storedClientId);
   };
 
   // 1) Supabase

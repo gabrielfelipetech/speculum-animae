@@ -151,11 +151,13 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { useRouter } from '#app'
+import { useSupabaseUser } from '#imports'
 import type { TemperamentReport, GraphPoint } from '~/types/results'
 import ResultsSection from '~/components/results/ResultsSection.vue'
 import ResultsSidebarLink from '~/components/results/ResultsSidebarLink.vue'
 import BaseButton from '~/components/base/BaseButton.vue'
 import SkeletonBlock from '~/components/base/SkeletonBlock.vue'
+import { getOrCreateClientId } from '~/utils/clientId'
 import { clearLastResultId } from '~/utils/testLastResult'
 
 const props = defineProps<{
@@ -166,14 +168,25 @@ const props = defineProps<{
 
 const report = props.report
 const router = useRouter()
+const supabaseUser = useSupabaseUser()
 const testSlug = computed(() => props.testSlug ?? null)
 const isDownloading = ref(false)
+const isLoggedIn = computed(() => {
+  const raw = supabaseUser.value?.id
+  return typeof raw === 'string' && /^[0-9a-f-]{36}$/i.test(raw)
+})
 
 function downloadPdf(): void {
   if (isDownloading.value) return
   if (process.client) {
     isDownloading.value = true
-    window.location.href = `/api/results/${props.sessionId}/pdf`
+    const clientId = !isLoggedIn.value ? getOrCreateClientId() : null
+    if (!isLoggedIn.value && !clientId) {
+      isDownloading.value = false
+      return
+    }
+    const query = clientId ? `?clientId=${encodeURIComponent(clientId)}` : ''
+    window.location.href = `/api/results/${props.sessionId}/pdf${query}`
     setTimeout(() => {
       isDownloading.value = false
     }, 8000)
