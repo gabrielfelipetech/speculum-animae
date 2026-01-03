@@ -1,9 +1,7 @@
-﻿// src/composables/useSaveResult.ts
-import { ref } from 'vue';
-import { useSupabaseUser } from '#imports';
+﻿import { ref } from 'vue';
 import type { LikertTestConfig } from '~/types/tests';
 import { getSupabaseAccessToken } from '~/utils/authToken';
-import { getOrCreateClientId } from '../utils/clientId';
+import { getOrCreateClientId } from '~/utils/clientId';
 
 interface SaveLikertResultArgs {
   config: LikertTestConfig;
@@ -21,11 +19,8 @@ interface SaveLikertResultArgs {
 export function useSaveResult() {
   const isSaving = ref(false);
   const lastError = ref<Error | null>(null);
-  const supabaseUser = useSupabaseUser();
 
-  async function saveLikertResult(
-    args: SaveLikertResultArgs,
-  ): Promise<string | null> {
+  async function saveLikertResult(args: SaveLikertResultArgs): Promise<string | null> {
     if (!import.meta.client) return null;
 
     isSaving.value = true;
@@ -33,32 +28,26 @@ export function useSaveResult() {
 
     try {
       const sessionId = crypto.randomUUID();
-      const rawUserId = supabaseUser.value?.id;
-      const userId =
-        typeof rawUserId === 'string' && /^[0-9a-f-]{36}$/i.test(rawUserId)
-          ? rawUserId
-          : null;
-      const clientId = userId ? null : getOrCreateClientId();
-      if (!userId && !clientId) {
+
+      // Fonte de verdade: token (não useSupabaseUser aqui)
+      const token = await getSupabaseAccessToken();
+      const isLoggedIn = typeof token === 'string' && token.length > 0;
+
+      const clientId = getOrCreateClientId();
+      if (!isLoggedIn && !clientId) {
         return null;
       }
 
       const compactAnswers: Record<string, number> = {};
       for (const [key, value] of Object.entries(args.answers)) {
-        if (typeof value === 'number') {
-          compactAnswers[key] = value;
-        }
+        if (typeof value === 'number') compactAnswers[key] = value;
       }
 
-      // Normaliza categoria em so 2 tipos
       const category: 'twelveLayers' | 'temperaments' =
-        args.config.category === 'temperaments'
-          ? 'temperaments'
-          : 'twelveLayers';
+        args.config.category === 'temperaments' ? 'temperaments' : 'twelveLayers';
 
-      const token = userId ? await getSupabaseAccessToken() : null;
       const headers: Record<string, string> = {};
-      if (token) {
+      if (isLoggedIn && token) {
         headers.Authorization = `Bearer ${token}`;
       }
 
@@ -68,6 +57,7 @@ export function useSaveResult() {
         headers: Object.keys(headers).length ? headers : undefined,
         body: {
           sessionId,
+          // pode mandar sempre; o servidor só usa quando estiver deslogado
           clientId: clientId ?? null,
           category,
           results: args.results,
@@ -77,29 +67,19 @@ export function useSaveResult() {
             subtitle: args.config.subtitle,
             groupsLabel: args.config.groupsLabel ?? 'Camada',
           },
+          answers: compactAnswers,
         },
       });
 
       return response?.id ?? null;
     } catch (error) {
       console.error('Failed to save result', error);
-      if (error instanceof Error) {
-        lastError.value = error;
-      } else {
-        lastError.value = new Error('Unknown error');
-      }
+      lastError.value = error instanceof Error ? error : new Error('Unknown error');
       return null;
     } finally {
       isSaving.value = false;
     }
   }
 
-  return {
-    saveLikertResult,
-    isSaving,
-    lastError,
-  };
+  return { saveLikertResult, isSaving, lastError };
 }
-
-
-

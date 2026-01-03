@@ -43,14 +43,12 @@ export default defineEventHandler(async (event) => {
   let entry: StoredResult | null = null;
 
   const canAccess = (storedUserId?: string | null, storedClientId?: string | null): boolean => {
-    if (storedUserId) {
-      return Boolean(userId && storedUserId === userId);
-    }
-    if (userId) {
-      return false;
-    }
-    return Boolean(clientId && storedClientId && clientId === storedClientId);
-  };
+  if (storedUserId) {
+    return Boolean(userId && storedUserId === userId);
+  }
+  return Boolean(clientId && storedClientId && clientId === storedClientId);
+};
+
 
   // 1) Supabase
   try {

@@ -35,14 +35,14 @@ const { data, error, pending } = useLazyAsyncData<AnyReport>(
     const query: Record<string, string> = {};
 
     const token = await getSupabaseAccessToken();
-
     if (token) {
       headers.Authorization = `Bearer ${token}`;
-    } else {
-      const clientId = import.meta.client ? getOrCreateClientId() : null;
-      if (clientId) {
-        query.clientId = clientId;
-      }
+    }
+
+    // sempre enviar clientId quando estiver no client (compat: anon + logado)
+    const clientId = import.meta.client ? getOrCreateClientId() : null;
+    if (clientId) {
+      query.clientId = clientId;
     }
 
     return $fetch(`/api/results/${sessionId.value}`, {
@@ -76,6 +76,7 @@ const temperamentReport = computed<TemperamentReport | null>(() => {
     : null;
 });
 </script>
+
 
 <template>
   <section
