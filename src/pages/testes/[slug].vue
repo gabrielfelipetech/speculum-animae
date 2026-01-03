@@ -34,7 +34,6 @@
 </template>
 
 <script setup lang="ts">
-import { computed, watchEffect } from 'vue';
 import { useHead, useRoute, useRouter, useSeoMeta } from '#imports';
 import { getLikertTestBySlug } from '~/config/tests';
 import { getAllArticles } from '~/data/articles';
@@ -45,6 +44,46 @@ import RelatedArticles from '~/components/articles/RelatedArticles.vue';
 import FaqSection from '~/components/faq/FaqSection.vue';
 import LikertTestView from '~/components/tests/LikertTestView.vue';
 import BaseButton from '~/components/base/BaseButton.vue';
+import { computed, ref, watchEffect } from 'vue';
+import { getSupabaseAccessToken } from '~/utils/authToken';
+import { buildActorKey } from '~/utils/actorKey';
+import { getOrCreateClientId } from '~/utils/clientId';
+
+const route = useRoute();
+const router = useRouter();
+
+const slug = computed(() => String(route.params.slug || ''));
+
+const isFresh = computed(() => {
+  const value = route.query.fresh;
+  if (Array.isArray(value)) return value.includes('1');
+  return value === '1';
+});
+
+const likertConfig = computed(() => getLikertTestBySlug(slug.value));
+
+const didRedirect = ref(false);
+
+watchEffect(() => {
+  if (!process.client) return;
+  if (didRedirect.value) return;
+  if (isFresh.value) return;
+  if (!likertConfig.value) return;
+
+  void tryRedirectToLastResult();
+});
+
+async function tryRedirectToLastResult(): Promise<void> {
+  const token = await getSupabaseAccessToken();
+  const actorKey = buildActorKey(token, getOrCreateClientId());
+  if (!actorKey) return;
+
+  const lastResultId = getLastResultId(slug.value, actorKey);
+  if (!lastResultId) return;
+
+  didRedirect.value = true;
+  router.replace({ path: `/resultados/${lastResultId}`, query: { t: slug.value } });
+}
 
 type PublicSlug = '12-camadas' | 'temperamentos-classicos';
 
@@ -71,18 +110,7 @@ const TEST_CATEGORY_BY_SLUG: Record<PublicSlug, string> = {
   'temperamentos-classicos': 'temperamentos',
 };
 
-const route = useRoute();
-const router = useRouter();
 
-const slug = computed(() => String(route.params.slug || ''));
-
-const isFresh = computed(() => {
-  const value = route.query.fresh;
-  if (Array.isArray(value)) return value.includes('1');
-  return value === '1';
-});
-
-const likertConfig = computed(() => getLikertTestBySlug(slug.value));
 const faqItems = computed(() => getFaqByTestSlug(slug.value));
 const relatedArticles = computed(() => {
   if (!isPublicSlug(slug.value)) return [];

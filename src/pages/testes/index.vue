@@ -48,14 +48,16 @@ const publicTests: PublicTest[] = [
     title: 'Teste das 12 camadas da personalidade',
     description: 'Avalie suas camadas internas com perguntas guiadas e claras.',
     kicker: 'Personalidade',
-    href: '/testes/12-camadas',
+    href: '/testes/12-camadas?fresh=1',
+
   },
   {
     slug: 'temperamentos-classicos',
     title: 'Temperamentos clássicos',
     description: 'Descubra seu perfil clássico e como ele impacta seu dia a dia.',
     kicker: 'Temperamento',
-    href: '/testes/temperamentos-classicos',
+    href: '/testes/temperamentos-classicos?fresh=1',
+
   },
 ];
 

@@ -29,7 +29,7 @@ const testSlug = computed(() => {
 });
 
 const { data, error, pending } = useLazyAsyncData<AnyReport>(
-  () => `results-${sessionId.value}`,
+  `results-${sessionId.value}`,
   async () => {
     const headers: Record<string, string> = {};
     const query: Record<string, string> = {};
@@ -37,12 +37,9 @@ const { data, error, pending } = useLazyAsyncData<AnyReport>(
     const token = await getSupabaseAccessToken();
     if (token) {
       headers.Authorization = `Bearer ${token}`;
-    }
-
-    // sempre enviar clientId quando estiver no client (compat: anon + logado)
-    const clientId = import.meta.client ? getOrCreateClientId() : null;
-    if (clientId) {
-      query.clientId = clientId;
+    } else {
+      const clientId = import.meta.client ? getOrCreateClientId() : null;
+      if (clientId) query.clientId = clientId;
     }
 
     return $fetch(`/api/results/${sessionId.value}`, {
@@ -52,9 +49,10 @@ const { data, error, pending } = useLazyAsyncData<AnyReport>(
   },
   {
     server: false,
-    watch: [sessionId],
+    getCachedData: () => undefined,
   },
 );
+
 
 const isLoading = computed(() => pending.value || (!data.value && !error.value));
 

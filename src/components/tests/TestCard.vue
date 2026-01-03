@@ -1,7 +1,7 @@
 <!-- src/components/tests/TestCard.vue (ou o arquivo onde está esse card) -->
 <template>
   <NuxtLink
-    :to="`/testes/${test.slug}`"
+    :to="to"
     class="group flex flex-col justify-between rounded-2xl border border-slate-200/80 bg-white/90
            p-4 shadow-sm transition
            hover:-translate-y-0.5 hover:border-brand-500/70 hover:shadow-md
@@ -43,13 +43,18 @@
 </template>
 
 <script setup lang="ts">
+  import { computed } from 'vue';
 import type { LikertTestConfig } from '~/types/tests'
 import TestTagPill from '~/components/tests/TestTagPill.vue'
 
-defineProps<{
-  test: LikertTestConfig
-  variant: 'core' | 'other'
-}>()
+const props = defineProps<{
+  test: LikertTestConfig;
+  variant: 'core' | 'other';
+}>();
+const to = computed(() => ({
+  path: `/testes/${props.test.slug}`,
+  query: { fresh: '1' },
+}));
 </script>
 
 <style scoped>
