@@ -6,7 +6,10 @@
     @close="emit('close')"
   >
     <div class="relative space-y-5">
-      <div v-if="loading" class="absolute inset-0 z-10 rounded-2xl bg-white/70 p-4 dark:bg-slate-900/70">
+      <div
+        v-if="loading"
+        class="absolute inset-0 z-10 rounded-2xl bg-white/70 p-4 dark:bg-slate-900/70"
+      >
         <div class="flex h-full flex-col gap-3">
           <SkeletonBlock class="h-4 w-20" />
           <SkeletonBlock class="h-6 w-2/3" />
@@ -14,21 +17,39 @@
           <SkeletonBlock class="h-10 w-full rounded-lg" />
         </div>
       </div>
+
       <!-- Cabeçalho -->
       <header class="space-y-1">
-        <p class="text-[0.7rem] font-semibold uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">
+        <p
+          class="text-[0.7rem] font-semibold uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400"
+        >
           Acesso
         </p>
+
         <h2 class="text-lg font-semibold leading-tight">
-          {{ mode === 'signin' ? 'Entrar na sua conta' : 'Criar uma conta' }}
+          {{
+            mode === 'signin'
+              ? 'Entrar na sua conta'
+              : mode === 'signup'
+                ? 'Criar uma conta'
+                : 'Recuperar senha'
+          }}
         </h2>
+
         <p class="text-xs text-slate-500 dark:text-slate-400">
-          Use seu e-mail ou continue com o Google.
+          {{
+            mode === 'reset'
+              ? 'Vamos enviar um link para você definir uma nova senha.'
+              : 'Use seu e-mail ou continue com o Google.'
+          }}
         </p>
       </header>
 
-      <!-- Tabs Entrar / Cadastrar -->
-      <div class="flex gap-2 rounded-full bg-slate-100 p-1 text-xs dark:bg-slate-800">
+      <!-- Tabs Entrar / Cadastrar (oculta no reset) -->
+      <div
+        v-if="mode !== 'reset'"
+        class="flex gap-2 rounded-full bg-slate-100 p-1 text-xs dark:bg-slate-800"
+      >
         <button
           type="button"
           class="flex-1 rounded-full px-3 py-1.5 font-medium transition"
@@ -55,9 +76,19 @@
         </button>
       </div>
 
-      <!-- Mensagens de erro -->
-      <div v-if="localError || errorMessage" class="rounded-lg bg-red-50 px-3 py-2 text-[0.7rem] text-red-700 dark:bg-red-900/40 dark:text-red-200">
+      <!-- Mensagens de erro/sucesso -->
+      <div
+        v-if="localError || errorMessage"
+        class="rounded-lg bg-red-50 px-3 py-2 text-[0.7rem] text-red-700 dark:bg-red-900/40 dark:text-red-200"
+      >
         {{ localError || errorMessage }}
+      </div>
+
+      <div
+        v-if="successMessage"
+        class="rounded-lg bg-emerald-50 px-3 py-2 text-[0.7rem] text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-200"
+      >
+        {{ successMessage }}
       </div>
 
       <!-- Formulário -->
@@ -106,7 +137,7 @@
           </div>
         </div>
 
-        <!-- E-mail -->
+        <!-- E-mail (signin/signup/reset) -->
         <div class="space-y-2">
           <label class="block text-xs font-medium text-slate-700 dark:text-slate-200">
             E-mail
@@ -120,8 +151,8 @@
           </label>
         </div>
 
-        <!-- Senha -->
-        <div class="space-y-2">
+        <!-- Senha (signin/signup) -->
+        <div v-if="mode !== 'reset'" class="space-y-2">
           <label class="block text-xs font-medium text-slate-700 dark:text-slate-200">
             Senha
             <input
@@ -130,18 +161,16 @@
               required
               minlength="8"
               class="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs text-slate-900 shadow-sm outline-none ring-indigo-500/0 transition placeholder:text-slate-400 hover:border-slate-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-50 dark:placeholder:text-slate-500 dark:hover:border-slate-500"
-              autocomplete="current-password"
+              :autocomplete="mode === 'signin' ? 'current-password' : 'new-password'"
             >
           </label>
 
           <!-- Link Esqueci senha (só login) -->
-          <div
-            v-if="mode === 'signin'"
-            class="flex justify-end"
-          >
+          <div v-if="mode === 'signin'" class="flex justify-end">
             <button
               type="button"
               class="text-[0.7rem] font-medium text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300"
+              @click="switchMode('reset')"
             >
               Esqueci minha senha
             </button>
@@ -171,7 +200,10 @@
                 </span>
               </span>
 
-              <span v-if="password && passwordConfirm && !passwordsMatch" class="text-[0.65rem] text-red-500">
+              <span
+                v-if="password && passwordConfirm && !passwordsMatch"
+                class="text-[0.65rem] text-red-500"
+              >
                 As senhas não coincidem
               </span>
             </div>
@@ -186,6 +218,17 @@
           </div>
         </div>
 
+        <!-- Reset helper -->
+        <div v-if="mode === 'reset'" class="flex justify-end">
+          <button
+            type="button"
+            class="text-[0.7rem] font-medium text-slate-600 hover:text-slate-800 dark:text-slate-300 dark:hover:text-slate-100"
+            @click="switchMode('signin')"
+          >
+            Voltar para login
+          </button>
+        </div>
+
         <!-- Submit -->
         <button
           type="submit"
@@ -194,12 +237,18 @@
         >
           <span v-if="loading">Processando...</span>
           <span v-else>
-            {{ mode === 'signin' ? 'Entrar' : 'Criar conta' }}
+            {{
+              mode === 'signin'
+                ? 'Entrar'
+                : mode === 'signup'
+                  ? 'Criar conta'
+                  : 'Enviar link de recuperação'
+            }}
           </span>
         </button>
 
-        <!-- Divisor -->
-        <div class="flex items-center gap-2">
+        <!-- Divisor (só signin/signup) -->
+        <div v-if="mode !== 'reset'" class="flex items-center gap-2">
           <div class="h-px flex-1 bg-slate-200 dark:bg-slate-800" />
           <span class="text-[0.65rem] uppercase tracking-[0.15em] text-slate-400">
             ou
@@ -207,14 +256,17 @@
           <div class="h-px flex-1 bg-slate-200 dark:bg-slate-800" />
         </div>
 
-        <!-- Google -->
+        <!-- Google (só signin/signup) -->
         <button
+          v-if="mode !== 'reset'"
           type="button"
           class="flex w-full items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-800 shadow-sm transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-50 dark:hover:bg-slate-800"
           :disabled="loading"
           @click="handleGoogle"
         >
-          <span class="inline-flex h-4 w-4 items-center justify-center rounded-sm bg-white text-[0.6rem] leading-none text-slate-900 shadow dark:bg-slate-200">
+          <span
+            class="inline-flex h-4 w-4 items-center justify-center rounded-sm bg-white text-[0.6rem] leading-none text-slate-900 shadow dark:bg-slate-200"
+          >
             G
           </span>
           <span>
@@ -231,9 +283,11 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue';
+import { computed, ref, watch } from 'vue';
 import BaseModal from '~/components/base/BaseModal.vue';
 import SkeletonBlock from '~/components/base/SkeletonBlock.vue';
+
+type Mode = 'signin' | 'signup' | 'reset';
 
 const props = defineProps<{
   open: boolean;
@@ -252,6 +306,7 @@ const emit = defineEmits<{
     gender?: 'male' | 'female';
   }): void;
   (e: 'google-auth', payload: { mode: 'signin' | 'signup' }): void;
+  (e: 'reset-password', payload: { email: string }): void;
 }>();
 
 const internalOpen = computed({
@@ -259,7 +314,8 @@ const internalOpen = computed({
   set: (value: boolean) => emit('update:open', value),
 });
 
-const mode = ref<'signin' | 'signup'>('signin');
+const mode = ref<Mode>('signin');
+
 const name = ref('');
 const gender = ref<'male' | 'female' | ''>('');
 const email = ref('');
@@ -267,6 +323,17 @@ const password = ref('');
 const passwordConfirm = ref('');
 
 const localError = ref<string | null>(null);
+const successMessage = ref<string | null>(null);
+
+watch(
+  () => props.open,
+  (isOpen) => {
+    if (!isOpen) {
+      localError.value = null;
+      successMessage.value = null;
+    }
+  },
+);
 
 const passwordsMatch = computed(
   () =>
@@ -285,9 +352,9 @@ const passwordScore = computed(() => {
   if (/[^A-Za-z0-9]/.test(value)) score++;
 
   if (!value) return 0;
-  if (score <= 1) return 1; // fraca
-  if (score === 2) return 2; // média
-  return 3; // forte
+  if (score <= 1) return 1;
+  if (score === 2) return 2;
+  return 3;
 });
 
 const passwordStrengthLabel = computed(() => {
@@ -343,6 +410,10 @@ const strengthBarWidth = computed(() => {
 });
 
 const canSubmit = computed(() => {
+  if (mode.value === 'reset') {
+    return !!email.value;
+  }
+
   if (mode.value === 'signin') {
     return !!email.value && !!password.value;
   }
@@ -358,25 +429,42 @@ const canSubmit = computed(() => {
   return (
     baseOk &&
     passwordsMatch.value &&
-    passwordScore.value >= 2 && // pelo menos "média"
+    passwordScore.value >= 2 &&
     password.value.length >= 8
   );
 });
 
-function switchMode(next: 'signin' | 'signup') {
+function switchMode(next: Mode) {
   mode.value = next;
   localError.value = null;
+  successMessage.value = null;
 
   if (next === 'signin') {
-    // não precisa limpar tudo, mas podemos limpar campos específicos
+    passwordConfirm.value = '';
+  }
+
+  if (next === 'reset') {
+    password.value = '';
     passwordConfirm.value = '';
   }
 }
 
 function handleSubmit(): void {
   localError.value = null;
+  successMessage.value = null;
 
-  if (!email.value || !password.value) {
+  if (!email.value) {
+    localError.value = 'Preencha o e-mail.';
+    return;
+  }
+
+  if (mode.value === 'reset') {
+    emit('reset-password', { email: email.value });
+    successMessage.value = 'Se este e-mail existir, enviaremos um link de recuperação.';
+    return;
+  }
+
+  if (!password.value) {
     localError.value = 'Preencha e-mail e senha.';
     return;
   }
@@ -398,21 +486,21 @@ function handleSubmit(): void {
   }
 
   emit('submit-email', {
-    mode: mode.value,
+    mode: mode.value === 'signin' ? 'signin' : 'signup',
     email: email.value,
     password: password.value,
     name: mode.value === 'signup' ? name.value : undefined,
-    gender:
-      mode.value === 'signup'
-        ? (gender.value as 'male' | 'female')
-        : undefined,
+    gender: mode.value === 'signup' ? (gender.value as 'male' | 'female') : undefined,
   });
 }
 
 function handleGoogle(): void {
   localError.value = null;
+  successMessage.value = null;
+  if (mode.value === 'reset') return;
+
   emit('google-auth', {
-    mode: mode.value,
+    mode: mode.value === 'signin' ? 'signin' : 'signup',
   });
 }
 </script>

@@ -1,5 +1,4 @@
-﻿<!-- src/app.vue -->
-<template>
+﻿<template>
   <div
     class="min-h-screen bg-slate-50 text-slate-900 transition-colors dark:bg-slate-950 dark:text-slate-50 pt-8"
   >
@@ -18,6 +17,7 @@
       @close="isAuthOpen = false"
       @submit-email="handleEmailAuth"
       @google-auth="handleGoogleAuth"
+      @reset-password="handleResetPassword"
     />
 
     <main class="mx-auto max-w-5xl px-4 py-10">
@@ -28,32 +28,41 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, watch, ref, computed } from 'vue'
-import { useHead, useSeoMeta, useRoute, useRuntimeConfig } from '#imports'
+import { onMounted, watch, ref, computed } from 'vue';
+import { useHead, useSeoMeta, useRoute, useRuntimeConfig } from '#imports';
 
-import SiteHeader from '~/components/layout/SiteHeader.vue'
-import AuthModal from '~/components/auth/AuthModal.vue'
-import { useAuth } from '~/composables/useAuth'
-import SiteFooter from '~/components/layout/SiteFooter.vue'
+import SiteHeader from '~/components/layout/SiteHeader.vue';
+import AuthModal from '~/components/auth/AuthModal.vue';
+import { useAuth } from '~/composables/useAuth';
+import SiteFooter from '~/components/layout/SiteFooter.vue';
 
-type Theme = 'light' | 'dark'
+type Theme = 'light' | 'dark';
 
-const theme = useState<Theme>('theme', () => 'light')
-const isAuthOpen = ref(false)
+const theme = useState<Theme>('theme', () => 'light');
+const isAuthOpen = ref(false);
 
-const { signInWithEmail, signUpWithEmail, signInWithGoogle, signOut, loading, errorMessage } =
-  useAuth()
+const {
+  signInWithEmail,
+  signUpWithEmail,
+  signInWithGoogle,
+  signOut,
+  sendPasswordReset,
+  loading,
+  errorMessage,
+} = useAuth();
 
-const authLoading = computed(() => loading.value)
-const authError = computed(() => errorMessage.value ?? null)
+const authLoading = computed(() => loading.value);
+const authError = computed(() => errorMessage.value ?? null);
 
-// --- SEO GLOBAL ---
-const route = useRoute()
-const runtime = useRuntimeConfig()
-const siteUrl = String(runtime.public.siteUrl || 'https://speculumanimae.com.br').replace(/\/$/, '')
+const route = useRoute();
+const runtime = useRuntimeConfig();
+const siteUrl = String(runtime.public.siteUrl || 'https://speculumanimae.com.br').replace(
+  /\/$/,
+  '',
+);
 
 // canonical SEM querystring (evita duplicar /?fresh=1 etc.)
-const canonical = computed(() => `${siteUrl}${route.path}`)
+const canonical = computed(() => `${siteUrl}${route.path}`);
 
 useSeoMeta(() => ({
   titleTemplate: (t) => (t ? `${t} | Speculum Animae` : 'Speculum Animae'),
@@ -63,7 +72,7 @@ useSeoMeta(() => ({
   ogUrl: canonical.value,
   ogImage: `${siteUrl}/logo-512.png`,
   twitterCard: 'summary_large_image',
-}))
+}));
 
 useHead(() => ({
   link: [{ rel: 'canonical', href: canonical.value }],
@@ -88,71 +97,76 @@ useHead(() => ({
       }),
     },
   ],
-}))
+}));
 
-// --- THEME ---
 function applyThemeClass(value: Theme): void {
   if (process.client) {
-    const root = document.documentElement
-    root.classList.toggle('dark', value === 'dark')
+    const root = document.documentElement;
+    root.classList.toggle('dark', value === 'dark');
   }
 }
 
 onMounted(() => {
-  if (!process.client) return
+  if (!process.client) return;
 
-  const saved = window.localStorage.getItem('theme')
+  const saved = window.localStorage.getItem('theme');
   if (saved === 'dark' || saved === 'light') {
-    theme.value = saved as Theme
+    theme.value = saved as Theme;
   } else {
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
-    theme.value = prefersDark ? 'dark' : 'light'
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    theme.value = prefersDark ? 'dark' : 'light';
   }
-  applyThemeClass(theme.value)
-})
+  applyThemeClass(theme.value);
+});
 
 watch(
   theme,
   (value) => {
-    if (!process.client) return
-    window.localStorage.setItem('theme', value)
-    applyThemeClass(value)
+    if (!process.client) return;
+    window.localStorage.setItem('theme', value);
+    applyThemeClass(value);
   },
   { immediate: false },
-)
+);
 
 function toggleTheme(): void {
-  theme.value = theme.value === 'light' ? 'dark' : 'light'
+  theme.value = theme.value === 'light' ? 'dark' : 'light';
 }
 
 async function handleEmailAuth(payload: {
-  mode: 'signin' | 'signup'
-  email: string
-  password: string
-  name?: string
-  gender?: 'male' | 'female'
+  mode: 'signin' | 'signup';
+  email: string;
+  password: string;
+  name?: string;
+  gender?: 'male' | 'female';
 }) {
   if (payload.mode === 'signin') {
-    const user = await signInWithEmail(payload.email, payload.password)
-    if (user) isAuthOpen.value = false
+    const user = await signInWithEmail(payload.email, payload.password);
+    if (user) isAuthOpen.value = false;
   } else {
-    if (!payload.name || !payload.gender) return
+    if (!payload.name || !payload.gender) return;
     const user = await signUpWithEmail({
       email: payload.email,
       password: payload.password,
       fullName: payload.name,
       gender: payload.gender,
-    })
-    if (user) isAuthOpen.value = false
+    });
+    if (user) isAuthOpen.value = false;
   }
 }
 
 async function handleGoogleAuth() {
-  await signInWithGoogle()
+  await signInWithGoogle();
 }
 
 async function handleLogout() {
-  await signOut()
+  await signOut();
+}
+
+async function handleResetPassword(payload: { email: string }) {
+  const ok = await sendPasswordReset(payload.email);
+  if (ok) {
+    isAuthOpen.value = false
+  }
 }
 </script>
-
