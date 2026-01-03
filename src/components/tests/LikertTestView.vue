@@ -112,8 +112,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref, toRefs, watch, type ComponentPublicInstance } from 'vue'
+import { computed, ref, toRefs, watch, type ComponentPublicInstance } from 'vue'
 import { useRouter } from '#app'
+import { getLastResultId, setLastResultId } from '~/utils/testLastResult'
 
 import BaseButton from '~/components/base/BaseButton.vue'
 import SkeletonBlock from '~/components/base/SkeletonBlock.vue'
@@ -133,6 +134,10 @@ const props = defineProps<{
 
 const { config } = toRefs(props)
 const router = useRouter()
+const storedLastResultId = computed(() => getLastResultId(config.value.slug))
+const skipAutoComputeOnMount = computed(
+  () => props.fresh !== true && Boolean(storedLastResultId.value),
+)
 
 const {
   answers,
@@ -156,7 +161,10 @@ const {
   fieldKey,
   goPrevious,
   goNext,
-} = useLikertTestRunner(config, { fresh: props.fresh === true })
+} = useLikertTestRunner(config, {
+  fresh: props.fresh === true,
+  skipAutoComputeOnMount: skipAutoComputeOnMount.value,
+})
 
 const questionRefs = ref<HTMLElement[]>([])
 const shouldRedirectOnComplete = ref(false)
@@ -184,7 +192,8 @@ watch(currentGroupIndex, () => {
 watch(lastResultId, (id) => {
   if (!id || !shouldRedirectOnComplete.value) return
   shouldRedirectOnComplete.value = false
-  router.push(`/resultados/${id}`)
+  setLastResultId(config.value.slug, id)
+  router.push({ path: `/resultados/${id}`, query: { t: config.value.slug } })
 })
 
 function handleNextClick(): void {

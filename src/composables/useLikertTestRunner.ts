@@ -50,10 +50,11 @@ function shuffleArray<T>(input: T[]): T[] {
 
 export function useLikertTestRunner(
   config: Ref<LikertTestConfig> | LikertTestConfig,
-  options?: { fresh?: boolean },
+  options?: { fresh?: boolean; skipAutoComputeOnMount?: boolean },
 ) {
   const cfg = isRef(config) ? config : ref(config);
   const isFreshStart = !!options?.fresh;
+  const skipAutoComputeOnMount = options?.skipAutoComputeOnMount === true;
 
   const answers = reactive<Record<string, number | null>>({});
   const currentGroupIndex = ref(0);
@@ -248,7 +249,9 @@ export function useLikertTestRunner(
 
       if (firstIncompleteIndex === -1) {
         currentGroupIndex.value = Math.max(0, totalGroups.value - 1);
-        void computeResults();
+        if (!skipAutoComputeOnMount) {
+          void computeResults();
+        }
       } else {
         currentGroupIndex.value = firstIncompleteIndex;
       }

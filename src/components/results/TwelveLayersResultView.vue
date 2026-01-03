@@ -8,15 +8,20 @@
         id="overview"
         class="rounded-3xl bg-gradient-to-br from-amber-200/60 to-amber-50 p-6 dark:from-amber-900/30 dark:to-slate-900/80"
       >
-        <p class="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">
-          Seu retrato nas 12 camadas
-        </p>
-        <h1 class="mt-2 font-display text-3xl tracking-tight md:text-4xl">
-          {{ report.overall.title }}
-        </h1>
-        <p class="mt-2 max-w-2xl text-sm text-slate-600 dark:text-slate-300">
-          {{ report.overall.subtitle }}
-        </p>
+        <div class="flex flex-wrap items-start justify-between gap-4">
+          <div>
+            <p class="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">
+              Seu retrato nas 12 camadas
+            </p>
+            <h1 class="mt-2 font-display text-3xl tracking-tight md:text-4xl">
+              {{ report.overall.title }}
+            </h1>
+            <p class="mt-2 max-w-2xl text-sm text-slate-600 dark:text-slate-300">
+              {{ report.overall.subtitle }}
+            </p>
+          </div>
+
+        </div>
       </header>
 
       <!-- Mapa das 12 camadas (barrinhas) -->
@@ -76,6 +81,25 @@
           Baixar relatório completo (PDF)
         </BaseButton>
       </div>
+
+      <section
+        v-if="testSlug"
+        class="rounded-2xl border border-slate-200/80 bg-white/90 p-5 text-sm shadow-sm dark:border-slate-800 dark:bg-slate-900/80"
+      >
+        <h2 class="text-base font-semibold text-slate-900 dark:text-slate-50">
+          Proximo passo
+        </h2>
+        <p class="mt-1 text-xs text-slate-500 dark:text-slate-300">
+          Refaca o teste para gerar um novo resultado atualizado.
+        </p>
+        <BaseButton
+          type="button"
+          class="mt-3 rounded-full text-xs font-semibold uppercase tracking-[0.18em]"
+          @click="handleRetake"
+        >
+          Refazer teste
+        </BaseButton>
+      </section>
     </div>
 
     <!-- Sidebar -->
@@ -98,14 +122,26 @@
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue'
+import { useRouter } from '#app'
 import type { TwelveLayersReport } from '~/types/results'
 import ResultsSection from '~/components/results/ResultsSection.vue'
 import ResultsSidebarLink from '~/components/results/ResultsSidebarLink.vue'
 import BaseButton from '~/components/base/BaseButton.vue'
+import { clearLastResultId } from '~/utils/testLastResult'
 
 const props = defineProps<{
   report: TwelveLayersReport
+  testSlug?: string | null
 }>()
 
 const report = props.report
+const router = useRouter()
+const testSlug = computed(() => props.testSlug ?? null)
+
+function handleRetake(): void {
+  if (!testSlug.value) return
+  clearLastResultId(testSlug.value)
+  router.push({ path: `/testes/${testSlug.value}`, query: { fresh: '1' } })
+}
 </script>

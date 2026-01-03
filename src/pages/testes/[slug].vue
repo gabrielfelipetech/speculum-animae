@@ -34,11 +34,12 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, watchEffect } from 'vue';
 import { useHead, useRoute, useRouter, useSeoMeta } from '#imports';
 import { getLikertTestBySlug } from '~/config/tests';
 import { getAllArticles } from '~/data/articles';
 import { getFaqByTestSlug } from '~/data/faq';
+import { getLastResultId } from '~/utils/testLastResult';
 import { buildFaqSchema } from '~/utils/seo/faqSchema';
 import RelatedArticles from '~/components/articles/RelatedArticles.vue';
 import FaqSection from '~/components/faq/FaqSection.vue';
@@ -75,7 +76,11 @@ const router = useRouter();
 
 const slug = computed(() => String(route.params.slug || ''));
 
-const isFresh = computed(() => route.query.fresh === '1');
+const isFresh = computed(() => {
+  const value = route.query.fresh;
+  if (Array.isArray(value)) return value.includes('1');
+  return value === '1';
+});
 
 const likertConfig = computed(() => getLikertTestBySlug(slug.value));
 const faqItems = computed(() => getFaqByTestSlug(slug.value));
@@ -114,6 +119,20 @@ useHead(() => {
       },
     ],
   };
+});
+
+watchEffect(() => {
+  if (!process.client) return;
+  if (isFresh.value) return;
+  if (!likertConfig.value) return;
+
+  const lastResultId = getLastResultId(slug.value);
+  if (!lastResultId) return;
+
+  router.replace({
+    path: `/resultados/${lastResultId}`,
+    query: { t: slug.value },
+  });
 });
 
 function isPublicSlug(value: string): value is PublicSlug {

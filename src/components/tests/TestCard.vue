@@ -1,7 +1,7 @@
 <!-- src/components/tests/TestCard.vue (ou o arquivo onde está esse card) -->
 <template>
   <NuxtLink
-    :to="{ path: `/testes/${test.slug}`, query: { fresh: '1' } }"
+    :to="`/testes/${test.slug}`"
     class="group flex flex-col justify-between rounded-2xl border border-slate-200/80 bg-white/90
            p-4 shadow-sm transition
            hover:-translate-y-0.5 hover:border-brand-500/70 hover:shadow-md

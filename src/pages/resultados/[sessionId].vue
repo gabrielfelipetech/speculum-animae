@@ -20,6 +20,11 @@ useSeoMeta({
 
 const route = useRoute();
 const sessionId = computed(() => route.params.sessionId as string);
+const testSlug = computed(() => {
+  const value = route.query.t;
+  if (Array.isArray(value)) return value[0] ?? null;
+  return typeof value === 'string' ? value : null;
+});
 
 const { data, error, pending } = useLazyAsyncData<AnyReport>(
   `results-${sessionId.value}`,
@@ -93,12 +98,14 @@ const temperamentReport = computed<TemperamentReport | null>(() => {
     <TwelveLayersResultsView
       v-if="twelveReport"
       :report="twelveReport"
+      :test-slug="testSlug"
     />
 
     <TemperamentsResultsView
       v-else-if="temperamentReport"
       :report="temperamentReport"
       :session-id="sessionId"
+      :test-slug="testSlug"
     />
   </section>
 </template>
