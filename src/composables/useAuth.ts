@@ -1,7 +1,6 @@
 // src/composables/useAuth.ts
 import { ref, computed } from 'vue';
-import { useSupabaseClient, useSupabaseUser, useRuntimeConfig } from '#imports';
-import type { User } from '@supabase/supabase-js';
+import { useSupabaseClient, useSupabaseUser } from '#imports';
 
 export type Gender = 'male' | 'female';
 
@@ -15,12 +14,11 @@ type SignUpPayload = Readonly<{
 export function useAuth() {
   const supabase = useSupabaseClient();
   const user = useSupabaseUser();
-  const runtime = useRuntimeConfig();
 
   const loading = ref(false);
   const errorMessage = ref<string | null>(null);
 
-  const isLoggedIn = computed(() => !!user.value);
+  const isLoggedIn = computed(() => !!user.value?.id);
 
   function resetError(): void {
     errorMessage.value = null;
@@ -40,15 +38,7 @@ export function useAuth() {
     }
   }
 
-  function getPublicOrigin(): string {
-    // Prioridade: NUXT_PUBLIC_SITE_URL (prod) -> window.location.origin (dev)
-    const siteUrlRaw = String(runtime.public.siteUrl || '').trim();
-    const siteUrl = siteUrlRaw ? siteUrlRaw.replace(/\/$/, '') : '';
-    const fallback = import.meta.client ? window.location.origin : '';
-    return siteUrl || fallback;
-  }
-
-  async function signInWithEmail(email: string, password: string): Promise<User | null> {
+  async function signInWithEmail(email: string, password: string) {
     if (!email || !password) return null;
 
     loading.value = true;
@@ -71,7 +61,7 @@ export function useAuth() {
     }
   }
 
-  async function signUpWithEmail(payload: SignUpPayload): Promise<User | null> {
+  async function signUpWithEmail(payload: SignUpPayload) {
     const { email, password, fullName, gender } = payload;
 
     loading.value = true;
@@ -83,8 +73,6 @@ export function useAuth() {
         password,
         options: {
           data: { full_name: fullName, gender },
-          // opcional: caso você use /auth/callback para confirmar sessão
-          // emailRedirectTo: import.meta.client ? `${getPublicOrigin()}/auth/callback` : undefined,
         },
       });
 
@@ -106,14 +94,13 @@ export function useAuth() {
     try {
       if (!import.meta.client) return;
 
-      const origin = getPublicOrigin();
+      const origin = window.location.origin; // <- SEMPRE pega localhost em dev
       const redirectTo = `${origin}/auth/callback`;
 
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
           redirectTo,
-          queryParams: { prompt: 'consent' },
         },
       });
 
@@ -125,7 +112,7 @@ export function useAuth() {
     }
   }
 
-  async function signOut(): Promise<boolean> {
+  async function signOut() {
     loading.value = true;
     resetError();
 
@@ -141,31 +128,6 @@ export function useAuth() {
     }
   }
 
-  async function sendPasswordReset(email: string): Promise<boolean> {
-    if (!email) return false;
-
-    loading.value = true;
-    resetError();
-
-    try {
-      const origin = getPublicOrigin();
-      const redirectTo = `${origin}/auth/reset-password`;
-
-      const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo,
-      });
-
-      if (error) {
-        errorMessage.value = mapAuthErrorMessage(error.code, error.message);
-        return false;
-      }
-
-      return true;
-    } finally {
-      loading.value = false;
-    }
-  }
-
   return {
     user,
     isLoggedIn,
@@ -175,7 +137,5 @@ export function useAuth() {
     signUpWithEmail,
     signInWithGoogle,
     signOut,
-    
-    sendPasswordReset,
   };
 }

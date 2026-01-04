@@ -36,8 +36,10 @@ export default defineNuxtConfig({
 
   runtimeConfig: {
     supabaseServiceRoleKey: process.env.SUPABASE_SERVICE_ROLE_KEY,
+    stripeSecretKey: process.env.STRIPE_SECRET_KEY,
     public: {
       siteUrl: process.env.NUXT_SITE_URL,
+      stripePublicKey: process.env.NUXT_PUBLIC_STRIPE_PUBLISHABLE_KEY,
 
       supabaseUrl: process.env.NUXT_PUBLIC_SUPABASE_URL ?? process.env.SUPABASE_URL,
       supabaseAnonKey:
@@ -57,7 +59,7 @@ export default defineNuxtConfig({
 
   sitemap: {
     includeAppSources: false,
-    urls: ['/', '/testes/12-camadas', '/testes/temperamentos-classicos', '/artigos', ...articleUrls],
+    urls: ['/', '/testes/12-camadas', '/testes/temperamentos-classicos', '/artigos', '/planos', ...articleUrls],
     exclude: ['/resultados/**', '/testes/historico', '/auth/**', '/api/**'],
   },
 
