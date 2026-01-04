@@ -5,18 +5,11 @@
       "title": "Temperamento colerico: tracos, virtudes e riscos",
       "description": "Entenda o colerico: pontos fortes, desafios e como equilibrar impulsividade.",
       "category": "temperamentos",
-      "tags": [
-        "temperamentos",
-        "colerico",
-        "autoconhecimento"
-      ],
+      "tags": ["temperamentos", "colerico", "autoconhecimento"],
       "publishedAt": "2026-01-01",
       "updatedAt": "2026-01-03",
-      
-      
-      "relatedTestSlugs": [
-        "temperamentos-classicos"
-      ],
+      "relatedTestSlugs": ["temperamentos-classicos"],
+      "access": "free",
       "file": "temperamento-colerico-tracos-virtudes-riscos.json"
     },
     {
@@ -24,18 +17,11 @@
       "title": "Temperamento melancolico: forcas, sensibilidade e equilibrio",
       "description": "Como o melancolico percebe o mundo e o que ajuda a manter o equilibrio.",
       "category": "temperamentos",
-      "tags": [
-        "temperamentos",
-        "melancolico",
-        "sensibilidade"
-      ],
+      "tags": ["temperamentos", "melancolico", "sensibilidade"],
       "publishedAt": "2026-01-02",
       "updatedAt": "2026-01-04",
-      
-      
-      "relatedTestSlugs": [
-        "temperamentos-classicos"
-      ],
+      "relatedTestSlugs": ["temperamentos-classicos"],
+      "access": "free",
       "file": "temperamento-melancolico-forcas-sensibilidade-equilibrio.json"
     },
     {
@@ -43,18 +29,11 @@
       "title": "12 camadas: um mapa pratico de autoconhecimento",
       "description": "Veja como as camadas se conectam e por que elas ajudam a organizar sua jornada.",
       "category": "personalidade",
-      "tags": [
-        "personalidade",
-        "12-camadas",
-        "autoconhecimento"
-      ],
+      "tags": ["personalidade", "12-camadas", "autoconhecimento"],
       "publishedAt": "2026-01-05",
       "updatedAt": "2026-01-06",
-      
-      
-      "relatedTestSlugs": [
-        "12-camadas"
-      ],
+      "relatedTestSlugs": ["12-camadas"],
+      "access": "free",
       "file": "12-camadas-mapa-de-autoconhecimento.json"
     },
     {
@@ -62,18 +41,11 @@
       "title": "Tracos de personalidade: observar sem rotulos",
       "description": "Um guia curto para observar tracos sem cair em rotulos rigidos.",
       "category": "personalidade",
-      "tags": [
-        "personalidade",
-        "tracos",
-        "autoobservacao"
-      ],
+      "tags": ["personalidade", "tracos", "autoobservacao"],
       "publishedAt": "2026-01-07",
       "updatedAt": "2026-01-07",
-      
-      
-      "relatedTestSlugs": [
-        "12-camadas"
-      ],
+      "relatedTestSlugs": ["12-camadas"],
+      "access": "free",
       "file": "tracos-de-personalidade-observar-sem-rotulos.json"
     },
     {
@@ -81,16 +53,11 @@
       "title": "Habitos diarios para mais clareza mental",
       "description": "Micro rotinas que ajudam a ter foco, calma e constancia.",
       "category": "virtudes-habitos",
-      "tags": [
-        "habitos",
-        "clareza",
-        "foco"
-      ],
+      "tags": ["habitos", "clareza", "foco"],
       "publishedAt": "2026-01-08",
       "updatedAt": "2026-01-09",
-      
-      
       "relatedTestSlugs": [],
+      "access": "free",
       "file": "habitos-diarios-para-mais-clareza-mental.json"
     },
     {
@@ -98,16 +65,11 @@
       "title": "Virtudes praticas para equilibrio emocional",
       "description": "Pequenas virtudes aplicadas ao cotidiano para lidar melhor com conflitos.",
       "category": "virtudes-habitos",
-      "tags": [
-        "virtudes",
-        "emocao",
-        "equilibrio"
-      ],
+      "tags": ["virtudes", "emocao", "equilibrio"],
       "publishedAt": "2026-01-09",
       "updatedAt": "2026-01-10",
-      
-      
       "relatedTestSlugs": [],
+      "access": "free",
       "file": "virtudes-praticas-para-equilibrio-emocional.json"
     },
     {
@@ -115,16 +77,11 @@
       "title": "Linguagens do amor: como identificar no dia a dia",
       "description": "Sinais simples para reconhecer como voce e o outro demonstram afeto.",
       "category": "relacionamentos",
-      "tags": [
-        "relacionamentos",
-        "linguagens-do-amor",
-        "comunicacao"
-      ],
+      "tags": ["relacionamentos", "linguagens-do-amor", "comunicacao"],
       "publishedAt": "2026-01-10",
       "updatedAt": "2026-01-11",
-      
-      
       "relatedTestSlugs": [],
+      "access": "free",
       "file": "linguagens-do-amor-como-identificar-no-dia-a-dia.json"
     },
     {
@@ -132,17 +89,72 @@
       "title": "Conversas dificeis com empatia e limites",
       "description": "Um roteiro simples para dialogos delicados sem perder a firmeza.",
       "category": "relacionamentos",
-      "tags": [
-        "relacionamentos",
-        "empatia",
-        "dialogo"
-      ],
+      "tags": ["relacionamentos", "empatia", "dialogo"],
       "publishedAt": "2026-01-11",
       "updatedAt": "2026-01-12",
-      
-      
       "relatedTestSlugs": [],
+      "access": "free",
       "file": "conversas-dificeis-com-empatia-e-limites.json"
+    },
+    {
+      "slug": "temperamento-sanguineo-energia-social-virtudes-excessos",
+      "title": "Temperamento sanguineo: energia social, virtudes e excessos",
+      "description": "O que torna o sanguineo leve e carismatico, e como evitar dispersao e exageros.",
+      "category": "temperamentos",
+      "tags": ["temperamentos", "sanguineo", "socializacao"],
+      "publishedAt": "2026-01-13",
+      "updatedAt": "2026-01-13",
+      "relatedTestSlugs": ["temperamentos-classicos"],
+      "access": "free",
+      "file": "temperamento-sanguineo-energia-social-virtudes-excessos.json"
+    },
+    {
+      "slug": "temperamento-fleumatico-constancia-paz-inercia",
+      "title": "Temperamento fleumatico: constancia, paz e armadilhas da inercia",
+      "description": "Entenda o fleumatico: estabilidade, lealdade e como superar procrastinacao.",
+      "category": "temperamentos",
+      "tags": ["temperamentos", "fleumatico", "constancia"],
+      "publishedAt": "2026-01-14",
+      "updatedAt": "2026-01-14",
+      "relatedTestSlugs": ["temperamentos-classicos"],
+      "access": "free",
+      "file": "temperamento-fleumatico-constancia-paz-inercia.json"
+    },
+    {
+      "slug": "combinacoes-de-temperamentos-interpretacao-inicial",
+      "title": "Combinacoes de temperamentos: como ler o primeiro e o segundo juntos",
+      "description": "Um guia pratico para interpretar o temperamento predominante e o secundario com clareza.",
+      "category": "temperamentos",
+      "tags": ["temperamentos", "combinacoes", "autoanalise"],
+      "publishedAt": "2026-01-15",
+      "updatedAt": "2026-01-15",
+      "relatedTestSlugs": ["temperamentos-classicos"],
+      "access": "free",
+      "file": "combinacoes-de-temperamentos-interpretacao-inicial.json"
+    },
+    {
+      "slug": "12-camadas-o-que-cada-camada-significa-e-o-que-nao-significa",
+      "title": "As 12 camadas: o que cada camada significa (e o que nao significa)",
+      "description": "Entenda o papel de cada camada e evite interpretacoes erradas e rotulos rigidos.",
+      "category": "personalidade",
+      "tags": ["12-camadas", "personalidade", "metodo"],
+      "publishedAt": "2026-01-16",
+      "updatedAt": "2026-01-16",
+      "relatedTestSlugs": ["12-camadas"],
+      "access": "free",
+      "file": "12-camadas-o-que-cada-camada-significa-e-o-que-nao-significa.json"
+    },
+    {
+      "slug": "12-camadas-como-interpretar-resultados-sem-rotulos",
+      "title": "Como interpretar seu resultado das 12 camadas sem cair em rotulos",
+      "description": "Um roteiro simples para transformar o resultado em observacao e acao pratica.",
+      "category": "personalidade",
+      "tags": ["12-camadas", "interpretacao", "autoconhecimento"],
+      "publishedAt": "2026-01-17",
+      "updatedAt": "2026-01-17",
+      "relatedTestSlugs": ["12-camadas"],
+      "access": "free",
+      "file": "12-camadas-como-interpretar-resultados-sem-rotulos.json"
     }
   ]
 }
