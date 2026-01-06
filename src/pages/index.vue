@@ -86,7 +86,7 @@ import { useHead, useSeoMeta } from '#imports';
 import { allTests } from '~/config/tests';
 import { getGlobalFaq } from '~/data/faq';
 import { buildFaqSchema } from '~/utils/seo/faqSchema';
-import type { LikertTestConfig } from '~/types/tests';
+import type { TestConfig } from '~/types/tests';
 import TestCard from '~/components/tests/TestCard.vue';
 import FaqSection from '~/components/faq/FaqSection.vue';
 
@@ -96,7 +96,7 @@ useSeoMeta({
     'Teste suas camadas de personalidade e temperamentos clássicos em uma experiência guiada.',
 });
 
-const allLikertTests = allTests.likert as LikertTestConfig[];
+const allLikertTests = allTests.likert as TestConfig[];
 
 const coreTests = computed(() =>
   allLikertTests.filter((test) => test.category === 'core'),

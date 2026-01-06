@@ -2,9 +2,72 @@
 import { serverSupabaseClient } from '#supabase/server';
 import { resolveAuthUser } from '../utils/authUser';
 
+export type ReportSlug =
+  | 'twelve-layers'
+  | 'temperaments'
+  | 'love-languages'
+  | 'attachment-styles'
+  | 'conflict-communication'
+  | 'jealousy-boundaries'
+  | 'temperament-compatibility'
+  | 'big-five'
+  | 'disc'
+  | 'self-sabotage'
+  | 'procrastination'
+  | 'decision-making'
+  | 'learning-style-practice'
+  | 'study-focus-attention'
+  | 'study-habits'
+  | 'metacognition'
+  | 'work-values'
+  | 'motivators'
+  | 'leadership-style'
+  | 'teamwork-collaboration'
+  | 'anxiety-triggers'
+  | 'burnout-stress'
+  | 'habits-consistency'
+  | 'sleep-energy'
+  | 'archetypes'
+  | 'self-esteem'
+  | 'emotional-intelligence';
+
+const REPORT_SLUGS: ReportSlug[] = [
+  'twelve-layers',
+  'temperaments',
+  'love-languages',
+  'attachment-styles',
+  'conflict-communication',
+  'jealousy-boundaries',
+  'temperament-compatibility',
+  'big-five',
+  'disc',
+  'self-sabotage',
+  'procrastination',
+  'decision-making',
+  'learning-style-practice',
+  'study-focus-attention',
+  'study-habits',
+  'metacognition',
+  'work-values',
+  'motivators',
+  'leadership-style',
+  'teamwork-collaboration',
+  'anxiety-triggers',
+  'burnout-stress',
+  'habits-consistency',
+  'sleep-energy',
+  'archetypes',
+  'self-esteem',
+  'emotional-intelligence',
+];
+
+function isValidReportSlug(value: string): value is ReportSlug {
+  return REPORT_SLUGS.includes(value as ReportSlug);
+}
+
 export interface StoredResult {
   id: string; // sessionId
-  slug: 'twelve-layers' | 'temperaments';
+  slug: ReportSlug;
   userId?: string | null;
   email?: string | null;
   clientId?: string | null;
@@ -28,14 +91,20 @@ export default defineEventHandler(async (event) => {
   const body = await readBody<{
     sessionId: string;
     clientId?: string | null;
-    category: 'twelveLayers' | 'temperaments';
+    slug: ReportSlug;
     results: { groupId: string; name: string; average: number }[];
     topSummaries?: StoredResult['topSummaries'];
     meta?: StoredResult['meta'];
   }>(event);
 
-  const slug: StoredResult['slug'] =
-    body.category === 'twelveLayers' ? 'twelve-layers' : 'temperaments';
+  const slug = body.slug;
+
+  if (!isValidReportSlug(slug)) {
+    throw createError({
+      statusCode: 400,
+      message: 'slug invalido',
+    });
+  }
 
   const authUser = await resolveAuthUser(event);
   const userId = authUser?.id ?? null;

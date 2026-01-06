@@ -44,11 +44,11 @@
 
 <script setup lang="ts">
   import { computed } from 'vue';
-import type { LikertTestConfig } from '~/types/tests'
+import type { TestConfig } from '~/types/tests'
 import TestTagPill from '~/components/tests/TestTagPill.vue'
 
 const props = defineProps<{
-  test: LikertTestConfig;
+  test: TestConfig;
   variant: 'core' | 'other';
 }>();
 const to = computed(() => ({

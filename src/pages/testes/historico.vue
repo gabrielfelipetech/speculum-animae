@@ -72,13 +72,13 @@
 import { computed, onMounted } from 'vue';
 import { useLazyAsyncData, useSeoMeta } from '#app';
 import { getSupabaseAccessToken } from '~/utils/authToken';
+import { allTests } from '~/config/tests';
+import type { TestConfig } from '~/types/tests';
 import SkeletonBlock from '~/components/base/SkeletonBlock.vue';
-
-type Slug = 'twelve-layers' | 'temperaments';
 
 interface HistoryItem {
   id: string;
-  slug: Slug;
+  slug: string;
   timestamp: string;
   meta?: {
     title?: string;
@@ -126,6 +126,14 @@ onMounted(() => {
 });
 
 const items = computed(() => data.value?.items ?? []);
+const testCatalog = allTests.likert as TestConfig[];
+const testByResultSlug = computed(() => {
+  const map = new Map<string, TestConfig>();
+  for (const test of testCatalog) {
+    map.set(test.resultSlug, test);
+  }
+  return map;
+});
 
 const errorMessage = computed(() => {
   if (!error.value) return '';
@@ -133,16 +141,13 @@ const errorMessage = computed(() => {
   return payload.data?.message ?? 'Erro ao carregar o historico.';
 });
 
-function labelBySlug(slug: Slug): string {
-  return slug === 'twelve-layers'
-    ? '12 camadas da personalidade'
-    : 'Temperamentos classicos';
+function labelBySlug(slug: string): string {
+  return testByResultSlug.value.get(slug)?.title ?? slug;
 }
 
-function defaultTitle(slug: Slug): string {
-  return slug === 'twelve-layers'
-    ? 'Relatorio das 12 camadas'
-    : 'Relatorio de temperamentos';
+function defaultTitle(slug: string): string {
+  const test = testByResultSlug.value.get(slug);
+  return test ? `Relatorio: ${test.title}` : 'Relatorio do teste';
 }
 
 function formatDate(iso: string): string {

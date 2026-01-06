@@ -1,11 +1,11 @@
 ﻿import { ref } from 'vue';
-import type { LikertTestConfig } from '~/types/tests';
+import type { TestAnswer, TestAnswerMap, TestConfig } from '~/types/tests';
 import { getSupabaseAccessToken } from '~/utils/authToken';
 import { getOrCreateClientId } from '~/utils/clientId';
 
 interface SaveLikertResultArgs {
-  config: LikertTestConfig;
-  answers: Record<string, number | null>;
+  config: TestConfig;
+  answers: TestAnswerMap;
   results: { groupId: string; name: string; average: number }[];
   topSummaries: {
     groupId: string;
@@ -38,13 +38,10 @@ export function useSaveResult() {
         return null;
       }
 
-      const compactAnswers: Record<string, number> = {};
+      const compactAnswers: Record<string, TestAnswer> = {};
       for (const [key, value] of Object.entries(args.answers)) {
-        if (typeof value === 'number') compactAnswers[key] = value;
+        if (value != null) compactAnswers[key] = value;
       }
-
-      const category: 'twelveLayers' | 'temperaments' =
-        args.config.category === 'temperaments' ? 'temperaments' : 'twelveLayers';
 
       const headers: Record<string, string> = {};
       if (isLoggedIn && token) {
@@ -59,7 +56,7 @@ export function useSaveResult() {
           sessionId,
           // pode mandar sempre; o servidor só usa quando estiver deslogado
           clientId: clientId ?? null,
-          category,
+          slug: args.config.resultSlug,
           results: args.results,
           topSummaries: args.topSummaries,
           meta: {

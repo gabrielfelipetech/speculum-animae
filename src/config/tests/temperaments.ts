@@ -1,5 +1,6 @@
 // src/config/tests/temperaments.ts
-import type { LikertTestConfig, SummaryRule } from '~/types/tests';
+import type { SummaryRule, TestConfigInput } from '~/types/tests';
+import { withLikertGroups } from './helpers';
 
 export const defaultSummaryRules: SummaryRule[] = [
   {
@@ -37,9 +38,10 @@ export const defaultSummaryRules: SummaryRule[] = [
 // AGORA: 40 PERGUNTAS (10 POR TEMPERAMENTO)
 // -----------------------------------------------------------------------------
 
-export const temperamentsClassicTest: LikertTestConfig = {
+export const temperamentsClassicTest: TestConfigInput = {
   id: 'temperaments-classic',
   slug: 'temperamentos-classicos',
+  resultSlug: 'temperaments',
   title: 'Temperamentos Clássicos',
   subtitle: 'Colérico, Melancólico, Sanguíneo e Fleumático',
   description:
@@ -48,14 +50,13 @@ export const temperamentsClassicTest: LikertTestConfig = {
   emphasis: 'highlighted',
   tags: ['Temperamentos', 'Autoconhecimento', 'Clássico'],
   groupsLabel: 'Bloco',
-  scaleMinLabel: 'Discordo totalmente',
-  scaleMaxLabel: 'Concordo totalmente',
+  scale: 'agreement',
   hasPremiumReport: true,
   scoring: {
     strategy: 'average-per-group',
     summaryRules: defaultSummaryRules,
   },
-  groups: [
+  groups: withLikertGroups([
     // -------------------------------------------------------------------------
     // COLÉRICO
     // -------------------------------------------------------------------------
@@ -263,10 +264,10 @@ export const temperamentsClassicTest: LikertTestConfig = {
         },
       ],
     },
-  ],
+  ]),
 };
 
 // array que o index.ts espalha com "..."
-export const temperamentLikertTests: LikertTestConfig[] = [
+export const temperamentLikertTests: TestConfigInput[] = [
   temperamentsClassicTest,
 ];

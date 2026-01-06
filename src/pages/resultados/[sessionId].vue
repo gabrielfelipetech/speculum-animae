@@ -6,12 +6,19 @@ import { getOrCreateClientId } from '~/utils/clientId';
 
 import type {
   AnyReport,
+  AssessmentReport,
+  AssessmentReportKind,
   TwelveLayersReport,
   TemperamentReport,
 } from '~/types/results';
 
 import TwelveLayersResultsView from '../../components/results/TwelveLayersResultView.vue';
 import TemperamentsResultsView from '../../components/results/TemperamentsResultView.vue';
+import PersonalityResultsView from '~/components/results/PersonalityResultsView.vue';
+import RelationshipsResultsView from '~/components/results/RelationshipsResultsView.vue';
+import StudyResultsView from '~/components/results/StudyResultsView.vue';
+import WorkResultsView from '~/components/results/WorkResultsView.vue';
+import WellbeingResultsView from '~/components/results/WellbeingResultsView.vue';
 import SkeletonBlock from '~/components/base/SkeletonBlock.vue';
 
 useSeoMeta({
@@ -73,6 +80,88 @@ const temperamentReport = computed<TemperamentReport | null>(() => {
     ? (r as TemperamentReport)
     : null;
 });
+
+const assessmentReport = computed<AssessmentReport | null>(() => {
+  const r = data.value;
+  return r && r.kind !== 'twelveLayers' && r.kind !== 'temperaments'
+    ? (r as AssessmentReport)
+    : null;
+});
+
+const personalityKinds: AssessmentReportKind[] = [
+  'bigFive',
+  'disc',
+  'selfSabotage',
+  'procrastination',
+  'decisionMaking',
+  'archetypes',
+  'selfEsteem',
+  'emotionalIntelligence',
+];
+
+const relationshipKinds: AssessmentReportKind[] = [
+  'loveLanguages',
+  'attachment',
+  'conflictCommunication',
+  'jealousyBoundaries',
+  'temperamentCompatibility',
+];
+
+const studyKinds: AssessmentReportKind[] = [
+  'learningStyle',
+  'studyFocus',
+  'studyHabits',
+  'metacognition',
+];
+
+const workKinds: AssessmentReportKind[] = [
+  'workValues',
+  'motivators',
+  'leadershipStyle',
+  'teamwork',
+];
+
+const wellbeingKinds: AssessmentReportKind[] = [
+  'anxietyTriggers',
+  'burnoutStress',
+  'habitsConsistency',
+  'sleepEnergy',
+];
+
+const personalityReport = computed<AssessmentReport | null>(() => {
+  if (!assessmentReport.value) return null;
+  return personalityKinds.includes(assessmentReport.value.kind)
+    ? assessmentReport.value
+    : null;
+});
+
+const relationshipReport = computed<AssessmentReport | null>(() => {
+  if (!assessmentReport.value) return null;
+  return relationshipKinds.includes(assessmentReport.value.kind)
+    ? assessmentReport.value
+    : null;
+});
+
+const studyReport = computed<AssessmentReport | null>(() => {
+  if (!assessmentReport.value) return null;
+  return studyKinds.includes(assessmentReport.value.kind)
+    ? assessmentReport.value
+    : null;
+});
+
+const workReport = computed<AssessmentReport | null>(() => {
+  if (!assessmentReport.value) return null;
+  return workKinds.includes(assessmentReport.value.kind)
+    ? assessmentReport.value
+    : null;
+});
+
+const wellbeingReport = computed<AssessmentReport | null>(() => {
+  if (!assessmentReport.value) return null;
+  return wellbeingKinds.includes(assessmentReport.value.kind)
+    ? assessmentReport.value
+    : null;
+});
 </script>
 
 
@@ -111,7 +200,7 @@ const temperamentReport = computed<TemperamentReport | null>(() => {
   </section>
 
   <section
-    v-else-if="twelveReport || temperamentReport"
+    v-else-if="twelveReport || temperamentReport || assessmentReport"
     class="min-h-screen bg-slate-50/70 dark:bg-slate-950"
   >
     <TwelveLayersResultsView
@@ -124,6 +213,36 @@ const temperamentReport = computed<TemperamentReport | null>(() => {
       v-else-if="temperamentReport"
       :report="temperamentReport"
       :session-id="sessionId"
+      :test-slug="testSlug"
+    />
+
+    <PersonalityResultsView
+      v-else-if="personalityReport"
+      :report="personalityReport"
+      :test-slug="testSlug"
+    />
+
+    <RelationshipsResultsView
+      v-else-if="relationshipReport"
+      :report="relationshipReport"
+      :test-slug="testSlug"
+    />
+
+    <StudyResultsView
+      v-else-if="studyReport"
+      :report="studyReport"
+      :test-slug="testSlug"
+    />
+
+    <WorkResultsView
+      v-else-if="workReport"
+      :report="workReport"
+      :test-slug="testSlug"
+    />
+
+    <WellbeingResultsView
+      v-else-if="wellbeingReport"
+      :report="wellbeingReport"
       :test-slug="testSlug"
     />
   </section>

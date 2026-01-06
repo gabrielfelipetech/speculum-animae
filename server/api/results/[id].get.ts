@@ -5,6 +5,7 @@ import {
 import type { AnyReport } from '~/types/results';
 import { buildTwelveLayersReport } from '../report-builders/twelveLayers';
 import { buildTemperamentsReport } from '../report-builders/temperaments';
+import { buildAssessmentReport } from '../report-builders/assessments';
 import type { StoredResult } from '../results.post';
 import { resolveUserId } from '../../utils/resolveUserId';
 
@@ -127,10 +128,7 @@ export default defineEventHandler(async (event) => {
       report = buildTemperamentsReport(entry);
       break;
     default:
-      throw createError({
-        statusCode: 400,
-        message: 'Tipo de teste desconhecido',
-      });
+      report = buildAssessmentReport(entry);
   }
 
   return report;

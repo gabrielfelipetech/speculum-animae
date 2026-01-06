@@ -8,7 +8,15 @@
   watch,
   type Ref,
 } from 'vue';
-import type { LikertTestConfig, SummaryRule } from '~/types/tests';
+import type {
+  DimensionMap,
+  PairwiseQuestion,
+  SummaryRule,
+  TestAnswer,
+  TestAnswerMap,
+  TestConfig,
+  TestQuestion,
+} from '~/types/tests';
 import { useSaveResult } from '~/composables/useSaveResult';
 
 export interface GroupResult {
@@ -22,6 +30,7 @@ interface FlatQuestion {
   groupName: string;
   questionId: string;
   text: string;
+  question: TestQuestion;
 }
 
 interface StepGroup {
@@ -48,22 +57,203 @@ function shuffleArray<T>(input: T[]): T[] {
   return arr;
 }
 
+function isStringArray(value: unknown): value is string[] {
+  return Array.isArray(value) && value.every((item) => typeof item === 'string');
+}
+
+function clampLikert(value: number): number {
+  if (Number.isNaN(value)) return 0;
+  return Math.min(7, Math.max(1, value));
+}
+
+function normalizePairwiseSelections(
+  question: PairwiseQuestion,
+  raw: unknown,
+): string[] | null {
+  if (question.pairs.length === 0) return null;
+  const selections = isStringArray(raw)
+    ? raw
+    : typeof raw === 'string'
+      ? [raw]
+      : null;
+  if (!selections) return null;
+
+  return question.pairs.map((pair, index) => {
+    const selection = selections[index];
+    if (selection === pair.left.id || selection === pair.right.id) {
+      return selection;
+    }
+    return '';
+  });
+}
+
+function isAnswerComplete(question: FlatQuestion, answer: TestAnswer | null): boolean {
+  const q = question.question;
+
+  if (q.type === 'likert') {
+    return typeof answer === 'number' && !Number.isNaN(answer);
+  }
+
+  if (q.type === 'pairwise') {
+    const normalized = normalizePairwiseSelections(q, answer);
+    if (!normalized) return false;
+    return q.pairs.every((pair, index) => {
+      const selection = normalized[index];
+      return selection === pair.left.id || selection === pair.right.id;
+    });
+  }
+
+  if (q.type === 'rank') {
+    if (!isStringArray(answer)) return false;
+    if (answer.length !== q.options.length) return false;
+    const optionIds = new Set(q.options.map((opt) => opt.id));
+    if (answer.some((id) => !optionIds.has(id))) return false;
+    return new Set(answer).size === q.options.length;
+  }
+
+  if (!isStringArray(answer)) return false;
+
+  const minSelections =
+    typeof q.minSelections === 'number' ? q.minSelections : 1;
+  const maxSelections =
+    typeof q.maxSelections === 'number'
+      ? q.maxSelections
+      : q.options.length;
+
+  if (q.multiple) {
+    return answer.length >= minSelections && answer.length <= maxSelections;
+  }
+
+  return answer.length === 1;
+}
+
+function sanitizeAnswer(
+  question: FlatQuestion,
+  raw: unknown,
+): TestAnswer | null {
+  const q = question.question;
+
+  if (q.type === 'likert') {
+    if (typeof raw !== 'number') return null;
+    return clampLikert(raw);
+  }
+
+  if (q.type === 'pairwise') {
+    const normalized = normalizePairwiseSelections(q, raw);
+    if (!normalized) return null;
+    return normalized;
+  }
+
+  if (q.type === 'rank') {
+    if (!isStringArray(raw)) return null;
+    const optionIds = q.options.map((opt) => opt.id);
+    const filtered = raw.filter((id) => optionIds.includes(id));
+    if (filtered.length !== optionIds.length) return null;
+    if (new Set(filtered).size !== optionIds.length) return null;
+    return filtered;
+  }
+
+  const ids = q.options.map((opt) => opt.id);
+  if (typeof raw === 'string') {
+    return ids.includes(raw) ? [raw] : null;
+  }
+  if (!isStringArray(raw)) return null;
+  const filtered = raw.filter((id) => ids.includes(id));
+  if (!q.multiple && filtered.length > 1) return null;
+  return filtered;
+}
+
+type ScoreContribution = {
+  groupId: string;
+  value: number;
+};
+
+function resolveDimension(
+  dimensionMap: DimensionMap | undefined,
+  optionId: string,
+): string | null {
+  if (dimensionMap && dimensionMap[optionId]) return dimensionMap[optionId];
+  return optionId;
+}
+
+function buildContributions(
+  question: FlatQuestion,
+  answer: TestAnswer,
+): ScoreContribution[] {
+  const q = question.question;
+
+  if (q.type === 'likert') {
+    if (typeof answer !== 'number') return [];
+    const rawValue = q.reverse ? 8 - answer : answer;
+    const value = clampLikert(rawValue);
+    return [{ groupId: q.dimension, value }];
+  }
+
+  if (q.type === 'rank') {
+    if (!isStringArray(answer)) return [];
+    const optionCount = q.options.length;
+    if (optionCount === 0) return [];
+    const denominator = Math.max(1, optionCount - 1);
+    return q.options
+      .map((option) => {
+        const index = answer.indexOf(option.id);
+        if (index < 0) return null;
+        const value = 7 - (index * 6) / denominator;
+        const groupId = resolveDimension(q.dimensionMap, option.id);
+        if (!groupId) return null;
+        return { groupId, value };
+      })
+      .filter((item): item is ScoreContribution => item !== null);
+  }
+
+  if (q.type === 'pairwise') {
+    const normalized = normalizePairwiseSelections(q, answer);
+    if (!normalized) return [];
+
+    return q.pairs.flatMap((pair, index) => {
+      const selection = normalized[index];
+      if (selection !== pair.left.id && selection !== pair.right.id) return [];
+      const winner = selection === pair.left.id ? pair.left : pair.right;
+      const loser = selection === pair.left.id ? pair.right : pair.left;
+      return [
+        { groupId: winner.dimension, value: 7 },
+        { groupId: loser.dimension, value: 1 },
+      ];
+    });
+  }
+
+  if (!isStringArray(answer)) return [];
+  const selected = new Set(answer);
+  return q.options
+    .map((option) => {
+      const groupId = resolveDimension(q.dimensionMap, option.id);
+      if (!groupId) return null;
+      return {
+        groupId,
+        value: selected.has(option.id) ? 7 : 1,
+      };
+    })
+    .filter((item): item is ScoreContribution => item !== null);
+}
+
 export function useLikertTestRunner(
-  config: Ref<LikertTestConfig> | LikertTestConfig,
+  config: Ref<TestConfig> | TestConfig,
   options?: { fresh?: boolean; skipAutoComputeOnMount?: boolean },
 ) {
   const cfg = isRef(config) ? config : ref(config);
   const isFreshStart = !!options?.fresh;
   const skipAutoComputeOnMount = options?.skipAutoComputeOnMount === true;
 
-  const answers = reactive<Record<string, number | null>>({});
+  const answers = reactive<TestAnswerMap>({});
   const currentGroupIndex = ref(0);
   const submittedCurrentStep = ref(false);
   const results = ref<GroupResult[] | null>(null);
   const lastResultId = ref<string | null>(null);
 
   // grupos conceituais (camadas / temperamentos etc.)
-  const conceptualGroups = computed(() => cfg.value.groups);
+  const conceptualGroups = computed(
+    () => cfg.value.questionSet ?? cfg.value.groups,
+  );
 
   // perguntas achatadas
   const flatQuestions = computed<FlatQuestion[]>(() => {
@@ -75,10 +265,19 @@ export function useLikertTestRunner(
           groupName: group.name,
           questionId: q.id,
           text: q.text,
+          question: q,
         });
       }
     }
     return items;
+  });
+
+  const questionByKey = computed(() => {
+    const map = new Map<string, FlatQuestion>();
+    for (const item of flatQuestions.value) {
+      map.set(fieldKeyInternal(item.groupId, item.questionId), item);
+    }
+    return map;
   });
 
   // ordem embaralhada
@@ -134,34 +333,29 @@ export function useLikertTestRunner(
   );
 
   const answeredCount = computed(() => {
-    const validKeys = new Set(
-      flatQuestions.value.map((q) =>
-        fieldKeyInternal(q.groupId, q.questionId),
-      ),
-    );
-
     let count = 0;
-    for (const key of validKeys) {
-      if (typeof answers[key] === 'number') {
-        count += 1;
-      }
+    for (const question of flatQuestions.value) {
+      const key = fieldKeyInternal(question.groupId, question.questionId);
+      if (isAnswerComplete(question, answers[key] ?? null)) count += 1;
     }
     return count;
   });
 
   function isStepComplete(step: StepGroup): boolean {
-    return step.questions.every(
-      (q) =>
-        typeof answers[fieldKeyInternal(q.groupId, q.questionId)] ===
-        'number',
+    return step.questions.every((q) =>
+      isAnswerComplete(
+        q,
+        answers[fieldKeyInternal(q.groupId, q.questionId)] ?? null,
+      ),
     );
   }
 
   function isTestComplete(): boolean {
-    return flatQuestions.value.every(
-      (q) =>
-        typeof answers[fieldKeyInternal(q.groupId, q.questionId)] ===
-        'number',
+    return flatQuestions.value.every((q) =>
+      isAnswerComplete(
+        q,
+        answers[fieldKeyInternal(q.groupId, q.questionId)] ?? null,
+      ),
     );
   }
 
@@ -175,8 +369,10 @@ export function useLikertTestRunner(
 
     return group.questions.filter(
       (q) =>
-        typeof answers[fieldKeyInternal(q.groupId, q.questionId)] ===
-        'number',
+        isAnswerComplete(
+          q,
+          answers[fieldKeyInternal(q.groupId, q.questionId)] ?? null,
+        ),
     ).length;
   });
 
@@ -225,17 +421,13 @@ export function useLikertTestRunner(
       const raw = window.localStorage.getItem(storageKey.value);
       if (raw) {
         try {
-          const parsed = JSON.parse(raw) as Record<string, number>;
-          const validKeys = new Set(
-            flatQuestions.value.map((q) =>
-              fieldKeyInternal(q.groupId, q.questionId),
-            ),
-          );
-
+          const parsed = JSON.parse(raw) as Record<string, unknown>;
           for (const [key, value] of Object.entries(parsed)) {
-            if (!validKeys.has(key)) continue;
-            if (typeof value !== 'number') continue;
-            answers[key] = value;
+            const question = questionByKey.value.get(key);
+            if (!question) continue;
+            const sanitized = sanitizeAnswer(question, value);
+            if (sanitized == null) continue;
+            answers[key] = sanitized;
           }
         } catch (error) {
           console.error('Failed to load saved answers:', error);
@@ -271,11 +463,13 @@ export function useLikertTestRunner(
     (value) => {
       if (typeof window === 'undefined') return;
 
-      const serialized: Record<string, number> = {};
+      const serialized: Record<string, TestAnswer> = {};
       for (const [key, val] of Object.entries(value)) {
-        if (typeof val === 'number') {
-          serialized[key] = val;
-        }
+        const question = questionByKey.value.get(key);
+        if (!question) continue;
+        const sanitized = sanitizeAnswer(question, val);
+        if (sanitized == null) continue;
+        serialized[key] = sanitized;
       }
 
       window.localStorage.setItem(
@@ -340,23 +534,43 @@ export function useLikertTestRunner(
       return;
     }
 
-    const groupResults: GroupResult[] = conceptualGroups.value.map(
-      (group) => {
-        const scores = group.questions.map((q) => {
-          const value = answers[fieldKeyInternal(group.id, q.id)];
-          return typeof value === 'number' ? value : 0;
-        });
+    const totals = new Map<
+      string,
+      { groupId: string; name: string; sum: number; count: number }
+    >();
 
-        const sum = scores.reduce((acc, curr) => acc + curr, 0);
-        const average =
-          scores.length > 0 ? sum / scores.length : 0;
+    for (const group of conceptualGroups.value) {
+      totals.set(group.id, {
+        groupId: group.id,
+        name: group.name,
+        sum: 0,
+        count: 0,
+      });
+    }
 
-        return {
-          groupId: group.id,
-          name: group.name,
-          average,
-        };
-      },
+    for (const question of flatQuestions.value) {
+      const key = fieldKeyInternal(question.groupId, question.questionId);
+      const answer = answers[key] ?? null;
+      if (!isAnswerComplete(question, answer)) continue;
+
+      const contributions = buildContributions(
+        question,
+        answer as TestAnswer,
+      );
+      for (const contribution of contributions) {
+        const target = totals.get(contribution.groupId);
+        if (!target) continue;
+        target.sum += contribution.value;
+        target.count += 1;
+      }
+    }
+
+    const groupResults: GroupResult[] = Array.from(totals.values()).map(
+      (item) => ({
+        groupId: item.groupId,
+        name: item.name,
+        average: item.count > 0 ? item.sum / item.count : 0,
+      }),
     );
 
     groupResults.sort((a, b) => b.average - a.average);
@@ -376,6 +590,13 @@ export function useLikertTestRunner(
     if (currentGroupIndex.value === 0) return;
     submittedCurrentStep.value = false;
     currentGroupIndex.value -= 1;
+  }
+
+  function isQuestionAnswered(question: FlatQuestion): boolean {
+    return isAnswerComplete(
+      question,
+      answers[fieldKeyInternal(question.groupId, question.questionId)] ?? null,
+    );
   }
 
   function goNext(): void {
@@ -418,6 +639,7 @@ export function useLikertTestRunner(
     canGoNext,
     overallProgressPercent,
     topSummaries,
+    isQuestionAnswered,
 
     fieldKey,
     goPrevious,

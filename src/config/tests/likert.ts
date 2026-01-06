@@ -1,5 +1,6 @@
 // src/config/tests/likert.ts
-import type { LikertTestConfig, SummaryRule } from '~/types/tests';
+import type { SummaryRule, TestConfigInput } from '~/types/tests';
+import { withLikertGroups } from './helpers';
 
 export const defaultSummaryRules: SummaryRule[] = [
   {
@@ -33,10 +34,11 @@ export const defaultSummaryRules: SummaryRule[] = [
 ];
 
 
-export const likertTests: LikertTestConfig[] = [
+export const likertTests: TestConfigInput[] = [
   {
     id: 'twelve-layers',
     slug: '12-camadas',
+    resultSlug: 'twelve-layers',
     title: '12 Camadas da Personalidade',
     subtitle: 'Modelo inspirado em Olavo de Carvalho',
     description:
@@ -45,14 +47,13 @@ export const likertTests: LikertTestConfig[] = [
     emphasis: 'highlighted',
     tags: ['Olavo de Carvalho', 'Estrutura da alma'],
     groupsLabel: 'Camada',
-    scaleMinLabel: 'Discordo totalmente',
-    scaleMaxLabel: 'Concordo totalmente',
+    scale: 'agreement',
     hasPremiumReport: true,
     scoring: {
       strategy: 'average-per-group',
       summaryRules: defaultSummaryRules,
     },
-    groups: [
+    groups: withLikertGroups([
       {
         id: 'layer-1',
         name: 'Camada 1 – Corpo e existência',
@@ -389,10 +390,10 @@ export const likertTests: LikertTestConfig[] = [
           },
         ],
       },
-    ],
+    ]),
   },
 ];
 
-export function getLikertTestBySlug(slug: string): LikertTestConfig | undefined {
+export function getLikertTestBySlug(slug: string): TestConfigInput | undefined {
   return likertTests.find((test) => test.slug === slug);
 }

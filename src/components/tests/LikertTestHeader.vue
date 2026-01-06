@@ -12,15 +12,21 @@
     <p class="max-w-2xl text-sm text-slate-600 dark:text-slate-300">
       {{ config.description }}
     </p>
+    <p
+      v-if="config.disclaimer"
+      class="max-w-2xl rounded-lg border border-amber-200/70 bg-amber-50/80 p-3 text-[0.7rem] text-amber-900 dark:border-amber-500/40 dark:bg-amber-900/20 dark:text-amber-100"
+    >
+      {{ config.disclaimer }}
+    </p>
   </header>
 </template>
 
 <script setup lang="ts">
 import { toRefs } from 'vue';
-import type { LikertTestConfig } from '~/types/tests';
+import type { TestConfig } from '~/types/tests';
 
 const props = defineProps<{
-  config: LikertTestConfig;
+  config: TestConfig;
 }>();
 
 const { config } = toRefs(props);

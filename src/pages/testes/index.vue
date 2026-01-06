@@ -1,6 +1,6 @@
 ﻿<!-- src/pages/testes/index.vue -->
 <template>
-  <section class="mx-auto max-w-4xl space-y-6 px-4 py-8">
+  <section class="mx-auto max-w-5xl space-y-6 px-4 py-8">
     <header class="space-y-2">
       <p class="text-xs font-semibold uppercase tracking-[0.25em] text-slate-500 dark:text-slate-400">
         Speculum Animae
@@ -11,14 +11,23 @@
       </p>
     </header>
 
-    <div class="grid gap-4 md:grid-cols-2">
-      <TestCard
-        v-for="test in tests"
-        :key="test.id"
-        :test="test"
-        :variant="test.category === 'core' ? 'core' : 'other'"
-      />
-    </div>
+    <section class="space-y-4">
+      <h2 class="text-sm font-semibold text-slate-700 dark:text-slate-200">
+        Testes principais
+      </h2>
+      <div class="grid gap-4 md:grid-cols-2">
+        <TestCard v-for="test in coreTests" :key="test.id" :test="test" variant="core" />
+      </div>
+    </section>
+
+    <section v-if="otherTests.length" class="space-y-4">
+      <h2 class="text-sm font-semibold text-slate-700 dark:text-slate-200">
+        Outros testes
+      </h2>
+      <div class="grid gap-4 md:grid-cols-2">
+        <TestCard v-for="test in otherTests" :key="test.id" :test="test" variant="other" />
+      </div>
+    </section>
   </section>
 </template>
 
@@ -26,7 +35,7 @@
 import { computed } from 'vue'
 import { useSeoMeta } from '#imports'
 import { allTests } from '~/config/tests'
-import type { LikertTestConfig } from '~/types/tests'
+import type { TestConfig } from '~/types/tests'
 import TestCard from '~/components/tests/TestCard.vue'
 
 useSeoMeta({
@@ -34,16 +43,17 @@ useSeoMeta({
   description: 'Lista de testes públicos do Speculum Animae para começar agora.',
 })
 
-const allLikertTests = allTests.likert as LikertTestConfig[]
+const allLikertTests = allTests.likert as TestConfig[]
 
-const tests = computed(() => {
-  return [...allLikertTests]
-    .slice()
-    .sort((a, b) => {
-      const aCore = a.category === 'core' ? 0 : 1
-      const bCore = b.category === 'core' ? 0 : 1
-      if (aCore !== bCore) return aCore - bCore
-      return a.title.localeCompare(b.title, 'pt-BR')
-    })
-})
+function sortByTitle(a: TestConfig, b: TestConfig): number {
+  return a.title.localeCompare(b.title, 'pt-BR')
+}
+
+const coreTests = computed(() =>
+  allLikertTests.filter((test) => test.category === 'core').slice().sort(sortByTitle),
+)
+
+const otherTests = computed(() =>
+  allLikertTests.filter((test) => test.category !== 'core').slice().sort(sortByTitle),
+)
 </script>

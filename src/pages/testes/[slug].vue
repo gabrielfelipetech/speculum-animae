@@ -1,6 +1,6 @@
 ﻿<template>
   <main class="mx-auto max-w-4xl px-4 py-8">
-    <div v-if="!likertConfig">
+    <div v-if="!testConfig">
       <h1 class="font-display text-2xl tracking-tight">
         Teste não encontrado
       </h1>
@@ -14,7 +14,7 @@
     </div>
 
     <div v-else class="space-y-10">
-      <LikertTestView :config="likertConfig" :fresh="isFresh" />
+      <LikertTestView :config="testConfig" :fresh="isFresh" />
 
       <RelatedArticles
         v-if="relatedArticles.length"
@@ -35,7 +35,7 @@
 
 <script setup lang="ts">
 import { useHead, useRoute, useRouter, useSeoMeta } from '#imports';
-import { getLikertTestBySlug } from '~/config/tests';
+import { getTestBySlug } from '~/config/tests';
 import { getAllArticles } from '~/data/articles';
 import { getFaqByTestSlug } from '~/data/faq';
 import { getLastResultId } from '~/utils/testLastResult';
@@ -60,7 +60,7 @@ const isFresh = computed(() => {
   return value === '1';
 });
 
-const likertConfig = computed(() => getLikertTestBySlug(slug.value));
+const testConfig = computed(() => getTestBySlug(slug.value));
 
 const didRedirect = ref(false);
 
@@ -68,7 +68,7 @@ watchEffect(() => {
   if (!process.client) return;
   if (didRedirect.value) return;
   if (isFresh.value) return;
-  if (!likertConfig.value) return;
+  if (!testConfig.value) return;
 
   void tryRedirectToLastResult();
 });
@@ -120,10 +120,10 @@ const relatedArticles = computed(() => {
 
 const seoData = computed<SeoPayload>(() => {
   if (isPublicSlug(slug.value)) return SEO_BY_SLUG[slug.value];
-  if (likertConfig.value) {
+  if (testConfig.value) {
     return {
-      title: likertConfig.value.title,
-      description: likertConfig.value.description,
+      title: testConfig.value.title,
+      description: testConfig.value.description,
     };
   }
   return {
@@ -152,7 +152,7 @@ useHead(() => {
 watchEffect(() => {
   if (!process.client) return;
   if (isFresh.value) return;
-  if (!likertConfig.value) return;
+  if (!testConfig.value) return;
 
   const lastResultId = getLastResultId(slug.value);
   if (!lastResultId) return;

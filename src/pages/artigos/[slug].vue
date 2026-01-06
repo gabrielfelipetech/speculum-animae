@@ -116,12 +116,12 @@ const TEST_LINKS: Record<string, { slug: string; title: string; href: string }> 
   'temperamentos-classicos': {
     slug: 'temperamentos-classicos',
     title: 'Teste de temperamentos classicos',
-    href: '/testes/temperamentos-classicos',
+    href: '/testes/temperamentos-classicos?fresh=1',
   },
   '12-camadas': {
     slug: '12-camadas',
     title: 'Teste das 12 camadas',
-    href: '/testes/12-camadas',
+    href: '/testes/12-camadas?fresh=1',
   },
 };
 

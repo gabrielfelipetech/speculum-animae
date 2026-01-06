@@ -38,15 +38,13 @@
             tabindex="0"
             @keydown="
               (event) =>
-                handleQuestionKeydown(
-                  event,
-                  questionIndex,
-                  question.groupId,
-                  question.questionId,
-                )
+                handleQuestionKeydown(event, questionIndex, question)
             "
           >
-            <p class="text-sm font-medium text-slate-800 dark:text-slate-100">
+            <p
+              :id="questionLabelId(question)"
+              class="text-sm font-medium text-slate-800 dark:text-slate-100"
+            >
               {{ question.text }}
             </p>
 
@@ -54,19 +52,27 @@
               Afirmação {{ questionIndex + 1 }} de {{ currentGroupTotalQuestions }}
             </div>
 
-            <LikertScaleQuestion
-              :model-value="answers[fieldKey(question.groupId, question.questionId)] ?? null"
-              :name="fieldKey(question.groupId, question.questionId)"
-              :min-label="config.scaleMinLabel"
-              :max-label="config.scaleMaxLabel"
+            <QuestionRenderer
+              :question="question.question"
+              :model-value="answers[questionKey(question)] ?? null"
+              :name="questionKey(question)"
+              :min-label="getScaleLabels(question.question)?.minLabel"
+              :max-label="getScaleLabels(question.question)?.maxLabel"
+              :labelled-by-id="questionLabelId(question)"
+              :described-by-id="
+                isQuestionInvalid(question) ? questionErrorId(question) : undefined
+              "
+              :disabled="isSaving"
+              :error="isQuestionInvalid(question)"
               @update:modelValue="(value) => {
-                answers[fieldKey(question.groupId, question.questionId)] = value
+                answers[questionKey(question)] = value
               }"
               @answered="handleQuestionAnswered(questionIndex)"
             />
 
             <p
-              v-if="submittedCurrentStep && !answers[fieldKey(question.groupId, question.questionId)]"
+              v-if="isQuestionInvalid(question)"
+              :id="questionErrorId(question)"
               class="text-[0.7rem] text-red-500"
             >
               Responda esta afirmação.
@@ -118,17 +124,18 @@ import { getLastResultId, setLastResultId } from '~/utils/testLastResult'
 
 import BaseButton from '~/components/base/BaseButton.vue'
 import SkeletonBlock from '~/components/base/SkeletonBlock.vue'
-import LikertScaleQuestion from '~/components/tests/LikertScaleQuestion.vue'
+import QuestionRenderer from '~/components/tests/QuestionRenderer.vue'
 import LikertTestHeader from '~/components/tests/LikertTestHeader.vue'
 import LikertTestProgress from '~/components/tests/LikertTestProgress.vue'
 import LikertTestResultsGeneric from '~/components/tests/LikertTestResultsGeneric.vue'
 import LikertTestResultsTemperaments from '~/components/tests/LikertTestResultsTemperaments.vue'
 
-import type { LikertTestConfig } from '~/types/tests'
+import type { TestConfig, TestQuestion } from '~/types/tests'
+import { resolveScaleLabels } from '~/config/tests/scales'
 import { useLikertTestRunner } from '~/composables/useLikertTestRunner'
 
 const props = defineProps<{
-  config: LikertTestConfig
+  config: TestConfig
   fresh?: boolean
 }>()
 
@@ -138,6 +145,14 @@ const storedLastResultId = computed(() => getLastResultId(config.value.slug))
 const skipAutoComputeOnMount = computed(
   () => props.fresh !== true && Boolean(storedLastResultId.value),
 )
+function getScaleLabels(question: TestQuestion) {
+  if (question.type !== 'likert') return null
+  return resolveScaleLabels(
+    question.scaleKey ?? config.value.scale,
+    config.value.scaleMinLabel,
+    config.value.scaleMaxLabel,
+  )
+}
 
 const {
   answers,
@@ -158,6 +173,7 @@ const {
   canGoNext,
   overallProgressPercent,
   topSummaries,
+  isQuestionAnswered,
   fieldKey,
   goPrevious,
   goNext,
@@ -168,6 +184,29 @@ const {
 
 const questionRefs = ref<HTMLElement[]>([])
 const shouldRedirectOnComplete = ref(false)
+
+type RunnerQuestion = {
+  groupId: string
+  questionId: string
+  text: string
+  question: TestQuestion
+}
+
+function questionKey(question: RunnerQuestion): string {
+  return fieldKey(question.groupId, question.questionId)
+}
+
+function questionLabelId(question: RunnerQuestion): string {
+  return `question-${questionKey(question).replace(/:/g, '-')}`
+}
+
+function questionErrorId(question: RunnerQuestion): string {
+  return `question-error-${questionKey(question).replace(/:/g, '-')}`
+}
+
+function isQuestionInvalid(question: RunnerQuestion): boolean {
+  return submittedCurrentStep.value && !isQuestionAnswered(question)
+}
 
 function setQuestionRef(el: Element | ComponentPublicInstance | null, index: number): void {
   if (el instanceof HTMLElement) {
@@ -217,14 +256,15 @@ function handleQuestionAnswered(questionIndex: number): void {
 function handleQuestionKeydown(
   event: KeyboardEvent,
   questionIndex: number,
-  groupId: string,
-  questionId: string,
+  question: RunnerQuestion,
 ): void {
+  if (isSaving.value) return
+  if (event.target !== event.currentTarget) return
   const key = event.key
-  const field = fieldKey(groupId, questionId)
+  const field = questionKey(question)
   const current = answers[field]
 
-  if (key === 'ArrowLeft' || key === 'ArrowRight') {
+  if (question.question.type === 'likert' && (key === 'ArrowLeft' || key === 'ArrowRight')) {
     event.preventDefault()
 
     let next: number

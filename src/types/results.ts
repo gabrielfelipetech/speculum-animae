@@ -1,6 +1,15 @@
 // src/types/results.ts
 
 export type AccessLevel = 'free' | 'premium';
+
+export type DimensionLevel = 'low' | 'medium' | 'high';
+export type DimensionScore = {
+  key: string;
+  label: string;
+  raw: number;
+  normalized: number;
+  level: DimensionLevel;
+};
 export type ResultBlockUi = {
   variant?: 'text' | 'list' | 'twoColumnCards';
   icon?: 'check' | 'warning' | 'energy' | 'guide' | 'neutral';
@@ -28,6 +37,9 @@ export type ResultBlock = {
   access: AccessLevel;
   content?: ResultBlockContent;
   ui?: ResultBlockUi;
+};
+export type ReportBlock = ResultBlock & {
+  title: string;
 };
 export type GraphPoint = {
   label: string;
@@ -85,5 +97,57 @@ export interface TemperamentReport {
   relationships: { blocks: ResultBlock[] };
 }
 
+/* ---------- Generic Assessments ---------- */
 
-export type AnyReport = TwelveLayersReport | TemperamentReport;
+export type AssessmentReportKind =
+  | 'bigFive'
+  | 'disc'
+  | 'selfSabotage'
+  | 'procrastination'
+  | 'decisionMaking'
+  | 'loveLanguages'
+  | 'attachment'
+  | 'conflictCommunication'
+  | 'jealousyBoundaries'
+  | 'temperamentCompatibility'
+  | 'learningStyle'
+  | 'studyFocus'
+  | 'studyHabits'
+  | 'metacognition'
+  | 'workValues'
+  | 'motivators'
+  | 'leadershipStyle'
+  | 'teamwork'
+  | 'anxietyTriggers'
+  | 'burnoutStress'
+  | 'habitsConsistency'
+  | 'sleepEnergy'
+  | 'archetypes'
+  | 'selfEsteem'
+  | 'emotionalIntelligence';
+
+export type ReportKind = AssessmentReportKind | 'twelveLayers' | 'temperaments';
+
+export type ReportSection = {
+  id: string;
+  title: string;
+  subtitle?: string;
+  blocks: ReportBlock[];
+};
+
+export interface AssessmentReport {
+  kind: AssessmentReportKind;
+  sessionId: string;
+  title: string;
+  subtitle: string;
+  summary: string[];
+  scores: DimensionScore[];
+  recommendations: string[];
+  sections?: ReportSection[];
+  disclaimer?: string;
+}
+
+export type AnyReport =
+  | TwelveLayersReport
+  | TemperamentReport
+  | AssessmentReport;
