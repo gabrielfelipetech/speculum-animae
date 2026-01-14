@@ -26,6 +26,32 @@
         </figure>
       </section>
 
+      <section class="space-y-2">
+        <p class="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">
+          Legal / Contato
+        </p>
+        <div class="flex flex-wrap items-center gap-3">
+          <NuxtLink
+            to="/termos"
+            class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500 hover:text-indigo-600 dark:text-slate-400 dark:hover:text-amber-300 transition"
+          >
+            Termos
+          </NuxtLink>
+          <NuxtLink
+            to="/privacidade"
+            class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500 hover:text-indigo-600 dark:text-slate-400 dark:hover:text-amber-300 transition"
+          >
+            Privacidade
+          </NuxtLink>
+          <a
+            :href="`mailto:${contactEmail}`"
+            class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500 hover:text-indigo-600 dark:text-slate-400 dark:hover:text-amber-300 transition"
+          >
+            Contato
+          </a>
+        </div>
+      </section>
+
     </div>
 
     <div
@@ -40,4 +66,5 @@
 
 <script setup lang="ts">
 const currentYear: number = new Date().getFullYear();
+const contactEmail = 'contato@speculumanimae.com.br';
 </script>
