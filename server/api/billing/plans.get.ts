@@ -1,4 +1,5 @@
 import { resolveAuthUser } from '../../utils/authUser';
+import { withCriticalApiLogging } from '../../utils/bugsnag';
 import type {
   BillingPlan,
   BillingPlansResponse,
@@ -104,15 +105,21 @@ function resolveMockPremiumStatus(
 }
 
 export default defineEventHandler(async (event) => {
-  const authUser = await resolveAuthUser(event);
+  const ctx = { area: 'billing.plans', authUserId: null as string | null };
 
-  const customer = resolveMockPremiumStatus(authUser);
+  return await withCriticalApiLogging(event, ctx, async () => {
+    const authUser = await resolveAuthUser(event);
+    const authUserId = authUser?.id ?? null;
+    ctx.authUserId = authUserId;
 
-  const response: BillingPlansResponse = {
-    plans: mockPlans,
-    customer,
-  };
+    const customer = resolveMockPremiumStatus(authUser);
 
-  // TODO: Replace mockPlans with Stripe Price/Product listing.
-  return response;
+    const response: BillingPlansResponse = {
+      plans: mockPlans,
+      customer,
+    };
+
+    // TODO: Replace mockPlans with Stripe Price/Product listing.
+    return response;
+  });
 });

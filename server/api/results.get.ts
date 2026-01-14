@@ -1,14 +1,23 @@
 // server/api/results.get.ts
+import { withCriticalApiLogging } from '../utils/bugsnag';
 import type { StoredResult } from './results.post';
 
-export default defineEventHandler(async () => {
-  const storage = useStorage<StoredResult[]>('results');
-  const key = 'items';
+export default defineEventHandler(async (event) => {
+  const authUserId = null;
 
-  const all =
-    ((await storage.getItem(key)) ?? []).sort((a, b) =>
-      a.timestamp < b.timestamp ? 1 : -1,
-    );
+  return await withCriticalApiLogging(
+    event,
+    { area: 'results.list', authUserId },
+    async () => {
+      const storage = useStorage<StoredResult[]>('results');
+      const key = 'items';
 
-  return { items: all };
+      const all =
+        ((await storage.getItem(key)) ?? []).sort((a, b) =>
+          a.timestamp < b.timestamp ? 1 : -1,
+        );
+
+      return { items: all };
+    },
+  );
 });

@@ -40,6 +40,9 @@ export default defineNuxtConfig({
     public: {
       siteUrl: process.env.NUXT_SITE_URL,
       stripePublicKey: process.env.NUXT_PUBLIC_STRIPE_PUBLISHABLE_KEY,
+      bugsnagApiKey: process.env.NUXT_PUBLIC_BUGSNAG_API_KEY,
+      appVersion: process.env.NUXT_PUBLIC_APP_VERSION ?? 'dev',
+      releaseStage: process.env.NUXT_PUBLIC_RELEASE_STAGE,
 
       supabaseUrl: process.env.NUXT_PUBLIC_SUPABASE_URL ?? process.env.SUPABASE_URL,
       supabaseAnonKey:

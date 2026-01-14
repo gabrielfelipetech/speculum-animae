@@ -1,6 +1,7 @@
 ﻿// server/api/results.post.ts
 import { serverSupabaseClient } from '#supabase/server';
 import { resolveAuthUser } from '../utils/authUser';
+import { withCriticalApiLogging } from '../utils/bugsnag';
 
 export type ReportSlug =
   | 'twelve-layers'
@@ -88,79 +89,85 @@ export interface StoredResult {
 }
 
 export default defineEventHandler(async (event) => {
-  const body = await readBody<{
-    sessionId: string;
-    clientId?: string | null;
-    slug: ReportSlug;
-    results: { groupId: string; name: string; average: number }[];
-    topSummaries?: StoredResult['topSummaries'];
-    meta?: StoredResult['meta'];
-  }>(event);
+  const ctx = { area: 'results.create', authUserId: null as string | null };
 
-  const slug = body.slug;
+  return await withCriticalApiLogging(event, ctx, async () => {
+    const body = await readBody<{
+      sessionId: string;
+      clientId?: string | null;
+      slug: ReportSlug;
+      results: { groupId: string; name: string; average: number }[];
+      topSummaries?: StoredResult['topSummaries'];
+      meta?: StoredResult['meta'];
+    }>(event);
 
-  if (!isValidReportSlug(slug)) {
-    throw createError({
-      statusCode: 400,
-      message: 'slug invalido',
-    });
-  }
+    const slug = body.slug;
 
-  const authUser = await resolveAuthUser(event);
-  const userId = authUser?.id ?? null;
-  const clientId =
-    userId === null && typeof body.clientId === 'string' ? body.clientId : null;
-
-  if (!userId && !clientId) {
-    throw createError({
-      statusCode: 400,
-      message: 'clientId nao informado',
-    });
-  }
-
-  // 1) Sempre salvar localmente como fallback
-  const storage = useStorage<StoredResult[]>('results');
-  const key = 'items';
-
-  const entry: StoredResult = {
-    id: body.sessionId,
-    slug,
-    userId: userId ?? null,
-    email: null,
-    clientId: userId ? null : clientId,
-    results: body.results,
-    topSummaries: body.topSummaries ?? undefined,
-    meta: body.meta ?? undefined,
-    timestamp: new Date().toISOString(),
-  };
-
-  const current = (await storage.getItem(key)) ?? [];
-  current.push(entry);
-  await storage.setItem(key, current);
-
-  // 2) Tentar sincronizar com Supabase (apenas se estiver logado)
-  try {
-    if (userId) {
-      const supabase = await serverSupabaseClient(event);
-
-      const { error } = await supabase.from('test_results').insert({
-        id: crypto.randomUUID(),
-        session_id: body.sessionId,
-        user_id: userId,
-        client_id: null,
-        slug,
-        results: body.results,
-        top_summaries: body.topSummaries ?? null,
-        meta: body.meta ?? null,
+    if (!isValidReportSlug(slug)) {
+      throw createError({
+        statusCode: 400,
+        message: 'slug invalido',
       });
-
-      if (error) {
-        console.error('[Supabase] erro ao inserir test_results', error);
-      }
     }
-  } catch (err) {
-    console.error('[Supabase] erro inesperado ao sincronizar resultados', err);
-  }
 
-  return { id: entry.id };
+    const authUser = await resolveAuthUser(event);
+    const authUserId = authUser?.id ?? null;
+    ctx.authUserId = authUserId;
+    const userId = authUserId;
+    const clientId =
+      userId === null && typeof body.clientId === 'string' ? body.clientId : null;
+
+    if (!userId && !clientId) {
+      throw createError({
+        statusCode: 400,
+        message: 'clientId nao informado',
+      });
+    }
+
+    // 1) Sempre salvar localmente como fallback
+    const storage = useStorage<StoredResult[]>('results');
+    const key = 'items';
+
+    const entry: StoredResult = {
+      id: body.sessionId,
+      slug,
+      userId: userId ?? null,
+      email: null,
+      clientId: userId ? null : clientId,
+      results: body.results,
+      topSummaries: body.topSummaries ?? undefined,
+      meta: body.meta ?? undefined,
+      timestamp: new Date().toISOString(),
+    };
+
+    const current = (await storage.getItem(key)) ?? [];
+    current.push(entry);
+    await storage.setItem(key, current);
+
+    // 2) Tentar sincronizar com Supabase (apenas se estiver logado)
+    try {
+      if (userId) {
+        const supabase = await serverSupabaseClient(event);
+
+        const { error } = await supabase.from('test_results').insert({
+          id: crypto.randomUUID(),
+          session_id: body.sessionId,
+          user_id: userId,
+          client_id: null,
+          slug,
+          results: body.results,
+          top_summaries: body.topSummaries ?? null,
+          meta: body.meta ?? null,
+        });
+
+        if (error) {
+          console.error('[Supabase] erro ao inserir test_results', error);
+        }
+      }
+    } catch (err) {
+      console.error('[Supabase] erro inesperado ao sincronizar resultados', err);
+    }
+
+    return { id: entry.id };
+  });
 });

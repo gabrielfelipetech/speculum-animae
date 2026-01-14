@@ -12,6 +12,9 @@
     "articles:split": "node --experimental-strip-types scripts/split-articles-json.ts"
   },
   "dependencies": {
+    "@bugsnag/browser-performance": "^3.2.0",
+    "@bugsnag/js": "^8.6.0",
+    "@bugsnag/plugin-vue": "^8.6.0",
     "@nuxt/content": "^3.8.2",
     "@nuxt/eslint": "^1.10.0",
     "@nuxt/fonts": "^0.12.1",

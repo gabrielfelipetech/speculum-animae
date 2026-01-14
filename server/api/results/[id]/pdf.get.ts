@@ -5,6 +5,7 @@ import PDFDocument from 'pdfkit';
 import type { StoredResult } from '../../results.post';
 import { buildTemperamentsPdfContent } from '../../report-builders/temperamentsPdf';
 import { resolveUserId } from '../../../utils/resolveUserId';
+import { withCriticalApiLogging } from '../../../utils/bugsnag';
 
 interface StoredResultRow {
   session_id: string;
@@ -17,14 +18,18 @@ interface StoredResultRow {
   created_at: string;
 }
 
+type AccessContext = {
+  userId: string | null;
+  clientId: string | null;
+};
+
 async function loadStoredResult(
   event: H3Event,
   id: string,
+  access: AccessContext,
 ): Promise<StoredResult | null> {
   // usuário logado (pode ser null)
-  const userId = await resolveUserId(event);
-  const query = getQuery(event);
-  const clientId = typeof query.clientId === 'string' ? query.clientId : null;
+  const { userId, clientId } = access;
 
   if (!userId && !clientId) {
     throw createError({
@@ -33,7 +38,10 @@ async function loadStoredResult(
     });
   }
 
-  const canAccess = (storedUserId?: string | null, storedClientId?: string | null): boolean => {
+  const canAccess = (
+    storedUserId?: string | null,
+    storedClientId?: string | null,
+  ): boolean => {
     if (storedUserId) {
       return Boolean(userId && storedUserId === userId);
     }
@@ -122,7 +130,10 @@ function addBulletList(doc: PDFKit.PDFDocument, items: string[]) {
 }
 
 export default defineEventHandler(async (event) => {
-  const id = getRouterParam(event, 'id');
+  const ctx = { area: 'results.pdf', authUserId: null as string | null };
+
+  return await withCriticalApiLogging(event, ctx, async () => {
+    const id = getRouterParam(event, 'id');
 
   if (!id) {
     throw createError({
@@ -131,7 +142,13 @@ export default defineEventHandler(async (event) => {
     });
   }
 
-  const entry = await loadStoredResult(event, id);
+    const query = getQuery(event);
+    const clientId = typeof query.clientId === 'string' ? query.clientId : null;
+    const authUserId = await resolveUserId(event);
+    ctx.authUserId = authUserId;
+    const userId = authUserId;
+
+    const entry = await loadStoredResult(event, id, { userId, clientId });
 
   if (!entry) {
     throw createError({
@@ -278,8 +295,6 @@ export default defineEventHandler(async (event) => {
 
   doc.end();
 
-  return sendStream(event, stream);
+    return sendStream(event, stream);
+  });
 });
-
-
-

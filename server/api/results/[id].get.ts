@@ -8,6 +8,7 @@ import { buildTemperamentsReport } from '../report-builders/temperaments';
 import { buildAssessmentReport } from '../report-builders/assessments';
 import type { StoredResult } from '../results.post';
 import { resolveUserId } from '../../utils/resolveUserId';
+import { withCriticalApiLogging } from '../../utils/bugsnag';
 
 interface StoredResultRow {
   session_id: string;
@@ -21,115 +22,123 @@ interface StoredResultRow {
 }
 
 export default defineEventHandler(async (event) => {
-  const id = getRouterParam(event, 'id');
+  const ctx = { area: 'results.detail', authUserId: null as string | null };
 
-  if (!id) {
-    throw createError({
-      statusCode: 400,
-      message: 'ID de sessao nao informado',
-    });
-  }
+  return await withCriticalApiLogging(event, ctx, async () => {
+    const id = getRouterParam(event, 'id');
 
-  const query = getQuery(event);
-  const clientId = typeof query.clientId === 'string' ? query.clientId : null;
-  const userId = await resolveUserId(event);
+    if (!id) {
+      throw createError({
+        statusCode: 400,
+        message: 'ID de sessao nao informado',
+      });
+    }
 
-  if (!userId && !clientId) {
-    throw createError({
-      statusCode: 400,
-      message: 'clientId nao informado',
-    });
-  }
+    const query = getQuery(event);
+    const clientId = typeof query.clientId === 'string' ? query.clientId : null;
+    const authUserId = await resolveUserId(event);
+    ctx.authUserId = authUserId;
+    const userId = authUserId;
 
-  let entry: StoredResult | null = null;
+    if (!userId && !clientId) {
+      throw createError({
+        statusCode: 400,
+        message: 'clientId nao informado',
+      });
+    }
 
-  const canAccess = (storedUserId?: string | null, storedClientId?: string | null): boolean => {
-  if (storedUserId) {
-    return Boolean(userId && storedUserId === userId);
-  }
-  return Boolean(clientId && storedClientId && clientId === storedClientId);
-};
+    let entry: StoredResult | null = null;
 
-
-  // 1) Supabase
-  try {
-    const supabase = await serverSupabaseClient(event);
-
-    const { data, error } = await supabase
-      .from('test_results')
-      .select('*')
-      .eq('session_id', id)
-      .maybeSingle<StoredResultRow>();
-
-    if (!error && data) {
-      if (!canAccess(data.user_id, data.client_id)) {
-        throw createError({
-          statusCode: 403,
-          message: 'Voce nao tem permissao para ver estes resultados.',
-        });
+    const canAccess = (
+      storedUserId?: string | null,
+      storedClientId?: string | null,
+    ): boolean => {
+      if (storedUserId) {
+        return Boolean(userId && storedUserId === userId);
       }
+      return Boolean(clientId && storedClientId && clientId === storedClientId);
+    };
 
-      entry = {
-        id: data.session_id,
-        slug: data.slug,
-        userId: data.user_id,
-        email: null,
-        clientId: data.client_id,
-        results: data.results,
-        topSummaries: data.top_summaries ?? undefined,
-        meta: data.meta ?? undefined,
-        timestamp: data.created_at,
-      };
-    } else if (error) {
+    // 1) Supabase
+    try {
+      const supabase = await serverSupabaseClient(event);
+
+      const { data, error } = await supabase
+        .from('test_results')
+        .select('*')
+        .eq('session_id', id)
+        .maybeSingle<StoredResultRow>();
+
+      if (!error && data) {
+        if (!canAccess(data.user_id, data.client_id)) {
+          throw createError({
+            statusCode: 403,
+            message: 'Voce nao tem permissao para ver estes resultados.',
+          });
+        }
+
+        entry = {
+          id: data.session_id,
+          slug: data.slug,
+          userId: data.user_id,
+          email: null,
+          clientId: data.client_id,
+          results: data.results,
+          topSummaries: data.top_summaries ?? undefined,
+          meta: data.meta ?? undefined,
+          timestamp: data.created_at,
+        };
+      } else if (error) {
+        console.error(
+          '[Supabase] erro ao buscar resultado, fallback para storage',
+          error,
+        );
+      }
+    } catch (err) {
       console.error(
-        '[Supabase] erro ao buscar resultado, fallback para storage',
-        error,
+        '[Supabase] erro inesperado ao buscar resultado, fallback para storage',
+        err,
       );
     }
-  } catch (err) {
-    console.error(
-      '[Supabase] erro inesperado ao buscar resultado, fallback para storage',
-      err,
-    );
-  }
 
-  // 2) Fallback: storage local
-  if (!entry) {
-    const storage = useStorage<StoredResult[]>('results');
-    const all = (await storage.getItem('items')) ?? [];
-    const fromStorage = all.find((item) => item.id === id);
+    // 2) Fallback: storage local
+    if (!entry) {
+      const storage = useStorage<StoredResult[]>('results');
+      const all = (await storage.getItem('items')) ?? [];
+      const fromStorage = all.find((item) => item.id === id);
 
-    if (fromStorage) {
-      if (!canAccess(fromStorage.userId, fromStorage.clientId)) {
-        throw createError({
-          statusCode: 403,
-          message: 'Voce nao tem permissao para ver estes resultados.',
-        });
+      if (fromStorage) {
+        if (!canAccess(fromStorage.userId, fromStorage.clientId)) {
+          throw createError({
+            statusCode: 403,
+            message: 'Voce nao tem permissao para ver estes resultados.',
+          });
+        }
+
+        entry = fromStorage;
       }
-
-      entry = fromStorage;
     }
-  }
 
-  if (!entry) {
-    throw createError({
-      statusCode: 404,
-      message: 'Resultados nao encontrados',
-    });
-  }
+    if (!entry) {
+      throw createError({
+        statusCode: 404,
+        message: 'Resultados nao encontrados',
+      });
+    }
 
-  let report: AnyReport;
+    let report: AnyReport;
 
-  switch (entry.slug) {
-    case 'twelve-layers':
-      report = buildTwelveLayersReport(entry);
-      break;
-    case 'temperaments':
-      report = buildTemperamentsReport(entry);
-      break;
-    default:
-      report = buildAssessmentReport(entry);
-  }
+    switch (entry.slug) {
+      case 'twelve-layers':
+        report = buildTwelveLayersReport(entry);
+        break;
+      case 'temperaments':
+        report = buildTemperamentsReport(entry);
+        break;
+      default:
+        report = buildAssessmentReport(entry);
+    }
 
-  return report;
+    return report;
+  });
 });
