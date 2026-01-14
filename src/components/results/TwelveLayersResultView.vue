@@ -5,8 +5,9 @@
     <div class="flex-1 space-y-8">
       <!-- Hero -->
       <header
+        ref="headerRef"
         id="overview"
-        class="rounded-3xl bg-gradient-to-br from-amber-200/60 to-amber-50 p-6 dark:from-amber-900/30 dark:to-slate-900/80"
+        class="rounded-3xl bg-gradient-to-br from-amber-200/60 to-amber-50 p-6 dark:from-amber-900/30 dark:to-slate-900/80 reveal"
       >
         <div class="flex flex-wrap items-start justify-between gap-4">
           <div>
@@ -27,7 +28,8 @@
       <!-- Mapa das 12 camadas (barrinhas) -->
       <div
         v-if="report.traits.graph?.length"
-        class="rounded-2xl border border-slate-200/80 bg-white/90 p-5 text-sm shadow-sm dark:border-slate-800 dark:bg-slate-900/80"
+        class="rounded-2xl border border-slate-200/80 bg-white/90 p-5 text-sm shadow-sm dark:border-slate-800 dark:bg-slate-900/80 reveal"
+        v-reveal="120"
       >
         <h2 class="text-base font-semibold text-slate-900 dark:text-slate-50">
           Mapa das 12 camadas
@@ -58,15 +60,16 @@
       </div>
 
       <!-- Seções de texto -->
-      <ResultsSection id="traits" title="1. Traços de personalidade" :blocks="report.traits.blocks" />
-      <ResultsSection id="career" title="2. Carreira" :blocks="report.career.blocks" />
-      <ResultsSection id="growth" title="3. Crescimento pessoal" :blocks="report.growth.blocks" />
-      <ResultsSection id="relationships" title="4. Relacionamentos" :blocks="report.relationships.blocks" />
+      <ResultsSection id="traits" title="1. Traços de personalidade" :blocks="report.traits.blocks" class="reveal" v-reveal="sectionDelayBase" />
+      <ResultsSection id="career" title="2. Carreira" :blocks="report.career.blocks" class="reveal" v-reveal="sectionDelayBase + sectionDelayStep" />
+      <ResultsSection id="growth" title="3. Crescimento pessoal" :blocks="report.growth.blocks" class="reveal" v-reveal="sectionDelayBase + sectionDelayStep * 2" />
+      <ResultsSection id="relationships" title="4. Relacionamentos" :blocks="report.relationships.blocks" class="reveal" v-reveal="sectionDelayBase + sectionDelayStep * 3" />
 
       <!-- CTA Premium -->
       <div
         id="relatorio-completo"
-        class="mt-6 rounded-2xl border border-amber-300/70 bg-amber-50/80 p-5 text-sm dark:border-amber-500/50 dark:bg-amber-900/20"
+        class="mt-6 rounded-2xl border border-amber-300/70 bg-amber-50/80 p-5 text-sm dark:border-amber-500/50 dark:bg-amber-900/20 reveal"
+        v-reveal="ctaDelay"
       >
         <h2 class="font-semibold text-amber-900 dark:text-amber-100">
           Desbloqueie o relatório PDF completo
@@ -84,7 +87,8 @@
 
       <section
         v-if="testSlug"
-        class="rounded-2xl border border-slate-200/80 bg-white/90 p-5 text-sm shadow-sm dark:border-slate-800 dark:bg-slate-900/80"
+        class="rounded-2xl border border-slate-200/80 bg-white/90 p-5 text-sm shadow-sm dark:border-slate-800 dark:bg-slate-900/80 reveal"
+        v-reveal="nextStepDelay"
       >
         <h2 class="text-base font-semibold text-slate-900 dark:text-slate-50">
           Proximo passo
@@ -122,9 +126,10 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useRouter } from '#app'
 import type { TwelveLayersReport } from '~/types/results'
+import { useReveal } from '~/composables/useReveal'
 import ResultsSection from '~/components/results/ResultsSection.vue'
 import ResultsSidebarLink from '~/components/results/ResultsSidebarLink.vue'
 import BaseButton from '~/components/base/BaseButton.vue'
@@ -138,6 +143,19 @@ const props = defineProps<{
 const report = props.report
 const router = useRouter()
 const testSlug = computed(() => props.testSlug ?? null)
+const headerRef = ref<HTMLElement | null>(null)
+const { revealNow } = useReveal()
+
+const sectionDelayBase = 200
+const sectionDelayStep = 80
+const ctaDelay = sectionDelayBase + sectionDelayStep * 4
+const nextStepDelay = ctaDelay + sectionDelayStep
+
+onMounted(() => {
+  if (headerRef.value) {
+    revealNow(headerRef.value)
+  }
+})
 
 function handleRetake(): void {
   if (!testSlug.value) return
@@ -145,3 +163,6 @@ function handleRetake(): void {
   router.push({ path: `/testes/${testSlug.value}`, query: { fresh: '1' } })
 }
 </script>
+
+
+

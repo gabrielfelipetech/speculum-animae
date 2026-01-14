@@ -1,0 +1,69 @@
+.reveal {
+  --duration: 420ms;
+  --delay: 0ms;
+  opacity: 0;
+  transform: translateY(12px);
+  transition:
+    opacity var(--duration) cubic-bezier(0.16, 1, 0.3, 1) var(--delay),
+    transform var(--duration) cubic-bezier(0.16, 1, 0.3, 1) var(--delay);
+  will-change: opacity, transform;
+}
+
+.reveal--in {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.reveal--fast {
+  --duration: 320ms;
+}
+
+.reveal--slow {
+  --duration: 520ms;
+}
+
+.reveal--delay-0 {
+  --delay: 0ms;
+}
+.reveal--delay-1 {
+  --delay: 80ms;
+}
+.reveal--delay-2 {
+  --delay: 160ms;
+}
+.reveal--delay-3 {
+  --delay: 240ms;
+}
+.reveal--delay-4 {
+  --delay: 320ms;
+}
+.reveal--delay-5 {
+  --delay: 400ms;
+}
+.reveal--delay-6 {
+  --delay: 480ms;
+}
+.reveal--delay-7 {
+  --delay: 560ms;
+}
+.reveal--delay-8 {
+  --delay: 640ms;
+}
+.reveal--delay-9 {
+  --delay: 720ms;
+}
+.reveal--delay-10 {
+  --delay: 800ms;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+  .reveal--in {
+    opacity: 1;
+    transform: none;
+  }
+}

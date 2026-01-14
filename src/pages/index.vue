@@ -1,6 +1,6 @@
 ﻿<template>
   <main class="mx-auto max-w-5xl space-y-10 px-4 py-8">
-    <header class="space-y-3">
+    <header ref="headerRef" class="space-y-3 reveal">
       <p
         class="text-xs font-semibold uppercase tracking-[0.25em] text-slate-500 dark:text-slate-400"
       >
@@ -22,12 +22,14 @@
       </h2>
 
       <div class="grid gap-4 md:grid-cols-2">
-        <TestCard
-          v-for="test in coreTests"
+        <div
+          v-for="(test, index) in coreTests"
           :key="test.id"
-          :test="test"
-          variant="core"
-        />
+          class="reveal"
+          v-reveal="index * 80"
+        >
+          <TestCard :test="test" variant="core" />
+        </div>
       </div>
     </section>
     <section v-if="otherTests.length" class="space-y-4">
@@ -36,12 +38,14 @@
       </h2>
 
       <div class="grid gap-4 md:grid-cols-2">
-        <TestCard
-          v-for="test in otherTests"
+        <div
+          v-for="(test, index) in otherTests"
           :key="test.id"
-          :test="test"
-          variant="other"
-        />
+          class="reveal"
+          v-reveal="index * 80"
+        >
+          <TestCard :test="test" variant="other" />
+        </div>
       </div>
     </section>
 
@@ -81,10 +85,11 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import { useHead, useSeoMeta } from '#imports';
 import { allTests } from '~/config/tests';
 import { getGlobalFaq } from '~/data/faq';
+import { useReveal } from '~/composables/useReveal';
 import { buildFaqSchema } from '~/utils/seo/faqSchema';
 import type { TestConfig } from '~/types/tests';
 import TestCard from '~/components/tests/TestCard.vue';
@@ -107,6 +112,15 @@ const otherTests = computed(() =>
 );
 
 const globalFaq = getGlobalFaq();
+
+const headerRef = ref<HTMLElement | null>(null);
+const { revealNow } = useReveal();
+
+onMounted(() => {
+  if (headerRef.value) {
+    revealNow(headerRef.value);
+  }
+});
 
 useHead(() => ({
   script: [

@@ -27,7 +27,7 @@ export default defineNuxtConfig({
     '@nuxtjs/sitemap',
   ],
 
-  css: ['~/assets/css/tailwind.css'],
+  css: ['~/assets/css/tailwind.css', '~/assets/css/motion.css'],
 
   site: {
     url: process.env.NUXT_SITE_URL ?? 'https://speculumanimae.com.br',

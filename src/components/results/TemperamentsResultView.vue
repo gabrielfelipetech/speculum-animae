@@ -5,8 +5,9 @@
     <div class="flex-1 space-y-8">
       <!-- Hero -->
       <header
+        ref="headerRef"
         id="overview"
-        class="rounded-3xl bg-gradient-to-br from-emerald-200/60 to-emerald-50 p-6 dark:from-emerald-900/30 dark:to-slate-900/80"
+        class="rounded-3xl bg-gradient-to-br from-emerald-200/60 to-emerald-50 p-6 dark:from-emerald-900/30 dark:to-slate-900/80 reveal"
       >
         <div class="flex flex-wrap items-start justify-between gap-4">
           <div>
@@ -26,7 +27,8 @@
 
       <!-- Gráfico dos temperamentos (barras 0-10) -->
       <div
-        class="rounded-2xl border border-slate-200/80 bg-white/90 p-5 text-sm shadow-sm dark:border-slate-800 dark:bg-slate-900/80"
+        class="rounded-2xl border border-slate-200/80 bg-white/90 p-5 text-sm shadow-sm dark:border-slate-800 dark:bg-slate-900/80 reveal"
+        v-reveal="120"
       >
         <h2 class="text-base font-semibold text-slate-900 dark:text-slate-50">
           Intensidade dos temperamentos
@@ -61,30 +63,39 @@
         id="traits"
         title="1. Traços e dinâmica do temperamento"
         :blocks="report.traits.blocks"
+        class="reveal"
+        v-reveal="sectionDelayBase"
       />
 
       <ResultsSection
         id="career"
         title="2. Carreira, ambição e estilo de trabalho"
         :blocks="report.career.blocks"
+        class="reveal"
+        v-reveal="sectionDelayBase + sectionDelayStep"
       />
 
       <ResultsSection
         id="growth"
         title="3. Crescimento, virtudes e estresse"
         :blocks="report.growth.blocks"
+        class="reveal"
+        v-reveal="sectionDelayBase + sectionDelayStep * 2"
       />
 
       <ResultsSection
         id="relationships"
         title="4. Relacionamentos e afetividade"
         :blocks="report.relationships.blocks"
+        class="reveal"
+        v-reveal="sectionDelayBase + sectionDelayStep * 3"
       />
 
       <!-- CTA -->
       <div
         id="relatorio-completo"
-        class="mt-6 rounded-2xl border border-emerald-300/70 bg-emerald-50/80 p-5 text-sm dark:border-emerald-500/50 dark:bg-emerald-900/20"
+        class="mt-6 rounded-2xl border border-emerald-300/70 bg-emerald-50/80 p-5 text-sm dark:border-emerald-500/50 dark:bg-emerald-900/20 reveal"
+        v-reveal="ctaDelay"
       >
         <h2 class="font-semibold text-emerald-900 dark:text-emerald-100">
           Relatório PDF completo de temperamentos
@@ -111,7 +122,8 @@
 
       <section
         v-if="testSlug"
-        class="rounded-2xl border border-slate-200/80 bg-white/90 p-5 text-sm shadow-sm dark:border-slate-800 dark:bg-slate-900/80"
+        class="rounded-2xl border border-slate-200/80 bg-white/90 p-5 text-sm shadow-sm dark:border-slate-800 dark:bg-slate-900/80 reveal"
+        v-reveal="nextStepDelay"
       >
         <h2 class="text-base font-semibold text-slate-900 dark:text-slate-50">
           Proximo passo
@@ -149,10 +161,11 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useRouter } from '#app'
 import { useSupabaseUser } from '#imports'
 import type { TemperamentReport, GraphPoint } from '~/types/results'
+import { useReveal } from '~/composables/useReveal'
 import ResultsSection from '~/components/results/ResultsSection.vue'
 import ResultsSidebarLink from '~/components/results/ResultsSidebarLink.vue'
 import BaseButton from '~/components/base/BaseButton.vue'
@@ -171,9 +184,22 @@ const router = useRouter()
 const supabaseUser = useSupabaseUser()
 const testSlug = computed(() => props.testSlug ?? null)
 const isDownloading = ref(false)
+const headerRef = ref<HTMLElement | null>(null)
+const { revealNow } = useReveal()
+
+const sectionDelayBase = 200
+const sectionDelayStep = 80
+const ctaDelay = sectionDelayBase + sectionDelayStep * 4
+const nextStepDelay = ctaDelay + sectionDelayStep
 const isLoggedIn = computed(() => {
   const raw = supabaseUser.value?.id
   return typeof raw === 'string' && /^[0-9a-f-]{36}$/i.test(raw)
+})
+
+onMounted(() => {
+  if (headerRef.value) {
+    revealNow(headerRef.value)
+  }
 })
 
 function downloadPdf(): void {
@@ -227,3 +253,5 @@ const graphPoints = computed<GraphPoint[]>(() => {
   }))
 })
 </script>
+
+

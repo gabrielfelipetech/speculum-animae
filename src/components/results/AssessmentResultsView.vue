@@ -1,7 +1,11 @@
 <template>
   <section class="mx-auto flex max-w-6xl gap-8 px-4 py-10">
     <div class="flex-1 space-y-8">
-      <header :id="ids.overview" :class="['rounded-3xl p-6', theme.heroClass]">
+      <header
+        ref="headerRef"
+        :id="ids.overview"
+        :class="['rounded-3xl p-6', theme.heroClass, 'reveal']"
+      >
         <div class="flex flex-wrap items-start justify-between gap-4">
           <div>
             <p class="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">
@@ -19,14 +23,16 @@
 
       <section
         v-if="report.disclaimer"
-        class="rounded-2xl border border-amber-200/70 bg-amber-50/80 p-4 text-xs text-amber-900 dark:border-amber-500/40 dark:bg-amber-900/20 dark:text-amber-100"
+        class="rounded-2xl border border-amber-200/70 bg-amber-50/80 p-4 text-xs text-amber-900 dark:border-amber-500/40 dark:bg-amber-900/20 dark:text-amber-100 reveal"
+        v-reveal="80"
       >
         {{ report.disclaimer }}
       </section>
 
       <section
         :id="ids.summary"
-        class="rounded-2xl border border-slate-200/80 bg-white/90 p-5 text-sm shadow-sm dark:border-slate-800 dark:bg-slate-900/80"
+        class="rounded-2xl border border-slate-200/80 bg-white/90 p-5 text-sm shadow-sm dark:border-slate-800 dark:bg-slate-900/80 reveal"
+        v-reveal="160"
       >
         <h2 class="text-base font-semibold text-slate-900 dark:text-slate-50">
           Resumo do perfil
@@ -42,7 +48,8 @@
       <section
         v-if="report.scores.length"
         :id="ids.scores"
-        class="rounded-2xl border border-slate-200/80 bg-white/90 p-5 text-sm shadow-sm dark:border-slate-800 dark:bg-slate-900/80"
+        class="rounded-2xl border border-slate-200/80 bg-white/90 p-5 text-sm shadow-sm dark:border-slate-800 dark:bg-slate-900/80 reveal"
+        v-reveal="240"
       >
         <h2 class="text-base font-semibold text-slate-900 dark:text-slate-50">
           Pontuacao por dimensao
@@ -74,7 +81,8 @@
 
       <section
         :id="ids.recommendations"
-        class="rounded-2xl border border-slate-200/80 bg-white/90 p-5 text-sm shadow-sm dark:border-slate-800 dark:bg-slate-900/80"
+        class="rounded-2xl border border-slate-200/80 bg-white/90 p-5 text-sm shadow-sm dark:border-slate-800 dark:bg-slate-900/80 reveal"
+        v-reveal="320"
       >
         <h2 class="text-base font-semibold text-slate-900 dark:text-slate-50">
           Recomendacoes praticas
@@ -88,17 +96,20 @@
       </section>
 
       <ResultsSection
-        v-for="section in report.sections ?? []"
+        v-for="(section, index) in report.sections ?? []"
         :id="section.id"
         :key="section.id"
         :title="section.title"
         :subtitle="section.subtitle"
         :blocks="section.blocks"
+        class="reveal"
+        v-reveal="sectionDelayBase + sectionDelayStep * index"
       />
 
       <section
         v-if="testSlug"
-        class="rounded-2xl border border-slate-200/80 bg-white/90 p-5 text-sm shadow-sm dark:border-slate-800 dark:bg-slate-900/80"
+        class="rounded-2xl border border-slate-200/80 bg-white/90 p-5 text-sm shadow-sm dark:border-slate-800 dark:bg-slate-900/80 reveal"
+        v-reveal="nextStepDelay"
       >
         <h2 class="text-base font-semibold text-slate-900 dark:text-slate-50">
           Proximo passo
@@ -144,9 +155,10 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import { useRouter } from '#app';
 import type { AssessmentReport } from '~/types/results';
+import { useReveal } from '~/composables/useReveal';
 import ResultsSection from '~/components/results/ResultsSection.vue';
 import ResultsSidebarLink from '~/components/results/ResultsSidebarLink.vue';
 import BaseButton from '~/components/base/BaseButton.vue';
@@ -168,6 +180,8 @@ const router = useRouter();
 const report = props.report;
 const theme = props.theme;
 const testSlug = computed(() => props.testSlug ?? null);
+const headerRef = ref<HTMLElement | null>(null);
+const { revealNow } = useReveal();
 
 const ids = {
   overview: 'overview',
@@ -177,6 +191,19 @@ const ids = {
 };
 
 const sidebarSections = computed(() => report.sections ?? []);
+const sectionsCount = computed(() => report.sections?.length ?? 0);
+
+const sectionDelayBase = 400;
+const sectionDelayStep = 80;
+const nextStepDelay = computed(
+  () => sectionDelayBase + sectionDelayStep * (sectionsCount.value + 1),
+);
+
+onMounted(() => {
+  if (headerRef.value) {
+    revealNow(headerRef.value);
+  }
+});
 
 function handleRetake(): void {
   if (!testSlug.value) return;

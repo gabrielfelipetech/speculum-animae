@@ -1,6 +1,6 @@
 <!-- src/components/tests/LikertTestHeader.vue -->
 <template>
-  <header class="space-y-2">
+  <header ref="headerRef" class="space-y-2 reveal">
     <h1
       class="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400"
     >
@@ -22,12 +22,22 @@
 </template>
 
 <script setup lang="ts">
-import { toRefs } from 'vue';
+import { onMounted, ref, toRefs } from 'vue';
 import type { TestConfig } from '~/types/tests';
+import { useReveal } from '~/composables/useReveal';
 
 const props = defineProps<{
   config: TestConfig;
 }>();
 
 const { config } = toRefs(props);
+
+const headerRef = ref<HTMLElement | null>(null);
+const { revealNow } = useReveal();
+
+onMounted(() => {
+  if (headerRef.value) {
+    revealNow(headerRef.value);
+  }
+});
 </script>

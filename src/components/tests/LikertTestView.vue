@@ -14,7 +14,8 @@
       <div
         v-if="currentGroup"
         data-test-step-container
-        class="rounded-2xl border border-slate-200/80 bg-white/90 p-4 dark:border-slate-800 dark:bg-slate-900/80"
+        class="rounded-2xl border border-slate-200/80 bg-white/90 p-4 dark:border-slate-800 dark:bg-slate-900/80 reveal"
+        v-reveal="120"
       >
         <div class="mb-3 flex items-start justify-between gap-3">
           <div>

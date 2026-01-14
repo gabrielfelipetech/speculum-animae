@@ -1,7 +1,7 @@
 ﻿<!-- src/pages/testes/index.vue -->
 <template>
   <section class="mx-auto max-w-5xl space-y-6 px-4 py-8">
-    <header class="space-y-2">
+    <header ref="headerRef" class="space-y-2 reveal">
       <p class="text-xs font-semibold uppercase tracking-[0.25em] text-slate-500 dark:text-slate-400">
         Speculum Animae
       </p>
@@ -16,7 +16,14 @@
         Testes principais
       </h2>
       <div class="grid gap-4 md:grid-cols-2">
-        <TestCard v-for="test in coreTests" :key="test.id" :test="test" variant="core" />
+        <div
+          v-for="(test, index) in coreTests"
+          :key="test.id"
+          class="reveal"
+          v-reveal="index * 80"
+        >
+          <TestCard :test="test" variant="core" />
+        </div>
       </div>
     </section>
 
@@ -25,17 +32,25 @@
         Outros testes
       </h2>
       <div class="grid gap-4 md:grid-cols-2">
-        <TestCard v-for="test in otherTests" :key="test.id" :test="test" variant="other" />
+        <div
+          v-for="(test, index) in otherTests"
+          :key="test.id"
+          class="reveal"
+          v-reveal="index * 80"
+        >
+          <TestCard :test="test" variant="other" />
+        </div>
       </div>
     </section>
   </section>
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useSeoMeta } from '#imports'
 import { allTests } from '~/config/tests'
 import type { TestConfig } from '~/types/tests'
+import { useReveal } from '~/composables/useReveal'
 import TestCard from '~/components/tests/TestCard.vue'
 
 useSeoMeta({
@@ -44,6 +59,15 @@ useSeoMeta({
 })
 
 const allLikertTests = allTests.likert as TestConfig[]
+
+const headerRef = ref<HTMLElement | null>(null)
+const { revealNow } = useReveal()
+
+onMounted(() => {
+  if (headerRef.value) {
+    revealNow(headerRef.value)
+  }
+})
 
 function sortByTitle(a: TestConfig, b: TestConfig): number {
   return a.title.localeCompare(b.title, 'pt-BR')
