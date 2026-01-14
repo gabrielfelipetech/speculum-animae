@@ -5,7 +5,7 @@
     <SiteHeader
       :theme="theme"
       @toggle-theme="toggleTheme"
-      @open-auth="isAuthOpen = true"
+      @open-auth="openAuthModal"
       @logout="handleLogout"
     />
 
@@ -13,8 +13,8 @@
       :open="isAuthOpen"
       :loading="authLoading"
       :error-message="authError"
-      @update:open="(v) => (isAuthOpen = v)"
-      @close="isAuthOpen = false"
+      @update:open="setAuthModal"
+      @close="closeAuthModal"
       @submit-email="handleEmailAuth"
       @google-auth="handleGoogleAuth"
       @reset-password="handleResetPassword"
@@ -28,18 +28,19 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, watch, ref, computed } from 'vue';
+import { onMounted, watch, computed } from 'vue';
 import { useHead, useSeoMeta, useRoute, useRuntimeConfig } from '#imports';
 
 import SiteHeader from '~/components/layout/SiteHeader.vue';
 import AuthModal from '~/components/auth/AuthModal.vue';
 import { useAuth } from '~/composables/useAuth';
+import { useAuthModal } from '~/composables/useAuthModal';
 import SiteFooter from '~/components/layout/SiteFooter.vue';
 
 type Theme = 'light' | 'dark';
 
 const theme = useState<Theme>('theme', () => 'light');
-const isAuthOpen = ref(false);
+const { isAuthOpen, openAuthModal, closeAuthModal, setAuthModal } = useAuthModal();
 
 const {
   signInWithEmail,
@@ -142,7 +143,7 @@ async function handleEmailAuth(payload: {
 }) {
   if (payload.mode === 'signin') {
     const user = await signInWithEmail(payload.email, payload.password);
-    if (user) isAuthOpen.value = false;
+    if (user) closeAuthModal();
   } else {
     if (!payload.name || !payload.gender) return;
     const user = await signUpWithEmail({
@@ -151,7 +152,7 @@ async function handleEmailAuth(payload: {
       fullName: payload.name,
       gender: payload.gender,
     });
-    if (user) isAuthOpen.value = false;
+    if (user) closeAuthModal();
   }
 }
 
@@ -166,7 +167,7 @@ async function handleLogout() {
 async function handleResetPassword(payload: { email: string }) {
   const ok = await sendPasswordReset(payload.email);
   if (ok) {
-    isAuthOpen.value = false
+    closeAuthModal();
   }
 }
 </script>

@@ -7,6 +7,7 @@ export default {
     './src/layouts/**/*.{vue,js,ts}',
     './src/pages/**/*.{vue,js,ts}',
     './src/app.vue',
+    './src/error.vue',
   ],
   darkMode: 'class',
   theme: {
