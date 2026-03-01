@@ -10,10 +10,14 @@
         to="/"
         class="flex items-center w-60 gap-4 text-xl font-semibold tracking-tight text-slate-900 dark:text-slate-50"
       >
-       <img src="/logo-512.png" alt="Speculum Animae" class="h-14 w-14 rounded-full" />
-  <span class="text-xl font-semibold tracking-tight text-slate-900 dark:text-slate-50">
-    Speculum Animae
-  </span>
+       <img
+         src="/logo-512.png"
+         :alt="t('common.brand')"
+         class="h-14 w-14 rounded-full"
+       />
+        <span class="text-xl font-semibold tracking-tight text-slate-900 dark:text-slate-50">
+          {{ t('common.brand') }}
+        </span>
       </NuxtLink>
 
       <nav class="hidden items-center gap-4 text-xs font-semibold uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400 md:flex">
@@ -21,13 +25,13 @@
           to="/artigos"
           class="transition hover:text-indigo-600 dark:hover:text-amber-300"
         >
-          Artigos
+          {{ t('menu.items.articles') }}
         </NuxtLink>
         <NuxtLink
           to="/planos"
           class="transition hover:text-indigo-600 dark:hover:text-amber-300"
         >
-          Planos
+          {{ t('menu.items.plan') }}
         </NuxtLink>
       </nav>
 
@@ -38,6 +42,8 @@
               <NuxtLink
                 to="/testes/historico"
                 class="hidden max-w-[160px] truncate text-xs text-slate-700 underline-offset-2 hover:underline dark:text-slate-200 sm:inline"
+                :aria-label="t('menu.items.testsDone')"
+                :title="t('menu.items.testsDone')"
               >
                 {{ displayName }}
               </NuxtLink>
@@ -47,7 +53,7 @@
                 class="rounded-full bg-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-800 shadow-sm transition hover:bg-slate-300 dark:bg-slate-800 dark:text-slate-50 dark:hover:bg-slate-700"
                 @click="emit('logout')"
               >
-                Sair
+                {{ t('common.actions.logout') }}
               </button>
             </template>
             <template v-else>
@@ -56,10 +62,11 @@
                 class="rounded-full bg-indigo-600 px-4 py-1.5 text-xs font-semibold text-white shadow-sm transition hover:bg-indigo-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900/5"
                 @click="emit('open-auth')"
               >
-                Entrar / Cadastrar
+                {{ t('common.actions.enterRegister') }}
               </button>
             </template>
           </div>
+          <LanguageToggle />
           <ThemeToggle
             :theme="props.theme"
             @toggle="emit('toggle-theme')"
@@ -72,7 +79,7 @@
           class="inline-flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 bg-slate-100 text-slate-700 shadow-sm transition hover:bg-slate-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:hover:bg-slate-700 dark:focus-visible:ring-offset-slate-900 md:hidden"
           :aria-expanded="isMenuOpen"
           aria-controls="mobile-menu"
-          aria-label="Abrir menu"
+          :aria-label="t('menu.title')"
           @click="toggleMenu"
         >
           <Icon name="mdi:menu" size="20" aria-hidden="true" />
@@ -94,8 +101,10 @@
 
 <script setup lang="ts">
 import { nextTick, ref, watch } from 'vue';
+import { useI18n } from '#imports';
 import MobileMenu from '~/components/layout/MobileMenu.vue';
 import ThemeToggle from '~/components/layout/ThemeToggle.vue';
+import LanguageToggle from '~/components/layout/LanguageToggle.vue';
 import { useAuthUi } from '~/composables/useAuthUi';
 
 const props = defineProps<{
@@ -109,6 +118,7 @@ const emit = defineEmits<{
 }>();
 
 const { isLoggedIn, displayName } = useAuthUi();
+const { t } = useI18n();
 const menuButtonRef = ref<HTMLButtonElement | null>(null);
 const isMenuOpen = ref(false);
 

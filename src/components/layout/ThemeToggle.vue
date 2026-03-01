@@ -19,6 +19,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
+import { useI18n } from '#imports'
 
 const props = defineProps<{
   theme: 'light' | 'dark'
@@ -28,8 +29,10 @@ const emit = defineEmits<{
   (e: 'toggle'): void
 }>()
 
-const label = computed(() => (props.theme === 'light' ? 'Modo escuro' : 'Modo claro'))
-const ariaLabel = computed(() =>
-  props.theme === 'light' ? 'Ativar modo escuro' : 'Ativar modo claro',
+const { t } = useI18n()
+
+const label = computed(() =>
+  props.theme === 'light' ? t('theme.dark') : t('theme.light'),
 )
+const ariaLabel = computed(() => label.value)
 </script>

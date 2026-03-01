@@ -6,10 +6,14 @@ export type ArticleBodyBlock =
   | { type: 'ol'; items: string[] }
   | { type: 'quote'; text: string; cite?: string };
 
+export type LocalizedTextMap = Record<string, string>;
+
 export type ArticleMeta = {
   slug: string;
   title: string;
+  titleI18n?: LocalizedTextMap;
   description: string;
+  descriptionI18n?: LocalizedTextMap;
   category: string;
   tags: string[];
   publishedAt: string;

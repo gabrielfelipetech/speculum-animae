@@ -8,6 +8,8 @@ export type SummaryRule = {
   descriptionTemplate: string;
 };
 
+export type LocalizedTextMap = Record<string, string>;
+
 export type LikertScaleId = 'agreement' | 'frequency' | 'intensity';
 
 export type LikertScaleLabels = {
@@ -88,9 +90,13 @@ type TestConfigCore = {
   resultSlug: string;
   kind?: ReportKind;
   title: string;
+  titleI18n?: LocalizedTextMap;
   subtitle?: string;
+  subtitleI18n?: LocalizedTextMap;
   description: string;
+  descriptionI18n?: LocalizedTextMap;
   disclaimer?: string;
+  disclaimerI18n?: LocalizedTextMap;
   category?: string;
   emphasis?: 'highlighted' | 'default';
   tags?: string[];

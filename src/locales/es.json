@@ -1,0 +1,73 @@
+﻿{
+  "common": {
+    "brand": "Speculum Animae",
+    "actions": {
+      "enterRegister": "Iniciar sesión / Registrarse",
+      "logout": "Salir",
+      "viewArticles": "Ver artículos",
+      "viewPlans": "Ver planes",
+      "viewTests": "Explorar pruebas",
+      "readArticle": "Leer artículo",
+      "startTest": "Iniciar prueba",
+      "close": "Cerrar"
+    }
+  },
+  "menu": {
+    "title": "Menú",
+    "greeting": "Hola, {name}",
+    "items": {
+      "testsDone": "Pruebas realizadas",
+      "articles": "Artículos",
+      "plan": "Planes"
+    }
+  },
+  "shome": {
+    "kicker": "Speculum Animae",
+    "title": "Pruebas de personalidad, temperamento y virtudes en un solo lugar.",
+    "description": "Comienza con la prueba de las 12 capas de la personalidad o explora otros instrumentos, como la prueba de temperamentos clásicos. Se añadirán más pruebas a medida que el proyecto evolucione.",
+    "sections": {
+      "coreTests": "Pruebas principales",
+      "otherTests": "Otras pruebas",
+      "articlesTitle": "Artículos",
+      "articlesCardTitle": "Lecturas para profundizar tu camino",
+      "articlesCardDescription": "Explora artículos sobre personalidad, temperamentos, virtudes y relaciones."
+    },
+    "faq": {
+      "kicker": "FAQ",
+      "title": "Preguntas frecuentes",
+      "description": "Respuestas rápidas a dudas comunes sobre la plataforma."
+    }
+  },
+  "testsIndex": {
+    "kicker": "Speculum Animae",
+    "title": "Pruebas",
+    "description": "Elige una prueba para comenzar tu camino de autoconocimiento."
+  },
+  "articlesIndex": {
+    "kicker": "Speculum Animae",
+    "title": "Artículos",
+    "description": "Lecturas sobre personalidad, temperamentos, virtudes y relaciones para apoyar tu autoconocimiento.",
+    "emptyState": "No se encontraron artículos. Prueba otro término o ajusta los filtros."
+  },
+  "billing": {
+    "title": "Planes",
+    "subtitleLoggedHint": "Si estás conectado, usamos tu correo automáticamente en el checkout."
+  },
+  "theme": {
+    "light": "Modo claro",
+    "dark": "Modo oscuro"
+  },
+  "language": {
+    "label": "Idioma",
+    "pt": "PT",
+    "en": "EN",
+    "es": "ES"
+  },
+  "footer": {
+    "legalContact": "Legal / Contacto",
+    "terms": "Términos",
+    "privacy": "Privacidad",
+    "contact": "Contacto",
+    "copyright": "{year} Speculum Animae. Todos los derechos reservados."
+  }
+}

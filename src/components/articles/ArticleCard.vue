@@ -17,13 +17,14 @@
     </div>
 
     <span class="mt-4 text-xs font-semibold uppercase tracking-[0.2em] text-indigo-600 dark:text-amber-300">
-      Ler artigo
+      {{ t('common.actions.readArticle') }}
     </span>
   </NuxtLink>
 </template>
 
 <script setup lang="ts">
 import { computed } from 'vue';
+import { useI18n } from '#imports';
 import type { ArticleMeta } from '~/types/articles';
 import { getCategoryLabel } from '~/data/articles';
 
@@ -31,6 +32,7 @@ const props = defineProps<{
   article: ArticleMeta;
 }>();
 
+const { t } = useI18n();
 const categoryLabel = computed(() => getCategoryLabel(props.article.category));
 const formattedDate = computed(() => formatDate(props.article.updatedAt));
 

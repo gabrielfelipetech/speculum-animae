@@ -1,4 +1,4 @@
-// nuxt.config.ts
+﻿// nuxt.config.ts
 import { readFileSync } from 'node:fs'
 import { defineNuxtConfig } from 'nuxt/config'
 
@@ -16,6 +16,7 @@ const articleUrls = manifest.articles.map((article) => `/artigos/${article.slug}
 
 export default defineNuxtConfig({
   srcDir: 'src/',
+  compatibilityDate: '2026-01-14',
   modules: [
     '@nuxtjs/tailwindcss',
     '@nuxt/content',
@@ -23,6 +24,7 @@ export default defineNuxtConfig({
     '@nuxt/fonts',
     '@nuxt/icon',
     '@nuxt/image',
+    '@nuxtjs/i18n',
     '@nuxtjs/supabase',
     '@nuxtjs/sitemap',
   ],
@@ -52,7 +54,7 @@ export default defineNuxtConfig({
     },
   },
 
-  // Evita indexar páginas privadas/sensíveis via header
+  // Evita indexar paginas privadas/sensiveis via header
   routeRules: {
     '/resultados/**': { headers: { 'x-robots-tag': 'noindex, nofollow' } },
     '/testes/historico': { headers: { 'x-robots-tag': 'noindex, nofollow' } },
@@ -73,6 +75,25 @@ export default defineNuxtConfig({
 
   tailwindcss: {
     viewer: false,
+  },
+
+  i18n: {
+    restructureDir: 'src',
+    defaultLocale: 'pt-BR',
+    strategy: 'no_prefix',
+    langDir: 'locales',
+    locales: [
+      { code: 'pt-BR', iso: 'pt-BR', name: 'Portuguese', file: 'pt-BR.json' },
+      { code: 'en', iso: 'en-US', name: 'English', file: 'en.json' },
+      { code: 'es', iso: 'es-ES', name: 'Spanish', file: 'es.json' },
+    ],
+    detectBrowserLanguage: {
+      useCookie: true,
+      cookieKey: 'sa_locale',
+      redirectOn: 'root',
+      fallbackLocale: 'pt-BR',
+    },
+    vueI18n: './i18n.config.ts',
   },
 
   postcss: {

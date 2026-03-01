@@ -1,4 +1,4 @@
-<!-- src/components/tests/TestCard.vue (ou o arquivo onde está esse card) -->
+﻿<!-- src/components/tests/TestCard.vue (ou o arquivo onde esta esse card) -->
 <template>
   <NuxtLink
     :to="to"
@@ -29,12 +29,10 @@
         <TestTagPill v-for="tag in test.tags" :key="tag" :label="tag" />
       </div>
 
-      
-
-      <span class="rainbow-cta  ml-auto shrink-0" aria-label="Iniciar teste">
+      <span class="rainbow-cta ml-auto shrink-0" :aria-label="t('common.actions.startTest')">
         <span class="rainbow-cta__inner">
           <span class="inline-flex items-center gap-1 text-[11px] font-semibold">
-            Iniciar Teste <span aria-hidden="true">→</span>
+            {{ t('common.actions.startTest') }} <span aria-hidden="true">&gt;</span>
           </span>
         </span>
       </span>
@@ -43,10 +41,12 @@
 </template>
 
 <script setup lang="ts">
-  import { computed } from 'vue';
+import { computed } from 'vue';
+import { useI18n } from '#imports';
 import type { TestConfig } from '~/types/tests'
 import TestTagPill from '~/components/tests/TestTagPill.vue'
 
+// TODO: Internationalize test title/subtitle when localized fields are available.
 const props = defineProps<{
   test: TestConfig;
   variant: 'core' | 'other';
@@ -55,6 +55,7 @@ const to = computed(() => ({
   path: `/testes/${props.test.slug}`,
   query: { fresh: '1' },
 }));
+const { t } = useI18n();
 </script>
 
 <style scoped>
@@ -68,9 +69,9 @@ const to = computed(() => ({
 }
 
 /*
-  Importante: NÃO defina display aqui.
-  Se você definir display (ex.: flex) no CSS scoped, ele pode sobrescrever o `sm:hidden`
-  e o botão aparecer no desktop (causando “dois botões”).
+  Importante: NAO defina display aqui.
+  Se voce definir display (ex.: flex) no CSS scoped, ele pode sobrescrever o `sm:hidden`
+  e o botao aparecer no desktop (causando dois botoes).
 */
 
 .rainbow-cta {
@@ -115,7 +116,7 @@ const to = computed(() => ({
   z-index: -2;
 }
 
-/* Miolo do botão */
+/* Miolo do botao */
 .rainbow-cta__inner {
   display: inline-flex;
   align-items: center;

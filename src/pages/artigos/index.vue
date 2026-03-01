@@ -2,12 +2,11 @@
   <section class="mx-auto max-w-5xl space-y-8 px-4 py-8">
     <header class="space-y-3">
       <p class="text-xs font-semibold uppercase tracking-[0.25em] text-slate-500 dark:text-slate-400">
-        Speculum Animae
+        {{ t('articlesIndex.kicker') }}
       </p>
-      <h1 class="font-display text-3xl tracking-tight md:text-4xl">Artigos</h1>
+      <h1 class="font-display text-3xl tracking-tight md:text-4xl">{{ t('articlesIndex.title') }}</h1>
       <p class="max-w-2xl text-sm text-slate-600 dark:text-slate-300">
-        Leituras sobre personalidade, temperamentos, virtudes e relacionamentos para apoiar seu
-        autoconhecimento.
+        {{ t('articlesIndex.description') }}
       </p>
     </header>
 
@@ -28,7 +27,7 @@
 
     <div v-else class="rounded-2xl border border-dashed border-slate-200 bg-white/80 p-6 text-center dark:border-slate-800 dark:bg-slate-900/60">
       <p class="text-sm text-slate-600 dark:text-slate-300">
-        Nenhum artigo encontrado. Tente outro termo ou ajuste os filtros.
+        {{ t('articlesIndex.emptyState') }}
       </p>
     </div>
   </section>
@@ -36,15 +35,17 @@
 
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue';
-import { useSeoMeta } from '#imports';
+import { useI18n, useSeoMeta } from '#imports';
 import { getAllArticles, getArticleCategories, getArticleTags } from '~/data/articles';
 import ArticleCard from '~/components/articles/ArticleCard.vue';
 import ArticlesFilters from '~/components/articles/ArticlesFilters.vue';
 
-useSeoMeta({
-  title: 'Artigos',
-  description: 'Artigos sobre personalidade, temperamentos, virtudes e relacionamentos.',
-});
+const { t } = useI18n();
+
+useSeoMeta(() => ({
+  title: t('articlesIndex.title'),
+  description: t('articlesIndex.description'),
+}));
 
 const allArticles = getAllArticles();
 const categories = getArticleCategories();
