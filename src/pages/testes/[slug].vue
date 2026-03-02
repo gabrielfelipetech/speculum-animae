@@ -38,16 +38,13 @@ import { useHead, useRoute, useRouter, useSeoMeta } from '#imports';
 import { getTestBySlug } from '~/config/tests';
 import { getAllArticles } from '~/data/articles';
 import { getFaqByTestSlug } from '~/data/faq';
-import { getLastResultId } from '~/utils/testLastResult';
 import { buildFaqSchema } from '~/utils/seo/faqSchema';
 import RelatedArticles from '~/components/articles/RelatedArticles.vue';
 import FaqSection from '~/components/faq/FaqSection.vue';
 import LikertTestView from '~/components/tests/LikertTestView.vue';
 import BaseButton from '~/components/base/BaseButton.vue';
-import { computed, ref, watchEffect } from 'vue';
-import { getSupabaseAccessToken } from '~/utils/authToken';
-import { buildActorKey } from '~/utils/actorKey';
-import { getOrCreateClientId } from '~/utils/clientId';
+import { computed, onMounted, ref } from 'vue';
+import { useLastResultRedirect } from '~/composables/useLastResultRedirect';
 
 const route = useRoute();
 const router = useRouter();
@@ -61,29 +58,31 @@ const isFresh = computed(() => {
 });
 
 const testConfig = computed(() => getTestBySlug(slug.value));
+const { tryRedirectToLastResult } = useLastResultRedirect();
 
 const didRedirect = ref(false);
+const attemptedRedirect = ref(false);
 
-watchEffect(() => {
-  if (!process.client) return;
-  if (didRedirect.value) return;
+async function tryInitialLastResultRedirect(): Promise<void> {
+  if (!import.meta.client) return;
+  if (didRedirect.value || attemptedRedirect.value) return;
   if (isFresh.value) return;
   if (!testConfig.value) return;
 
-  void tryRedirectToLastResult();
-});
+  attemptedRedirect.value = true;
 
-async function tryRedirectToLastResult(): Promise<void> {
-  const token = await getSupabaseAccessToken();
-  const actorKey = buildActorKey(token, getOrCreateClientId());
-  if (!actorKey) return;
-
-  const lastResultId = getLastResultId(slug.value, actorKey);
-  if (!lastResultId) return;
-
-  didRedirect.value = true;
-  router.replace({ path: `/resultados/${lastResultId}`, query: { t: slug.value } });
+  try {
+    const redirected = await tryRedirectToLastResult(slug.value);
+    didRedirect.value = redirected;
+  } catch {
+    // Keep the runner available if redirect fails.
+    didRedirect.value = false;
+  }
 }
+
+onMounted(() => {
+  void tryInitialLastResultRedirect();
+});
 
 type PublicSlug = '12-camadas' | 'temperamentos-classicos';
 
@@ -147,20 +146,6 @@ useHead(() => {
       },
     ],
   };
-});
-
-watchEffect(() => {
-  if (!process.client) return;
-  if (isFresh.value) return;
-  if (!testConfig.value) return;
-
-  const lastResultId = getLastResultId(slug.value);
-  if (!lastResultId) return;
-
-  router.replace({
-    path: `/resultados/${lastResultId}`,
-    query: { t: slug.value },
-  });
 });
 
 function isPublicSlug(value: string): value is PublicSlug {

@@ -3,12 +3,26 @@
   "type": "module",
   "private": true,
   "scripts": {
+    "sb:init": "supabase init",
+    "sb:start": "supabase start",
+    "sb:stop": "supabase stop",
+    "sb:status": "supabase status -o env",
+    "sb:pull": "supabase db pull remote_schema",
+    "sb:reset": "supabase db reset",
+    "sb:link": "supabase link --project-ref otjbkxaalohbmgasouah",
+    "sb:push": "supabase db push",
+    "sb:types": "supabase gen types typescript --linked > src/types/database.types.ts",
     "build": "nuxt build",
     "dev": "nuxt dev --port 5171",
+    "dev:e2e": "cross-env BILLING_PROVIDER=mock nuxt dev --port 5173 --strictPort",
     "generate": "nuxt generate",
+    "lint": "eslint .",
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare",
     "test": "vitest run",
+    "cy:open": "cross-env BILLING_PROVIDER=mock cypress open",
+    "cy:run:only": "cypress run",
+    "cy:run": "node scripts/run-cypress.mjs",
     "articles:split": "node --experimental-strip-types scripts/split-articles-json.ts"
   },
   "dependencies": {
@@ -31,12 +45,17 @@
     "eslint": "^9.39.1",
     "nuxt": "^4.2.1",
     "pdfkit": "^0.17.2",
+    "stripe": "^20.4.0",
     "vue": "^3.5.25",
     "vue-router": "^4.6.3"
   },
   "devDependencies": {
     "@nuxtjs/tailwindcss": "^6.14.0",
     "@types/pdfkit": "^0.17.4",
+    "cross-env": "^10.1.0",
+    "cypress": "^14.5.4",
+    "start-server-and-test": "^2.1.3",
+    "supabase": "^2.76.15",
     "vitest": "^3.2.0",
     "vue-tsc": "^3.1.5"
   }

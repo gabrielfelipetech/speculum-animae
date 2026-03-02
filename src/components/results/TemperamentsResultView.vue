@@ -172,6 +172,7 @@ import BaseButton from '~/components/base/BaseButton.vue'
 import SkeletonBlock from '~/components/base/SkeletonBlock.vue'
 import { getOrCreateClientId } from '~/utils/clientId'
 import { clearLastResultId } from '~/utils/testLastResult'
+import { buildClientActorKey, buildUserActorKey } from '~/utils/actorKey'
 
 const props = defineProps<{
   report: TemperamentReport
@@ -195,6 +196,11 @@ const isLoggedIn = computed(() => {
   const raw = supabaseUser.value?.id
   return typeof raw === 'string' && /^[0-9a-f-]{36}$/i.test(raw)
 })
+const actorKey = computed(() => {
+  const userKey = buildUserActorKey(supabaseUser.value?.id ?? null)
+  if (userKey) return userKey
+  return buildClientActorKey(getOrCreateClientId())
+})
 
 onMounted(() => {
   if (headerRef.value) {
@@ -204,7 +210,7 @@ onMounted(() => {
 
 function downloadPdf(): void {
   if (isDownloading.value) return
-  if (process.client) {
+  if (import.meta.client) {
     isDownloading.value = true
     const clientId = !isLoggedIn.value ? getOrCreateClientId() : null
     if (!isLoggedIn.value && !clientId) {
@@ -221,7 +227,7 @@ function downloadPdf(): void {
 
 function handleRetake(): void {
   if (!testSlug.value) return
-  clearLastResultId(testSlug.value)
+  clearLastResultId(testSlug.value, actorKey.value)
   router.push({ path: `/testes/${testSlug.value}`, query: { fresh: '1' } })
 }
 

@@ -13,6 +13,7 @@
       :open="isAuthOpen"
       :loading="authLoading"
       :error-message="authError"
+      :reset-feedback="resetFeedback"
       @update:open="setAuthModal"
       @close="closeAuthModal"
       @submit-email="handleEmailAuth"
@@ -28,8 +29,14 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, watch, computed } from 'vue';
-import { useHead, useSeoMeta, useRoute, useRuntimeConfig } from '#imports';
+import { onMounted, watch, computed, ref } from 'vue';
+import {
+  useHead,
+  useSeoMeta,
+  useRoute,
+  useRuntimeConfig,
+  useI18n,
+} from '#imports';
 
 import SiteHeader from '~/components/layout/SiteHeader.vue';
 import AuthModal from '~/components/auth/AuthModal.vue';
@@ -51,6 +58,10 @@ const {
   loading,
   errorMessage,
 } = useAuth();
+const { t } = useI18n();
+const resetFeedback = ref<{ tone: 'success' | 'error'; message: string } | null>(
+  null,
+);
 
 const authLoading = computed(() => loading.value);
 const authError = computed(() => errorMessage.value ?? null);
@@ -64,6 +75,13 @@ const siteUrl = String(runtime.public.siteUrl || 'https://speculumanimae.com.br'
 
 // canonical SEM querystring (evita duplicar /?fresh=1 etc.)
 const canonical = computed(() => `${siteUrl}${route.path}`);
+
+function isAuthModalQueryEnabled(value: unknown): boolean {
+  if (Array.isArray(value)) {
+    return value.some((item) => item === '1' || item === 'true');
+  }
+  return value === '1' || value === 'true';
+}
 
 useSeoMeta(() => ({
   titleTemplate: (t) => (t ? `${t} | Speculum Animae` : 'Speculum Animae'),
@@ -101,14 +119,14 @@ useHead(() => ({
 }));
 
 function applyThemeClass(value: Theme): void {
-  if (process.client) {
+  if (import.meta.client) {
     const root = document.documentElement;
     root.classList.toggle('dark', value === 'dark');
   }
 }
 
 onMounted(() => {
-  if (!process.client) return;
+  if (!import.meta.client) return;
 
   const saved = window.localStorage.getItem('theme');
   if (saved === 'dark' || saved === 'light') {
@@ -123,7 +141,7 @@ onMounted(() => {
 watch(
   theme,
   (value) => {
-    if (!process.client) return;
+    if (!import.meta.client) return;
     window.localStorage.setItem('theme', value);
     applyThemeClass(value);
   },
@@ -165,9 +183,34 @@ async function handleLogout() {
 }
 
 async function handleResetPassword(payload: { email: string }) {
-  const ok = await sendPasswordReset(payload.email);
-  if (ok) {
-    closeAuthModal();
+  const result = await sendPasswordReset(payload.email);
+  if (result.ok) {
+    resetFeedback.value = {
+      tone: 'success',
+      message: t('auth.reset.success'),
+    };
+    return;
   }
+
+  resetFeedback.value = {
+    tone: 'error',
+    message: result.error || t('auth.reset.error'),
+  };
 }
+
+watch(isAuthOpen, (isOpen) => {
+  if (!isOpen) {
+    resetFeedback.value = null;
+  }
+});
+
+watch(
+  () => route.query.auth,
+  (value) => {
+    if (!import.meta.client) return;
+    if (!isAuthModalQueryEnabled(value)) return;
+    openAuthModal();
+  },
+  { immediate: true },
+);
 </script>

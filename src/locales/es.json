@@ -53,6 +53,12 @@
     "title": "Planes",
     "subtitleLoggedHint": "Si estás conectado, usamos tu correo automáticamente en el checkout."
   },
+  "auth": {
+    "reset": {
+      "success": "Si este correo existe, enviaremos un enlace de recuperacion.",
+      "error": "No se pudo enviar el correo de recuperacion."
+    }
+  },
   "theme": {
     "light": "Modo claro",
     "dark": "Modo oscuro"

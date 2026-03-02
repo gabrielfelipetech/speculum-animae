@@ -1,0 +1,52 @@
+{
+  "kind": "bigFive",
+  "sessionId": "result-generic-001",
+  "title": "Resultado do teste",
+  "subtitle": "Resumo do seu perfil",
+  "summary": [
+    "Seu destaque principal foi Abertura.",
+    "A segunda maior presenca apareceu em Consciencia.",
+    "Use este retrato como ponto de partida para escolhas conscientes."
+  ],
+  "scores": [
+    {
+      "key": "openness",
+      "label": "Abertura",
+      "raw": 6.3,
+      "normalized": 88,
+      "level": "high"
+    },
+    {
+      "key": "conscientiousness",
+      "label": "Consciencia",
+      "raw": 5.7,
+      "normalized": 78,
+      "level": "high"
+    },
+    {
+      "key": "extraversion",
+      "label": "Extroversao",
+      "raw": 3.8,
+      "normalized": 47,
+      "level": "medium"
+    }
+  ],
+  "recommendations": [
+    "Aproveite Abertura como alavanca em tarefas importantes.",
+    "Escolha pequenas praticas para fortalecer Extroversao de forma gradual."
+  ],
+  "sections": [
+    {
+      "id": "highlights",
+      "title": "Destaques do perfil",
+      "blocks": [
+        {
+          "id": "highlights-main",
+          "title": "Seu ponto forte atual",
+          "access": "free",
+          "body": "A dimensao Abertura aparece como base principal."
+        }
+      ]
+    }
+  ]
+}

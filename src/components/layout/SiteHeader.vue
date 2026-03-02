@@ -59,6 +59,7 @@
             <template v-else>
               <button
                 type="button"
+                data-cy="open-auth-modal"
                 class="rounded-full bg-indigo-600 px-4 py-1.5 text-xs font-semibold text-white shadow-sm transition hover:bg-indigo-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900/5"
                 @click="emit('open-auth')"
               >

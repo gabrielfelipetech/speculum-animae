@@ -6,10 +6,14 @@ export function isValidUuid(value: string | null | undefined): value is string {
   return typeof value === 'string' && /^[0-9a-f-]{36}$/i.test(value);
 }
 
+export function buildUserActorKey(userId: string | null): ActorKey | null {
+  if (!isValidUuid(userId)) return null;
+  return `u:${userId}`;
+}
+
 export function buildUserActorKeyFromToken(token: string | null): ActorKey | null {
   const sub = getJwtSubject(token);
-  if (!isValidUuid(sub)) return null;
-  return `u:${sub}`;
+  return buildUserActorKey(sub);
 }
 
 export function buildClientActorKey(clientId: string | null): ActorKey | null {

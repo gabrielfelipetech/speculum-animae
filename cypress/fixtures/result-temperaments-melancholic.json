@@ -1,0 +1,68 @@
+{
+  "kind": "temperaments",
+  "sessionId": "result-melancholic-001",
+  "temperament": {
+    "primary": {
+      "groupId": "melancholic",
+      "name": "Melancolico",
+      "average": 6.2
+    },
+    "secondary": {
+      "groupId": "phlegmatic",
+      "name": "Fleumatico",
+      "average": 5.1
+    }
+  },
+  "overall": {
+    "title": "Seu perfil de temperamento: Melancolico com tracos de Fleumatico",
+    "subtitle": "Este retrato foi construido a partir do teste de temperamentos.",
+    "blocks": [
+      {
+        "id": "temp-overview",
+        "access": "free",
+        "title": "Seu perfil de temperamento",
+        "body": "O eixo melancolico aparece de forma dominante no seu resultado."
+      }
+    ]
+  },
+  "traits": {
+    "blocks": [
+      {
+        "id": "traits-1",
+        "access": "free",
+        "title": "Tracos centrais",
+        "body": "Seu perfil melancolico tende a valorizar profundidade e reflexao."
+      }
+    ]
+  },
+  "career": {
+    "blocks": [
+      {
+        "id": "career-1",
+        "access": "free",
+        "title": "Carreira",
+        "body": "Voce tende a preferir contextos com sentido e qualidade."
+      }
+    ]
+  },
+  "growth": {
+    "blocks": [
+      {
+        "id": "growth-1",
+        "access": "free",
+        "title": "Crescimento",
+        "body": "Pratique passos pequenos para reduzir excesso de autocritica."
+      }
+    ]
+  },
+  "relationships": {
+    "blocks": [
+      {
+        "id": "rel-1",
+        "access": "free",
+        "title": "Relacionamentos",
+        "body": "Lealdade e profundidade afetiva sao pontos fortes deste perfil."
+      }
+    ]
+  }
+}

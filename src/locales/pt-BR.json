@@ -53,6 +53,12 @@
     "title": "Planos",
     "subtitleLoggedHint": "Se estiver logado, usamos seu e-mail automaticamente no checkout."
   },
+  "auth": {
+    "reset": {
+      "success": "Se este e-mail existir, enviaremos um link de recuperacao.",
+      "error": "Nao foi possivel enviar o e-mail de recuperacao."
+    }
+  },
   "theme": {
     "light": "Modo claro",
     "dark": "Modo escuro"

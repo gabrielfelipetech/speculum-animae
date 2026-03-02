@@ -157,12 +157,15 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue';
 import { useRouter } from '#app';
+import { useSupabaseUser } from '#imports';
 import type { AssessmentReport } from '~/types/results';
 import { useReveal } from '~/composables/useReveal';
 import ResultsSection from '~/components/results/ResultsSection.vue';
 import ResultsSidebarLink from '~/components/results/ResultsSidebarLink.vue';
 import BaseButton from '~/components/base/BaseButton.vue';
 import { clearLastResultId } from '~/utils/testLastResult';
+import { buildClientActorKey, buildUserActorKey } from '~/utils/actorKey';
+import { getOrCreateClientId } from '~/utils/clientId';
 
 type ThemeConfig = {
   kicker: string;
@@ -177,9 +180,15 @@ const props = defineProps<{
 }>();
 
 const router = useRouter();
+const supabaseUser = useSupabaseUser();
 const report = props.report;
 const theme = props.theme;
 const testSlug = computed(() => props.testSlug ?? null);
+const actorKey = computed(() => {
+  const userKey = buildUserActorKey(supabaseUser.value?.id ?? null);
+  if (userKey) return userKey;
+  return buildClientActorKey(getOrCreateClientId());
+});
 const headerRef = ref<HTMLElement | null>(null);
 const { revealNow } = useReveal();
 
@@ -207,7 +216,7 @@ onMounted(() => {
 
 function handleRetake(): void {
   if (!testSlug.value) return;
-  clearLastResultId(testSlug.value);
+  clearLastResultId(testSlug.value, actorKey.value);
   router.push({ path: `/testes/${testSlug.value}`, query: { fresh: '1' } });
 }
 </script>

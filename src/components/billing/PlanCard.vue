@@ -44,6 +44,7 @@
       <NuxtLink
         v-if="isFreePlan"
         to="/testes"
+        :data-cy="`plan-action-${plan.key}`"
         class="inline-flex w-full items-center justify-center rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-slate-700 shadow-sm transition hover:border-indigo-200 hover:text-indigo-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:border-amber-300 dark:hover:text-amber-200"
       >
         {{ plan.ctaLabel }}
@@ -52,6 +53,7 @@
       <button
         v-else
         type="button"
+        :data-cy="`plan-action-${plan.key}`"
         class="inline-flex w-full items-center justify-center rounded-full px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] shadow-sm transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-amber-300/80 dark:focus-visible:ring-offset-slate-950"
         :class="
           plan.highlight

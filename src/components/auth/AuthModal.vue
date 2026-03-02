@@ -78,17 +78,19 @@
 
       <!-- Mensagens de erro/sucesso -->
       <div
-        v-if="localError || errorMessage"
+        v-if="resolvedErrorMessage"
+        data-cy="auth-feedback-error"
         class="rounded-lg bg-red-50 px-3 py-2 text-[0.7rem] text-red-700 dark:bg-red-900/40 dark:text-red-200"
       >
-        {{ localError || errorMessage }}
+        {{ resolvedErrorMessage }}
       </div>
 
       <div
-        v-if="successMessage"
+        v-if="resolvedSuccessMessage"
+        data-cy="auth-feedback-success"
         class="rounded-lg bg-emerald-50 px-3 py-2 text-[0.7rem] text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-200"
       >
-        {{ successMessage }}
+        {{ resolvedSuccessMessage }}
       </div>
 
       <!-- Formulário -->
@@ -145,6 +147,7 @@
               v-model="email"
               type="email"
               required
+              data-cy="auth-email"
               class="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs text-slate-900 shadow-sm outline-none ring-indigo-500/0 transition placeholder:text-slate-400 hover:border-slate-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-50 dark:placeholder:text-slate-500 dark:hover:border-slate-500"
               autocomplete="email"
             >
@@ -160,6 +163,7 @@
               type="password"
               required
               minlength="8"
+              data-cy="auth-password"
               class="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs text-slate-900 shadow-sm outline-none ring-indigo-500/0 transition placeholder:text-slate-400 hover:border-slate-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-50 dark:placeholder:text-slate-500 dark:hover:border-slate-500"
               :autocomplete="mode === 'signin' ? 'current-password' : 'new-password'"
             >
@@ -169,6 +173,7 @@
           <div v-if="mode === 'signin'" class="flex justify-end">
             <button
               type="button"
+              data-cy="auth-forgot-password"
               class="text-[0.7rem] font-medium text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300"
               @click="switchMode('reset')"
             >
@@ -232,6 +237,7 @@
         <!-- Submit -->
         <button
           type="submit"
+          data-cy="auth-submit"
           class="flex w-full items-center justify-center rounded-lg bg-indigo-600 px-3 py-2 text-xs font-semibold text-white shadow-sm transition hover:bg-indigo-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900/5 disabled:cursor-not-allowed disabled:opacity-60"
           :disabled="loading || !canSubmit"
         >
@@ -293,6 +299,7 @@ const props = defineProps<{
   open: boolean;
   loading?: boolean;
   errorMessage?: string | null;
+  resetFeedback?: { tone: 'success' | 'error'; message: string } | null;
 }>();
 
 const emit = defineEmits<{
@@ -324,6 +331,19 @@ const passwordConfirm = ref('');
 
 const localError = ref<string | null>(null);
 const successMessage = ref<string | null>(null);
+
+const resetErrorMessage = computed(() =>
+  props.resetFeedback?.tone === 'error' ? props.resetFeedback.message : null,
+);
+const resetSuccessMessage = computed(() =>
+  props.resetFeedback?.tone === 'success' ? props.resetFeedback.message : null,
+);
+const resolvedErrorMessage = computed(
+  () => localError.value || props.errorMessage || resetErrorMessage.value,
+);
+const resolvedSuccessMessage = computed(
+  () => resetSuccessMessage.value || successMessage.value,
+);
 
 watch(
   () => props.open,
@@ -460,7 +480,6 @@ function handleSubmit(): void {
 
   if (mode.value === 'reset') {
     emit('reset-password', { email: email.value });
-    successMessage.value = 'Se este e-mail existir, enviaremos um link de recuperação.';
     return;
   }
 

@@ -203,6 +203,13 @@ import type {
   BillingCustomer,
 } from '~/types/billing';
 import { getSupabaseAccessToken } from '~/utils/authToken';
+import { getOrCreateClientId } from '~/utils/clientId';
+
+type ApiErrorPayload = {
+  data?: {
+    message?: string;
+  };
+};
 
 const fallbackPlans: BillingPlan[] = [
   {
@@ -347,6 +354,8 @@ async function startCheckout(plan: BillingPaidPlanKey): Promise<void> {
 
   try {
     const token = await getSupabaseAccessToken();
+    const origin = window.location.origin.replace(/\/$/, '');
+    const clientId = token ? null : getOrCreateClientId();
     const headers: Record<string, string> = {};
     if (token) {
       headers.Authorization = `Bearer ${token}`;
@@ -356,7 +365,13 @@ async function startCheckout(plan: BillingPaidPlanKey): Promise<void> {
       method: 'POST',
       credentials: 'include',
       headers: Object.keys(headers).length ? headers : undefined,
-      body: { plan },
+      body: {
+        plan,
+        planId: plan,
+        successUrl: `${origin}/planos?status=success`,
+        cancelUrl: `${origin}/planos?status=cancel`,
+        clientId,
+      },
     });
 
     if (response?.url) {
@@ -366,7 +381,7 @@ async function startCheckout(plan: BillingPaidPlanKey): Promise<void> {
 
     requestError.value = 'Nao foi possivel iniciar o checkout.';
   } catch (error) {
-    const payload = error as { data?: { message?: string } };
+    const payload = error as ApiErrorPayload;
     requestError.value =
       payload.data?.message ?? 'Nao foi possivel iniciar o checkout.';
   } finally {
@@ -392,6 +407,9 @@ async function startPortal(): Promise<void> {
       method: 'POST',
       credentials: 'include',
       headers: Object.keys(headers).length ? headers : undefined,
+      body: {
+        returnUrl: `${window.location.origin.replace(/\/$/, '')}/planos?status=portal`,
+      },
     });
 
     if (response?.url) {
@@ -401,7 +419,7 @@ async function startPortal(): Promise<void> {
 
     requestError.value = 'Nao foi possivel abrir o portal de cobranca.';
   } catch (error) {
-    const payload = error as { data?: { message?: string } };
+    const payload = error as ApiErrorPayload;
     requestError.value =
       payload.data?.message ?? 'Nao foi possivel abrir o portal de cobranca.';
   } finally {

@@ -1,0 +1,3 @@
+-- Intentionally empty migration created during the first remote `db pull`.
+-- It is kept as a placeholder because migration history was repaired for this
+-- version before the finalized schema migration was generated.

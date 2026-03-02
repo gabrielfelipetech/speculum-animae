@@ -1,4 +1,4 @@
-﻿import {
+import {
   computed,
   isRef,
   onBeforeUnmount,
@@ -9,7 +9,6 @@
   type Ref,
 } from 'vue';
 import type {
-  DimensionMap,
   PairwiseQuestion,
   SummaryRule,
   TestAnswer,
@@ -18,6 +17,7 @@ import type {
   TestQuestion,
 } from '~/types/tests';
 import { useSaveResult } from '~/composables/useSaveResult';
+import { scoreTest } from '~/shared/engine/scoring';
 
 export interface GroupResult {
   groupId: string;
@@ -163,79 +163,6 @@ function sanitizeAnswer(
   return filtered;
 }
 
-type ScoreContribution = {
-  groupId: string;
-  value: number;
-};
-
-function resolveDimension(
-  dimensionMap: DimensionMap | undefined,
-  optionId: string,
-): string | null {
-  if (dimensionMap && dimensionMap[optionId]) return dimensionMap[optionId];
-  return optionId;
-}
-
-function buildContributions(
-  question: FlatQuestion,
-  answer: TestAnswer,
-): ScoreContribution[] {
-  const q = question.question;
-
-  if (q.type === 'likert') {
-    if (typeof answer !== 'number') return [];
-    const rawValue = q.reverse ? 8 - answer : answer;
-    const value = clampLikert(rawValue);
-    return [{ groupId: q.dimension, value }];
-  }
-
-  if (q.type === 'rank') {
-    if (!isStringArray(answer)) return [];
-    const optionCount = q.options.length;
-    if (optionCount === 0) return [];
-    const denominator = Math.max(1, optionCount - 1);
-    return q.options
-      .map((option) => {
-        const index = answer.indexOf(option.id);
-        if (index < 0) return null;
-        const value = 7 - (index * 6) / denominator;
-        const groupId = resolveDimension(q.dimensionMap, option.id);
-        if (!groupId) return null;
-        return { groupId, value };
-      })
-      .filter((item): item is ScoreContribution => item !== null);
-  }
-
-  if (q.type === 'pairwise') {
-    const normalized = normalizePairwiseSelections(q, answer);
-    if (!normalized) return [];
-
-    return q.pairs.flatMap((pair, index) => {
-      const selection = normalized[index];
-      if (selection !== pair.left.id && selection !== pair.right.id) return [];
-      const winner = selection === pair.left.id ? pair.left : pair.right;
-      const loser = selection === pair.left.id ? pair.right : pair.left;
-      return [
-        { groupId: winner.dimension, value: 7 },
-        { groupId: loser.dimension, value: 1 },
-      ];
-    });
-  }
-
-  if (!isStringArray(answer)) return [];
-  const selected = new Set(answer);
-  return q.options
-    .map((option) => {
-      const groupId = resolveDimension(q.dimensionMap, option.id);
-      if (!groupId) return null;
-      return {
-        groupId,
-        value: selected.has(option.id) ? 7 : 1,
-      };
-    })
-    .filter((item): item is ScoreContribution => item !== null);
-}
-
 export function useLikertTestRunner(
   config: Ref<TestConfig> | TestConfig,
   options?: { fresh?: boolean; skipAutoComputeOnMount?: boolean },
@@ -250,12 +177,10 @@ export function useLikertTestRunner(
   const results = ref<GroupResult[] | null>(null);
   const lastResultId = ref<string | null>(null);
 
-  // grupos conceituais (camadas / temperamentos etc.)
   const conceptualGroups = computed(
     () => cfg.value.questionSet ?? cfg.value.groups,
   );
 
-  // perguntas achatadas
   const flatQuestions = computed<FlatQuestion[]>(() => {
     const items: FlatQuestion[] = [];
     for (const group of conceptualGroups.value) {
@@ -280,7 +205,6 @@ export function useLikertTestRunner(
     return map;
   });
 
-  // ordem embaralhada
   const orderedQuestions = ref<FlatQuestion[]>([]);
 
   const stepSize = computed(() => chooseStepSize(flatQuestions.value.length));
@@ -399,25 +323,19 @@ export function useLikertTestRunner(
     }
   }
 
-  // ---------------- onMounted: agora respeitando "fresh" ----------------
   onMounted(() => {
     if (typeof window === 'undefined') return;
 
-    // sempre gera ordem aleatoria
     orderedQuestions.value = shuffleArray(flatQuestions.value);
 
     if (isFreshStart) {
-      // 1) zera tudo
       for (const key of Object.keys(answers)) {
-        delete answers[key];
+        answers[key] = null;
       }
       currentGroupIndex.value = 0;
       submittedCurrentStep.value = false;
-
-      // 2) apaga qualquer coisa salva
       window.localStorage.removeItem(storageKey.value);
     } else {
-      // fluxo antigo: restaurar respostas do localStorage
       const raw = window.localStorage.getItem(storageKey.value);
       if (raw) {
         try {
@@ -434,7 +352,6 @@ export function useLikertTestRunner(
         }
       }
 
-      // posiciona na primeira etapa incompleta
       const firstIncompleteIndex = steps.value.findIndex(
         (step) => !isStepComplete(step),
       );
@@ -457,7 +374,6 @@ export function useLikertTestRunner(
     window.removeEventListener('beforeunload', handleBeforeUnload);
   });
 
-  // Persistencia das respostas
   watch(
     () => ({ ...answers }),
     (value) => {
@@ -479,8 +395,6 @@ export function useLikertTestRunner(
     },
     { deep: true },
   );
-
-  // ---------------- regras de resumo ----------------
 
   function getSummaryRule(score: number): SummaryRule | null {
     const rules = cfg.value.scoring.summaryRules;
@@ -534,46 +448,7 @@ export function useLikertTestRunner(
       return;
     }
 
-    const totals = new Map<
-      string,
-      { groupId: string; name: string; sum: number; count: number }
-    >();
-
-    for (const group of conceptualGroups.value) {
-      totals.set(group.id, {
-        groupId: group.id,
-        name: group.name,
-        sum: 0,
-        count: 0,
-      });
-    }
-
-    for (const question of flatQuestions.value) {
-      const key = fieldKeyInternal(question.groupId, question.questionId);
-      const answer = answers[key] ?? null;
-      if (!isAnswerComplete(question, answer)) continue;
-
-      const contributions = buildContributions(
-        question,
-        answer as TestAnswer,
-      );
-      for (const contribution of contributions) {
-        const target = totals.get(contribution.groupId);
-        if (!target) continue;
-        target.sum += contribution.value;
-        target.count += 1;
-      }
-    }
-
-    const groupResults: GroupResult[] = Array.from(totals.values()).map(
-      (item) => ({
-        groupId: item.groupId,
-        name: item.name,
-        average: item.count > 0 ? item.sum / item.count : 0,
-      }),
-    );
-
-    groupResults.sort((a, b) => b.average - a.average);
+    const groupResults = scoreTest(cfg.value, answers);
     results.value = groupResults;
 
     const savedId = await saveLikertResult({
@@ -646,7 +521,3 @@ export function useLikertTestRunner(
     goNext,
   };
 }
-
-
-
-

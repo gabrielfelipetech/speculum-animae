@@ -121,6 +121,7 @@
 <script setup lang="ts">
 import { computed, ref, toRefs, watch, type ComponentPublicInstance } from 'vue'
 import { useRouter } from '#app'
+import { useSupabaseUser } from '#imports'
 import { getLastResultId, setLastResultId } from '~/utils/testLastResult'
 
 import BaseButton from '~/components/base/BaseButton.vue'
@@ -134,6 +135,8 @@ import LikertTestResultsTemperaments from '~/components/tests/LikertTestResultsT
 import type { TestConfig, TestQuestion } from '~/types/tests'
 import { resolveScaleLabels } from '~/config/tests/scales'
 import { useLikertTestRunner } from '~/composables/useLikertTestRunner'
+import { buildClientActorKey, buildUserActorKey } from '~/utils/actorKey'
+import { getOrCreateClientId } from '~/utils/clientId'
 
 const props = defineProps<{
   config: TestConfig
@@ -142,7 +145,16 @@ const props = defineProps<{
 
 const { config } = toRefs(props)
 const router = useRouter()
-const storedLastResultId = computed(() => getLastResultId(config.value.slug))
+const supabaseUser = useSupabaseUser()
+const actorKey = computed(() => {
+  const userKey = buildUserActorKey(supabaseUser.value?.id ?? null)
+  if (userKey) return userKey
+  const clientId = getOrCreateClientId()
+  return buildClientActorKey(clientId)
+})
+const storedLastResultId = computed(() =>
+  getLastResultId(config.value.slug, actorKey.value),
+)
 const skipAutoComputeOnMount = computed(
   () => props.fresh !== true && Boolean(storedLastResultId.value),
 )
@@ -219,7 +231,7 @@ watch(currentGroupIndex, () => {
   questionRefs.value = []
   submittedCurrentStep.value = false
 
-  if (!process.client) return
+  if (!import.meta.client) return
 
   requestAnimationFrame(() => {
     const container = document.querySelector('[data-test-step-container]')
@@ -232,7 +244,7 @@ watch(currentGroupIndex, () => {
 watch(lastResultId, (id) => {
   if (!id || !shouldRedirectOnComplete.value) return
   shouldRedirectOnComplete.value = false
-  setLastResultId(config.value.slug, id)
+  setLastResultId(config.value.slug, id, actorKey.value)
   router.push({ path: `/resultados/${id}`, query: { t: config.value.slug } })
 })
 
@@ -244,7 +256,7 @@ function handleNextClick(): void {
 }
 
 function handleQuestionAnswered(questionIndex: number): void {
-  if (!process.client) return
+  if (!import.meta.client) return
 
   const nextIndex = questionIndex + 1
   const nextEl = questionRefs.value[nextIndex]

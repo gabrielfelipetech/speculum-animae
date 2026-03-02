@@ -25,6 +25,13 @@ import {
   buildPhlegmaticGrowth,
   buildPhlegmaticRelationships,
 } from './temperaments.phlegmatic';
+import {
+  buildMelancholicIntro,
+  buildMelancholicTraits,
+  buildMelancholicCareer,
+  buildMelancholicGrowth,
+  buildMelancholicRelationships,
+} from './temperaments.melancholic';
 
 export type { TemperamentScore } from './temperaments.shared';
 
@@ -92,6 +99,8 @@ export const TEMPERAMENT_TEXTS = {
         return buildSanguineIntro(primary, secondary);
       case 'phlegmatic':
         return buildPhlegmaticIntro(primary, secondary);
+      case 'melancholic':
+        return buildMelancholicIntro(primary, secondary);
       default:
         break;
     }
@@ -156,6 +165,8 @@ export const TEMPERAMENT_TEXTS = {
         return buildSanguineTraits(primary, secondary);
       case 'phlegmatic':
         return buildPhlegmaticTraits(primary, secondary);
+      case 'melancholic':
+        return buildMelancholicTraits(primary, secondary);
       default:
         break;
     }
@@ -215,6 +226,8 @@ export const TEMPERAMENT_TEXTS = {
         return buildSanguineCareer(primary, secondary);
       case 'phlegmatic':
         return buildPhlegmaticCareer(primary, secondary);
+      case 'melancholic':
+        return buildMelancholicCareer(primary, secondary);
       default:
         break;
     }
@@ -284,6 +297,8 @@ export const TEMPERAMENT_TEXTS = {
         return buildSanguineGrowth(primary, secondary);
       case 'phlegmatic':
         return buildPhlegmaticGrowth(primary, secondary);
+      case 'melancholic':
+        return buildMelancholicGrowth(primary, secondary);
       default:
         break;
     }
@@ -352,6 +367,8 @@ export const TEMPERAMENT_TEXTS = {
         return buildSanguineRelationships(primary, secondary);
       case 'phlegmatic':
         return buildPhlegmaticRelationships(primary, secondary);
+      case 'melancholic':
+        return buildMelancholicRelationships(primary, secondary);
       default:
         break;
     }

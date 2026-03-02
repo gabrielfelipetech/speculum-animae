@@ -53,6 +53,12 @@
     "title": "Plans",
     "subtitleLoggedHint": "If you're logged in, we use your email automatically at checkout."
   },
+  "auth": {
+    "reset": {
+      "success": "If this email exists, we will send a recovery link.",
+      "error": "Could not send the recovery email."
+    }
+  },
   "theme": {
     "light": "Light mode",
     "dark": "Dark mode"
