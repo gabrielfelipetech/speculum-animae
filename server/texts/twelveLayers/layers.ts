@@ -1,6 +1,4 @@
 // server/texts/twelveLayers/layers.ts
-import type { ResultBlock } from '~/types/results';
-
 export interface LayerScore {
   groupId: string;
   name: string;

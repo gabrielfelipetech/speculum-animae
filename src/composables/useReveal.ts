@@ -29,7 +29,7 @@ function applyReveal(el: HTMLElement, delayMs?: number): void {
 }
 
 export function useReveal(options: RevealOptions = {}) {
-  if (process.server) {
+  if (import.meta.server) {
     return {
       register: () => {},
       revealNow: () => {},
@@ -61,7 +61,7 @@ export function useReveal(options: RevealOptions = {}) {
         applyReveal(target, config?.delay);
         if (config?.once ?? settings.once) {
           observer.unobserve(target);
-    observed.delete(target);
+          observed.delete(target);
         }
       });
     },

@@ -23,3 +23,8 @@ logs
 .env.*
 !.env.example
 .env.local
+
+# Cypress artifacts
+cypress/screenshots/
+cypress/videos/
+cypress/downloads/

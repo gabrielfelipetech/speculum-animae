@@ -17,7 +17,7 @@ import type {
 export function buildCholericPdfProfile(
   ctx: TemperamentsBuilderContext,
 ): TemperamentProfile {
-  const { main, secondary } = ctx;
+  const { secondary } = ctx;
   const secondaryId = secondary?.id ?? null;
 
   const isPure =

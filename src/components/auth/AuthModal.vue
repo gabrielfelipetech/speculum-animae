@@ -147,7 +147,7 @@
               v-model="email"
               type="email"
               required
-              data-cy="auth-email"
+              :data-cy="mode === 'reset' ? 'auth-reset-email' : 'auth-email'"
               class="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs text-slate-900 shadow-sm outline-none ring-indigo-500/0 transition placeholder:text-slate-400 hover:border-slate-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-50 dark:placeholder:text-slate-500 dark:hover:border-slate-500"
               autocomplete="email"
             >
@@ -237,7 +237,7 @@
         <!-- Submit -->
         <button
           type="submit"
-          data-cy="auth-submit"
+          :data-cy="mode === 'reset' ? 'auth-reset-submit' : 'auth-submit'"
           class="flex w-full items-center justify-center rounded-lg bg-indigo-600 px-3 py-2 text-xs font-semibold text-white shadow-sm transition hover:bg-indigo-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900/5 disabled:cursor-not-allowed disabled:opacity-60"
           :disabled="loading || !canSubmit"
         >

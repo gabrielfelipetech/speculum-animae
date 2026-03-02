@@ -72,7 +72,7 @@ const sessionId = computed(() => {
 
 function handleUnlock(): void {
   if (isDownloading.value) return
-  if (!process.client) return
+  if (!import.meta.client) return
   if (!sessionId.value) {
     console.warn('[PremiumBlock] sessionId não encontrado na rota /resultados/:sessionId')
     return

@@ -95,9 +95,6 @@ export function buildMelancholicTraits(
 ): ResultBlock[] {
   const blocks: ResultBlock[] = [];
 
-  const primaryLabel = lowerLabel(primary);
-  const secondaryLabel = lowerLabel(secondary);
-
   // melancólico "puro" ou muito destacado
   if (!secondary || secondary.groupId === 'melancholic') {
     blocks.push({
@@ -177,9 +174,6 @@ export function buildMelancholicCareer(
   secondary?: TemperamentScore,
 ): ResultBlock[] {
   const blocks: ResultBlock[] = [];
-
-  const primaryLabel = lowerLabel(primary);
-  const secondaryLabel = lowerLabel(secondary);
 
   blocks.push({
     id: 'temp-career-style',

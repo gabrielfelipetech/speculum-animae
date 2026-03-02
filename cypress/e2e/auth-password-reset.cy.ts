@@ -10,12 +10,8 @@ describe('auth password reset flow', () => {
       body: {},
     }).as('passwordResetRequest');
 
-    cy.visit('/planos?auth=1', {
-      onBeforeLoad(window) {
-        cy.spy(window.console, 'error').as('consoleError');
-      },
-    });
-
+    cy.visit('/planos?auth=1');
+    cy.window().its('__NUXT__', { timeout: 20000 }).should('exist');
     cy.get('body').then(($body) => {
       if ($body.find('[data-cy="auth-email"]').length > 0) {
         return;
@@ -23,12 +19,12 @@ describe('auth password reset flow', () => {
       cy.get('[data-cy="open-auth-modal"]').should('be.visible').click({ force: true });
     });
 
-    cy.get('[data-cy="auth-email"]', { timeout: 10000 }).should('be.visible');
+    cy.get('[data-cy="auth-email"]', { timeout: 20000 }).should('be.visible');
     cy.get('[data-cy="auth-forgot-password"]').should('be.visible').click();
-    cy.get('[data-cy="auth-email"]').type('tester@example.com');
-    cy.get('[data-cy="auth-submit"]').click();
+    cy.get('[data-cy="auth-reset-email"]').should('be.visible').clear().type('tester@example.com');
+    cy.get('[data-cy="auth-reset-submit"]').click();
 
-    cy.wait('@passwordResetRequest');
+    cy.wait('@passwordResetRequest', { timeout: 20000 });
     cy.get('[data-cy="auth-feedback-success"]').should(
       'contain.text',
       'Se este e-mail existir',

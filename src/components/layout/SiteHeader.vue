@@ -113,9 +113,9 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
-  (e: 'toggle-theme'): void;
-  (e: 'open-auth'): void;
-  (e: 'logout'): void;
+  'toggle-theme': [];
+  'open-auth': [];
+  logout: [];
 }>();
 
 const { isLoggedIn, displayName } = useAuthUi();

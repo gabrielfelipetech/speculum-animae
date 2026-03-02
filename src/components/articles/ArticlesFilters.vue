@@ -33,7 +33,7 @@
 <script setup lang="ts">
 import { getCategoryLabel } from '~/data/articles';
 
-const props = defineProps<{
+defineProps<{
   search: string;
   category: string;
   tag: string | null;
@@ -42,9 +42,9 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
-  (e: 'update:search', value: string): void;
-  (e: 'update:category', value: string): void;
-  (e: 'update:tag', value: string | null): void;
+  'update:search': [value: string];
+  'update:category': [value: string];
+  'update:tag': [value: string | null];
 }>();
 
 function onSearchInput(event: Event): void {
@@ -55,13 +55,5 @@ function onSearchInput(event: Event): void {
 function onCategoryChange(event: Event): void {
   const target = event.target as HTMLSelectElement | null;
   emit('update:category', target?.value ?? 'all');
-}
-
-function toggleTag(value: string): void {
-  emit('update:tag', props.tag === value ? null : value);
-}
-
-function clearTag(): void {
-  emit('update:tag', null);
 }
 </script>

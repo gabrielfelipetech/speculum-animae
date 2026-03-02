@@ -101,10 +101,10 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
-  (e: 'close'): void;
-  (e: 'open-auth'): void;
-  (e: 'logout'): void;
-  (e: 'toggle-theme'): void;
+  close: [];
+  'open-auth': [];
+  logout: [];
+  'toggle-theme': [];
 }>();
 
 const panelRef = ref<HTMLDivElement | null>(null);

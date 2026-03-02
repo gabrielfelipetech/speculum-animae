@@ -101,9 +101,6 @@ export function buildPhlegmaticTraits(
   const blocks: ResultBlock[] = [];
   if (!primary) return blocks;
 
-  const primaryLabel = lowerLabel(primary);
-  const secondaryLabel = lowerLabel(secondary ?? null);
-
   // Fleumático "puro" (ou muito destacado)
   if (!secondary || secondary.groupId === 'phlegmatic') {
     blocks.push({
