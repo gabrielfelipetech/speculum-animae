@@ -11,24 +11,40 @@ export type TemperamentPremiumText = {
   temperament: TemperamentId;
   overview: string;
   strengths: string;
-  weaknesses: string;
+  risks: string;
   practices: string;
-  career: string;
+  work: string;
   relationships: string;
   checklist: string[];
+  // Legacy aliases used by existing report builders.
+  weaknesses: string;
+  career: string;
 };
 
 type SectionKey =
   | 'overview'
   | 'strengths'
-  | 'weaknesses'
+  | 'risks'
   | 'practices'
-  | 'career'
+  | 'work'
   | 'relationships';
 
-type SectionScore = {
+type ParagraphEntry = {
   index: number;
+  text: string;
+  normalized: string;
+  heading: SectionKey | null;
+};
+
+type ScoredParagraph = {
+  entry: ParagraphEntry;
   score: number;
+};
+
+type SectionLayout = {
+  minSentences: number;
+  maxSentences: number;
+  maxParagraphs: number;
 };
 
 const TEMPERAMENT_IDS: TemperamentId[] = [
@@ -66,25 +82,35 @@ const SECTION_KEYWORDS: Record<SectionKey, string[]> = {
     'descricao',
     'caracteristicas',
     'temperamento',
+    'personalidade',
+    'perfil',
+    'conceito',
   ],
   strengths: [
     'qualidades',
     'virtudes',
     'pontos fortes',
     'forcas',
-    'estabilidade',
-    'determinacao',
-    'autoconfianca',
+    'forca',
+    'forte',
+    'talento',
+    'habilidade',
+    'capacidade',
+    'potencial',
   ],
-  weaknesses: [
+  risks: [
     'desafios',
     'defeitos',
     'fraquezas',
     'riscos',
     'pontos de atencao',
-    'pode',
     'tendencia',
     'dificuldade',
+    'procrastin',
+    'inconst',
+    'impuls',
+    'vulner',
+    'medo',
   ],
   practices: [
     'crescimento',
@@ -95,8 +121,10 @@ const SECTION_KEYWORDS: Record<SectionKey, string[]> = {
     'exercicio',
     'autocontrole',
     'melhoria',
+    'rotina',
+    'proximos passos',
   ],
-  career: [
+  work: [
     'carreira',
     'trabalho',
     'profissional',
@@ -104,6 +132,7 @@ const SECTION_KEYWORDS: Record<SectionKey, string[]> = {
     'equipe',
     'produtividade',
     'metas',
+    'ambiente',
   ],
   relationships: [
     'relacionamentos',
@@ -117,11 +146,72 @@ const SECTION_KEYWORDS: Record<SectionKey, string[]> = {
   ],
 };
 
+const HEADING_KEYWORDS: Record<SectionKey, string[]> = {
+  overview: [
+    'visao geral',
+    'descricao completa',
+    'origem e conceito',
+    'caracteristicas',
+    'tracos de personalidade',
+    'perfil',
+  ],
+  strengths: ['forcas', 'forca', 'virtudes', 'qualidades', 'pontos fortes'],
+  risks: ['riscos', 'fraquezas', 'defeitos', 'desafios', 'pontos de atencao'],
+  practices: [
+    'crescimento pessoal',
+    'crescimento',
+    'praticas',
+    'desenvolvimento',
+    'proximos passos',
+  ],
+  work: ['carreira', 'trabalho', 'na carreira', 'ambiente profissional'],
+  relationships: ['relacionamentos', 'nos relacionamentos', 'vinculos', 'familia'],
+};
+
+const SECTION_LAYOUT: Record<SectionKey, SectionLayout> = {
+  overview: { minSentences: 12, maxSentences: 20, maxParagraphs: 3 },
+  strengths: { minSentences: 10, maxSentences: 18, maxParagraphs: 3 },
+  risks: { minSentences: 10, maxSentences: 18, maxParagraphs: 3 },
+  practices: { minSentences: 10, maxSentences: 18, maxParagraphs: 3 },
+  work: { minSentences: 10, maxSentences: 18, maxParagraphs: 3 },
+  relationships: { minSentences: 10, maxSentences: 18, maxParagraphs: 3 },
+};
+
+const POSITIVE_SIGNAL_KEYWORDS = [
+  'virtude',
+  'qualidade',
+  'forca',
+  'forte',
+  'talento',
+  'habilidade',
+  'excelente',
+  'potencial',
+  'capacidade',
+];
+
+const RISK_SIGNAL_KEYWORDS = [
+  'risco',
+  'fraqueza',
+  'defeito',
+  'desafio',
+  'vulner',
+  'perigo',
+  'dificuldade',
+  'procrastin',
+  'inconst',
+  'impuls',
+  'medo',
+];
+
 const INLINE_SOURCE_REGEX =
   /\b(?:https?:\/\/)?(?:www\.)?[a-z0-9-]+(?:\.[a-z0-9-]+)+(?:\/\S*)?\b/gi;
 const COMBINING_MARKS_REGEX = /[\u0300-\u036f]/g;
 const MULTI_SPACES_REGEX = /\s{2,}/g;
-const LEADING_BULLET_REGEX = /^[*\-•]\s*/;
+const DOMAIN_ONLY_REGEX =
+  /^(?:https?:\/\/)?(?:www\.)?[a-z0-9-]+(?:\.[a-z0-9-]+)+(?:\/\S*)?$/;
+const LEADING_BULLET_REGEX = /^[*\-\u2022]\s*/;
+const SHORT_HEADING_MAX_CHARS = 90;
+const SHORT_HEADING_MAX_WORDS = 12;
 const GENERIC_SECTION_FALLBACK =
   'Texto premium consolidado a partir do material de referencia deste temperamento, com foco em leitura pratica e aplicacao no dia a dia.';
 
@@ -149,22 +239,23 @@ function isNoiseLine(line: string): boolean {
   const normalized = normalizeForMatch(line);
   if (!normalized) return true;
   if (/^\d+$/.test(normalized)) return true;
-  if (
-    /^(?:https?:\/\/)?(?:www\.)?[a-z0-9-]+(?:\.[a-z0-9-]+)+(?:\/\S*)?$/.test(
-      normalized,
-    )
-  ) {
-    return true;
-  }
+  if (DOMAIN_ONLY_REGEX.test(normalized)) return true;
+
   if (
     normalized.startsWith('fontes') ||
+    normalized.startsWith('fonte') ||
+    normalized.startsWith('referencias') ||
+    normalized.startsWith('referencia') ||
+    normalized.startsWith('bibliografia') ||
     normalized.startsWith('citacoes') ||
     normalized.startsWith('citacoes integradas') ||
     normalized.startsWith('matriz comparativa') ||
-    normalized.startsWith('tabela de referencia')
+    normalized.startsWith('tabela de referencia') ||
+    normalized === 'gemini'
   ) {
     return true;
   }
+
   return false;
 }
 
@@ -177,13 +268,42 @@ function isNoiseParagraph(paragraph: string): boolean {
     normalized.includes('tabela de referencia cruzada') ||
     normalized.startsWith('iv. ') ||
     normalized.startsWith('iii. ') ||
-    normalized.startsWith('ii. ')
+    normalized.startsWith('ii. ') ||
+    normalized === 'gemini'
   );
 }
 
-function isHeadingParagraph(paragraph: string): boolean {
-  const noPunctuation = !/[.!?]/.test(paragraph);
-  return noPunctuation && paragraph.length < 90;
+function isHeadingLine(line: string): boolean {
+  const trimmed = line.trim();
+  if (!trimmed) return false;
+  if (isNoiseLine(trimmed)) return false;
+  if (trimmed.length > SHORT_HEADING_MAX_CHARS) return false;
+  if (/[.!?]/.test(trimmed)) return false;
+
+  const normalized = normalizeForMatch(trimmed);
+  const words = normalized.split(/\s+/).filter(Boolean);
+  if (words.length === 0 || words.length > SHORT_HEADING_MAX_WORDS) return false;
+  if (!/^[A-Za-z0-9À-ÿ]/u.test(trimmed)) return false;
+
+  for (const keywords of Object.values(HEADING_KEYWORDS)) {
+    if (keywords.some((keyword) => normalized.includes(keyword))) {
+      return true;
+    }
+  }
+
+  return /^[A-ZÀ-Ý0-9]/u.test(trimmed);
+}
+
+function resolveHeadingSection(line: string): SectionKey | null {
+  const normalized = normalizeForMatch(line);
+
+  for (const section of Object.keys(HEADING_KEYWORDS) as SectionKey[]) {
+    if (HEADING_KEYWORDS[section].some((keyword) => normalized.includes(keyword))) {
+      return section;
+    }
+  }
+
+  return null;
 }
 
 function splitSentences(text: string): string[] {
@@ -199,87 +319,160 @@ function sentenceLimit(text: string, maxSentences: number): string {
   return sentences.slice(0, maxSentences).join(' ');
 }
 
-function cleanParagraph(block: string): string {
-  const rawLines = block
-    .split('\n')
-    .map((line) => line.trim())
-    .filter((line) => line.length > 0)
-    .filter((line) => !isNoiseLine(line));
-
-  if (rawLines.length === 0) return '';
-
-  const lines = rawLines.map((line) => line.replace(LEADING_BULLET_REGEX, ''));
-  const allBulletLines = rawLines.every((line) => LEADING_BULLET_REGEX.test(line));
-
-  const combined = allBulletLines ? lines.join('. ') : lines.join(' ');
-  const withoutSources = stripInlineSources(combined);
-  if (!withoutSources) return '';
-  return normalizeSpaces(withoutSources);
+function countKeywordMatches(haystack: string, keywords: string[]): number {
+  let matches = 0;
+  for (const keyword of keywords) {
+    if (haystack.includes(keyword)) {
+      matches += 1;
+    }
+  }
+  return matches;
 }
 
-function extractParagraphs(rawText: string): string[] {
-  const blocks = rawText.replace(/\r\n/g, '\n').split(/\n\s*\n+/);
-  return blocks
-    .map(cleanParagraph)
-    .filter((paragraph) => paragraph.length > 60)
-    .filter((paragraph) => !isHeadingParagraph(paragraph))
-    .filter((paragraph) => !isNoiseParagraph(paragraph));
-}
-
-function scoreParagraph(paragraph: string, keywords: string[]): number {
-  const normalized = normalizeForMatch(paragraph);
+function scoreParagraphForSection(
+  paragraph: ParagraphEntry,
+  section: SectionKey,
+): number {
   let score = 0;
 
-  for (const keyword of keywords) {
-    if (normalized.includes(keyword)) {
-      score += 2;
-    }
+  if (paragraph.heading === section) {
+    score += 8;
+  }
+
+  const sectionKeywordMatches = countKeywordMatches(
+    paragraph.normalized,
+    SECTION_KEYWORDS[section],
+  );
+  score += sectionKeywordMatches * 2;
+
+  if (section === 'strengths') {
+    score += countKeywordMatches(paragraph.normalized, POSITIVE_SIGNAL_KEYWORDS) * 2;
+    score -= countKeywordMatches(paragraph.normalized, RISK_SIGNAL_KEYWORDS);
+  }
+
+  if (section === 'risks') {
+    score += countKeywordMatches(paragraph.normalized, RISK_SIGNAL_KEYWORDS) * 2;
+    score -= countKeywordMatches(paragraph.normalized, POSITIVE_SIGNAL_KEYWORDS);
   }
 
   return score;
 }
 
+function cleanParagraphLines(lines: string[]): string {
+  if (lines.length === 0) return '';
+
+  const stripped = lines
+    .map((line) => line.replace(LEADING_BULLET_REGEX, '').trim())
+    .filter((line) => line.length > 0)
+    .filter((line) => !isNoiseLine(line));
+
+  if (stripped.length === 0) return '';
+
+  const combined = stripped.join(' ');
+  const withoutSources = stripInlineSources(combined);
+  return normalizeSpaces(withoutSources);
+}
+
+function extractParagraphEntries(rawText: string): ParagraphEntry[] {
+  const lines = rawText.replace(/\r\n/g, '\n').split('\n');
+  const entries: ParagraphEntry[] = [];
+  const paragraphBuffer: string[] = [];
+  let activeHeading: SectionKey | null = null;
+
+  const flushParagraph = () => {
+    const cleaned = cleanParagraphLines(paragraphBuffer);
+    paragraphBuffer.length = 0;
+
+    if (!cleaned || cleaned.length < 80 || isNoiseParagraph(cleaned)) {
+      return;
+    }
+
+    entries.push({
+      index: entries.length,
+      text: cleaned,
+      normalized: normalizeForMatch(cleaned),
+      heading: activeHeading,
+    });
+  };
+
+  for (const rawLine of lines) {
+    const line = rawLine.trim();
+
+    if (!line) {
+      flushParagraph();
+      continue;
+    }
+
+    if (isNoiseLine(line)) {
+      continue;
+    }
+
+    if (isHeadingLine(line)) {
+      flushParagraph();
+      activeHeading = resolveHeadingSection(line);
+      continue;
+    }
+
+    paragraphBuffer.push(line);
+  }
+
+  flushParagraph();
+  return entries;
+}
+
 function selectSectionText(
-  paragraphs: string[],
+  paragraphs: ParagraphEntry[],
   section: SectionKey,
   usedIndexes: Set<number>,
 ): string {
-  const keywords = SECTION_KEYWORDS[section];
-  const scored: SectionScore[] = paragraphs
-    .map((paragraph, index) => ({
-      index,
-      score: scoreParagraph(paragraph, keywords),
+  const layout = SECTION_LAYOUT[section];
+  const scored: ScoredParagraph[] = paragraphs
+    .filter((paragraph) => !usedIndexes.has(paragraph.index))
+    .map((paragraph) => ({
+      entry: paragraph,
+      score: scoreParagraphForSection(paragraph, section),
     }))
-    .filter((item) => !usedIndexes.has(item.index) && item.score > 0)
-    .sort((a, b) => b.score - a.score || a.index - b.index);
+    .sort((a, b) => b.score - a.score || a.entry.index - b.entry.index);
 
-  const selectedIndexes: number[] = [];
+  const selected: ParagraphEntry[] = [];
+  let selectedSentences = 0;
 
-  for (const item of scored) {
-    if (selectedIndexes.length >= 2) break;
-    selectedIndexes.push(item.index);
-    if (paragraphs[item.index].length > 260) break;
+  const pushParagraph = (paragraph: ParagraphEntry): boolean => {
+    if (selected.some((entry) => entry.normalized === paragraph.normalized)) {
+      return false;
+    }
+
+    selected.push(paragraph);
+    usedIndexes.add(paragraph.index);
+    selectedSentences += splitSentences(paragraph.text).length || 1;
+    return true;
+  };
+
+  for (const candidate of scored) {
+    if (selected.length >= layout.maxParagraphs) break;
+    if (candidate.score <= 0 && selectedSentences >= layout.minSentences) break;
+    pushParagraph(candidate.entry);
+    if (selectedSentences >= layout.minSentences) break;
   }
 
-  if (selectedIndexes.length === 0) {
-    const fallbackIndex = paragraphs.findIndex(
-      (_paragraph, index) => !usedIndexes.has(index),
-    );
-    if (fallbackIndex >= 0) {
-      selectedIndexes.push(fallbackIndex);
+  if (selectedSentences < layout.minSentences) {
+    const fallbackParagraphs = paragraphs
+      .filter((paragraph) => !usedIndexes.has(paragraph.index))
+      .sort((a, b) => a.index - b.index);
+
+    for (const paragraph of fallbackParagraphs) {
+      if (selected.length >= layout.maxParagraphs) break;
+      pushParagraph(paragraph);
+      if (selectedSentences >= layout.minSentences) break;
     }
   }
 
-  if (selectedIndexes.length === 0) {
+  if (selected.length === 0) {
     return '';
   }
 
-  for (const index of selectedIndexes) {
-    usedIndexes.add(index);
-  }
-
-  const combined = selectedIndexes.map((index) => paragraphs[index]).join(' ');
-  return sentenceLimit(combined, 6);
+  const combined = selected.map((paragraph) => paragraph.text).join('\n\n');
+  return sentenceLimit(combined, layout.maxSentences);
 }
 
 function firstMeaningfulSentence(text: string): string {
@@ -289,13 +482,20 @@ function firstMeaningfulSentence(text: string): string {
 }
 
 function buildChecklist(
-  data: Omit<TemperamentPremiumText, 'temperament' | 'checklist'>,
+  data: {
+    overview: string;
+    strengths: string;
+    risks: string;
+    practices: string;
+    work: string;
+    relationships: string;
+  },
 ): string[] {
   const orderedSources = [
     data.strengths,
-    data.weaknesses,
+    data.risks,
     data.practices,
-    data.career,
+    data.work,
     data.relationships,
   ];
 
@@ -314,17 +514,20 @@ function buildChecklist(
   return items;
 }
 
-function pickFallbackText(paragraphs: string[], preferredIndexes: number[]): string {
+function pickFallbackText(
+  paragraphs: ParagraphEntry[],
+  preferredIndexes: number[],
+): string {
   for (const index of preferredIndexes) {
-    const candidate = paragraphs[index];
+    const candidate = paragraphs[index]?.text;
     if (candidate && candidate.length > 40) {
       return sentenceLimit(candidate, 4);
     }
   }
 
-  const firstAvailable = paragraphs.find((paragraph) => paragraph.length > 40);
+  const firstAvailable = paragraphs.find((paragraph) => paragraph.text.length > 40);
   if (firstAvailable) {
-    return sentenceLimit(firstAvailable, 4);
+    return sentenceLimit(firstAvailable.text, 4);
   }
 
   return GENERIC_SECTION_FALLBACK;
@@ -355,26 +558,22 @@ function resolveFilePath(temperament: TemperamentId): string {
 function buildTemperamentText(temperament: TemperamentId): TemperamentPremiumText {
   const filePath = resolveFilePath(temperament);
   const rawText = readFileSync(filePath, 'utf8');
-  const paragraphs = extractParagraphs(rawText);
+  const paragraphs = extractParagraphEntries(rawText);
   const usedIndexes = new Set<number>();
 
   const overview = selectSectionText(paragraphs, 'overview', usedIndexes);
   const strengths = selectSectionText(paragraphs, 'strengths', usedIndexes);
-  const weaknesses = selectSectionText(paragraphs, 'weaknesses', usedIndexes);
+  const risks = selectSectionText(paragraphs, 'risks', usedIndexes);
   const practices = selectSectionText(paragraphs, 'practices', usedIndexes);
-  const career = selectSectionText(paragraphs, 'career', usedIndexes);
-  const relationships = selectSectionText(
-    paragraphs,
-    'relationships',
-    usedIndexes,
-  );
+  const work = selectSectionText(paragraphs, 'work', usedIndexes);
+  const relationships = selectSectionText(paragraphs, 'relationships', usedIndexes);
 
   const baseText = {
     overview: overview || pickFallbackText(paragraphs, [0, 1]),
     strengths: strengths || pickFallbackText(paragraphs, [1, 0, 2]),
-    weaknesses: weaknesses || pickFallbackText(paragraphs, [2, 3, 1]),
+    risks: risks || pickFallbackText(paragraphs, [2, 3, 1]),
     practices: practices || pickFallbackText(paragraphs, [3, 2, 4]),
-    career: career || pickFallbackText(paragraphs, [4, 1, 0]),
+    work: work || pickFallbackText(paragraphs, [4, 1, 0]),
     relationships: relationships || pickFallbackText(paragraphs, [5, 2, 1]),
   };
 
@@ -382,6 +581,8 @@ function buildTemperamentText(temperament: TemperamentId): TemperamentPremiumTex
     temperament,
     ...baseText,
     checklist: buildChecklist(baseText),
+    weaknesses: baseText.risks,
+    career: baseText.work,
   };
 }
 

@@ -34,7 +34,7 @@ describe('temperaments pdf endpoint', () => {
     }).then((response) => {
       expect(response.status).to.eq(200);
       expect(response.headers['content-type']).to.contain('application/pdf');
-      expect(response.body.length).to.be.greaterThan(1024);
+      expect(response.body.length).to.be.greaterThan(50_000);
     });
   });
 });

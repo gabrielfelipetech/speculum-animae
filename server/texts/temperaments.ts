@@ -142,7 +142,7 @@ export const TEMPERAMENT_TEXTS = {
       title: 'Mapa completo do seu temperamento (Premium)',
       body:
         'No relatório em PDF você verá a leitura detalhada de cada temperamento presente em você, ' +
-        'com exemplos concretos de situações do dia a dia em que essas tendências aparecem — inclusive como elas mudam ' +
+        'com exemplos concretos de situações do dia a dia em que essas tendências aparecem - inclusive como elas mudam ' +
         'quando você está descansado, cansado, sob pressão ou em paz.',
     });
 
@@ -402,8 +402,8 @@ export const TEMPERAMENT_TEXTS = {
       access: 'premium',
       title: 'Orientações para amizades, família e vida afetiva (Premium)',
       body:
-        'No relatório em PDF você terá orientações específicas para cada tipo de relação — amizades, família, ' +
-        'namoro/casamento — mostrando como o seu temperamento costuma reagir em cada contexto e quais atitudes ajudam ' +
+        'No relatório em PDF você terá orientações específicas para cada tipo de relação - amizades, família, ' +
+        'namoro/casamento - mostrando como o seu temperamento costuma reagir em cada contexto e quais atitudes ajudam ' +
         'a construir vínculos mais maduros e estáveis.',
     });
 

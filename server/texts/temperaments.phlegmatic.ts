@@ -45,7 +45,7 @@ export function buildPhlegmaticIntro(
         `A combinação ${primaryLabel}-${secondaryLabel} une a calma e estabilidade do fleumático ` +
         `à energia orientada para metas do colérico. É um perfil de “gestor tranquilo”: você tende a ser realista, ` +
         `objetivo e capaz de manter a cabeça fria quando todos se agitam.\n\n` +
-        `Em termos de traços, costuma oscilar entre introversão e uma extroversão funcional — aparece e assume a frente quando é preciso, ` +
+        `Em termos de traços, costuma oscilar entre introversão e uma extroversão funcional - aparece e assume a frente quando é preciso, ` +
         `mas prefere não disputar os holofotes o tempo todo. Mantém o olhar prático e analítico, planeja antes de agir, ` +
         `e sua assertividade aumenta quando há um objetivo claro ou alguém a proteger.`;
     } else if (mixId === 'melancholic') {
@@ -115,7 +115,7 @@ export function buildPhlegmaticTraits(
         `gosta de gente, mas não precisa chamar atenção; observa muito antes de se expor. ` +
         `É mais realista que intuitivo: prefere o que é concreto, comprovado, que funciona na prática. ` +
         `Costuma ter mente analítica/pragmática, mas com boa sensibilidade para o clima emocional ao redor. ` +
-        `É planejador por natureza — organiza, cria rotinas, prefere o caminho seguro — e pouco desbravador impulsivo. ` +
+        `É planejador por natureza - organiza, cria rotinas, prefere o caminho seguro - e pouco desbravador impulsivo. ` +
         `Na assertividade, inclina-se mais à serenidade do que à confrontação: evita brigas, mas pode ficar em silêncio mesmo quando gostaria de se posicionar.`,
     });
   }
@@ -129,7 +129,7 @@ export function buildPhlegmaticTraits(
         `Na combinação fleumático-colérico, a calma do fleumático se une à energia orientada para metas do colérico. ` +
         `Isso gera um perfil que continua sendo moderado e observador, mas que reage com firmeza quando há um objetivo nítido em jogo.\n\n` +
         `Em termos de traços, você tende à ambiversão: é capaz de se expor e liderar quando necessário, mas não precisa de palco o tempo todo. ` +
-        `Mantém o olhar realista, analítico, com forte foco em solução de problemas. É planejador, porém não se perde em planos — sabe sair do papel e executar. ` +
+        `Mantém o olhar realista, analítico, com forte foco em solução de problemas. É planejador, porém não se perde em planos - sabe sair do papel e executar. ` +
         `A assertividade aparece de modo controlado: quando entende que algo precisa ser dito ou decidido, você o faz, mesmo sem gostar de conflito.`,
     });
   } else if (secondary && secondary.groupId === 'melancholic') {
@@ -234,7 +234,7 @@ export function buildPhlegmaticCareer(
         `áreas de suporte, ambientes educacionais e pastorais.\n\n` +
         `Você tende a ser organizado o suficiente para manter processos, e leve o bastante para tornar o ambiente mais humano. ` +
         `Sua motivação cresce quando há boa convivência e sensação de utilidade; cai quando o clima está hostil ou quando o trabalho se torna repetitivo demais sem nenhum contato humano. ` +
-        `A ambição é geralmente baixa em termos de poder, mas alta em querer que o grupo esteja bem — o que o torna candidato natural a papéis de “ponte” entre direção e equipe.`,
+        `A ambição é geralmente baixa em termos de poder, mas alta em querer que o grupo esteja bem - o que o torna candidato natural a papéis de “ponte” entre direção e equipe.`,
     });
   }
 
@@ -273,7 +273,7 @@ export function buildPhlegmaticGrowth(
       `Você provavelmente percebe em si a tendência a evitar confronto, adiar decisões difíceis ou “engolir” incômodos para não gerar briga.\n\n` +
       `Ao mesmo tempo, o eixo fleumático está naturalmente ligado à resiliência silenciosa: suporta muito, aguenta bastante peso sem se desestruturar externamente. ` +
       `O risco é que essa força se transforme em fuga (acomodação) ou em cansaço interno acumulado. Parte do crescimento passa por aprender a reconhecer cedo ` +
-      `os sinais de sobrecarga — desânimo, procrastinação, ironia, vontade de se desligar — e buscar ajuda ou ajustar rotas antes que a alma “desligue” por completo.`,
+      `os sinais de sobrecarga - desânimo, procrastinação, ironia, vontade de se desligar - e buscar ajuda ou ajustar rotas antes que a alma “desligue” por completo.`,
   });
 
   if (secondary && secondary.groupId === 'choleric') {
@@ -361,7 +361,7 @@ export function buildPhlegmaticRelationships(
       `O fleumático leva para os relacionamentos a mesma calma que leva para o trabalho: ` +
       `gosta de ambientes pacíficos, evita brigas e tende a ser um ponto de estabilidade para quem convive com ele.\n\n` +
       `Seu jeito de demonstrar carinho costuma ser discreto, mais por presença fiel e pequenos serviços do que por grandes declarações. ` +
-      `Valoriza a lealdade e o altruísmo concreto — estar ali, ajudar, ouvir, fazer o que é preciso. ` +
+      `Valoriza a lealdade e o altruísmo concreto - estar ali, ajudar, ouvir, fazer o que é preciso. ` +
       `A inteligência emocional aparece na leitura serena das pessoas e na capacidade de não reagir de modo explosivo, ` +
       `embora às vezes falte iniciativa para abrir o próprio coração ou para confrontar o que precisa ser dito.`,
   });
@@ -376,7 +376,7 @@ export function buildPhlegmaticRelationships(
         `É capaz de entrar em cena com força quando alguém querido precisa de defesa, mas não vive em modo de combate.\n\n` +
         `A autenticidade se expressa em franqueza ponderada: você não gosta de rodeios, porém mede as palavras para não ferir à toa. ` +
         `A lealdade é alta, o altruísmo se manifesta em atitudes consistentes, e a inteligência emocional cresce quando você aprende a não engolir ` +
-        `ressentimentos em silêncio — preferindo conversas firmes e respeitosas em vez de explosões tardias.`,
+        `ressentimentos em silêncio - preferindo conversas firmes e respeitosas em vez de explosões tardias.`,
     });
   } else if (secondary && secondary.groupId === 'melancholic') {
     blocks.push({
@@ -387,7 +387,7 @@ export function buildPhlegmaticRelationships(
         `Na combinação ${primaryLabel}-${secondaryLabel}, os relacionamentos são vividos com grande profundidade e discrição. ` +
         `Você costuma ter poucos vínculos, mas muito significativos, e tende a ser altamente leal a quem deixa se aproximar.\n\n` +
         `A autenticidade se manifesta mais pela coerência do que por palavras: você é o tipo de pessoa que “está sempre ali”, mesmo sem discursos. ` +
-        `O altruísmo é grande, mas pode ser silencioso — ajuda, mas nem sempre compartilha o que sente. ` +
+        `O altruísmo é grande, mas pode ser silencioso - ajuda, mas nem sempre compartilha o que sente. ` +
         `O desafio está em não guardar mágoas ou expectativas não ditas: sua inteligência emocional amadurece quando você se permite expressar dores, ` +
         `pedir consolo e dizer com clareza o que precisa, em vez de apenas suportar.`,
     });
@@ -414,7 +414,7 @@ export function buildPhlegmaticRelationships(
       'No relatório em PDF, o eixo fleumático é aplicado de forma concreta à vida afetiva: ' +
       'como o seu perfil tende a se comportar em amizade, namoro/casamento, relação com filhos, pais e comunidade. ' +
       'São oferecidas sugestões práticas para canalizar sua paz, lealdade e altruísmo sem cair em passividade, ' +
-      'e para crescer em verdadeira inteligência emocional — capaz de unir sinceridade e mansidão nas conversas difíceis e no cuidado diário com quem você ama.',
+      'e para crescer em verdadeira inteligência emocional - capaz de unir sinceridade e mansidão nas conversas difíceis e no cuidado diário com quem você ama.',
   });
 
   return blocks;

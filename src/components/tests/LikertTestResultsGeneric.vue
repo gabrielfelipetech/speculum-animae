@@ -47,7 +47,7 @@
           <span>
             <span class="font-medium">{{ group.name }}</span>
             <span class="text-slate-500 dark:text-slate-400">
-              — tende a se manifestar de forma mais frágil ou instável no momento.
+              - tende a se manifestar de forma mais frágil ou instável no momento.
             </span>
           </span>
         </li>

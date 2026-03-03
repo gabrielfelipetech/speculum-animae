@@ -34,6 +34,7 @@ describe('temperaments pdf filename', () => {
     }).then((response) => {
       expect(response.status).to.eq(200);
       expect(String(response.headers['content-type'])).to.contain('application/pdf');
+      expect(response.body.length).to.be.greaterThan(50_000);
 
       const disposition = String(response.headers['content-disposition'] ?? '');
       expect(disposition).to.contain('inline');

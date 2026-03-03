@@ -92,6 +92,56 @@ export interface TemperamentsPdfContent {
   resultsOrdered: TemperamentScoreSummary[];
   mainProfile: TemperamentProfile;
   secondaryProfile: TemperamentProfile | null;
+  integratedReadingParagraphs: string[];
+  finalChecklist: string[];
+}
+
+function splitParagraphs(text: string): string[] {
+  return text
+    .split(/\n\s*\n+/)
+    .map((paragraph) => paragraph.trim())
+    .filter((paragraph) => paragraph.length > 0);
+}
+
+function splitSentences(text: string): string[] {
+  return text
+    .split(/(?<=[.!?])\s+/)
+    .map((sentence) => sentence.trim())
+    .filter((sentence) => sentence.length > 0);
+}
+
+function sentenceLimit(text: string, maxSentences: number): string {
+  const sentences = splitSentences(text);
+  if (sentences.length <= maxSentences) {
+    return text.trim();
+  }
+  return sentences.slice(0, maxSentences).join(' ');
+}
+
+function firstSentence(text: string): string {
+  const sentence = splitSentences(text)[0];
+  return sentence ?? text.trim();
+}
+
+function compactSection(paragraphs: string[], maxSentences: number): string {
+  const merged = paragraphs.join(' ').trim();
+  if (!merged) return '';
+  return sentenceLimit(merged, maxSentences);
+}
+
+function dedupeChecklist(items: string[]): string[] {
+  const unique: string[] = [];
+  const seen = new Set<string>();
+
+  for (const item of items) {
+    const trimmed = item.trim();
+    const normalized = trimmed.toLowerCase();
+    if (!trimmed || seen.has(normalized)) continue;
+    seen.add(normalized);
+    unique.push(firstSentence(trimmed));
+  }
+
+  return unique;
 }
 
 function buildProfile(temperament: TemperamentId): TemperamentProfile {
@@ -100,14 +150,70 @@ function buildProfile(temperament: TemperamentId): TemperamentProfile {
   return {
     label: TEMPERAMENT_LABELS[temperament],
     overview: premium.overview,
-    strengths: [premium.strengths],
-    risks: [premium.weaknesses],
-    work: [premium.career],
-    relationships: [premium.relationships],
-    family: [premium.relationships],
-    spiritual: [premium.practices],
+    strengths: splitParagraphs(premium.strengths),
+    risks: splitParagraphs(premium.risks),
+    work: splitParagraphs(premium.work),
+    relationships: splitParagraphs(premium.relationships),
+    family: splitParagraphs(premium.relationships),
+    spiritual: splitParagraphs(premium.practices),
     examen: premium.checklist,
   };
+}
+
+function buildIntegratedReadingParagraphs(
+  mainProfile: TemperamentProfile,
+  secondaryProfile: TemperamentProfile | null,
+): string[] {
+  const overview = compactSection([mainProfile.overview], 4);
+  const strengths = compactSection(mainProfile.strengths, 3);
+  const risks = compactSection(mainProfile.risks, 2);
+  const work = compactSection(mainProfile.work, 2);
+  const relationships = compactSection(mainProfile.relationships, 2);
+  const practices = compactSection(mainProfile.spiritual, 2);
+
+  if (!secondaryProfile) {
+    return [
+      `No eixo ${mainProfile.label}, ${overview}`,
+      `Na pratica, esse perfil se fortalece quando ${strengths.toLowerCase()} ${work}`,
+      `Os principais pontos de atencao sao ${risks.toLowerCase()} ${relationships} ${practices}`,
+    ];
+  }
+
+  const secondaryOverview = compactSection([secondaryProfile.overview], 3);
+  const secondaryStrengths = compactSection(secondaryProfile.strengths, 2);
+  const secondaryRisks = compactSection(secondaryProfile.risks, 2);
+  const secondaryPractices = compactSection(secondaryProfile.spiritual, 2);
+
+  return [
+    `A combinacao ${mainProfile.label}-${secondaryProfile.label} mostra um eixo dominante no principal com modulacao clara do secundario. ${overview}`,
+    `No cotidiano, o principal se expressa por ${strengths.toLowerCase()} enquanto o secundario adiciona ${secondaryStrengths.toLowerCase()}`,
+    `Em contextos de pressao, aparecem riscos complementares: ${risks.toLowerCase()} e ${secondaryRisks.toLowerCase()}`,
+    `A leitura integrada fica mais estavel quando o plano de crescimento combina ${practices.toLowerCase()} com ${secondaryPractices.toLowerCase()} ${secondaryOverview}`,
+  ];
+}
+
+function buildFinalChecklist(
+  mainProfile: TemperamentProfile,
+  secondaryProfile: TemperamentProfile | null,
+): string[] {
+  const base = dedupeChecklist([
+    ...(mainProfile.examen ?? []),
+    ...(secondaryProfile?.examen ?? []),
+  ]);
+
+  if (base.length >= 5) {
+    return base.slice(0, 5);
+  }
+
+  const fallback = [
+    firstSentence(compactSection(mainProfile.strengths, 1)),
+    firstSentence(compactSection(mainProfile.risks, 1)),
+    firstSentence(compactSection(mainProfile.work, 1)),
+    firstSentence(compactSection(mainProfile.relationships, 1)),
+    firstSentence(compactSection(mainProfile.spiritual, 1)),
+  ].filter((item) => item.length > 0);
+
+  return dedupeChecklist([...base, ...fallback]).slice(0, 5);
 }
 
 function normalizeResultEntry(
@@ -142,6 +248,8 @@ export function buildTemperamentsPdfContent(
 
   const main = sorted[0];
   const secondary = sorted[1] ?? null;
+  const mainProfile = buildProfile(main.id);
+  const secondaryProfile = secondary ? buildProfile(secondary.id) : null;
 
   return {
     scale: TEMPERAMENT_SOURCE_SCALE,
@@ -160,7 +268,12 @@ export function buildTemperamentsPdfContent(
         }
       : null,
     resultsOrdered: sorted,
-    mainProfile: buildProfile(main.id),
-    secondaryProfile: secondary ? buildProfile(secondary.id) : null,
+    mainProfile,
+    secondaryProfile,
+    integratedReadingParagraphs: buildIntegratedReadingParagraphs(
+      mainProfile,
+      secondaryProfile,
+    ),
+    finalChecklist: buildFinalChecklist(mainProfile, secondaryProfile),
   };
 }
