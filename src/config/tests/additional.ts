@@ -417,8 +417,8 @@ export const additionalTests: TestConfigInput[] = [
   },
   {
     id: 'temperament-compatibility',
-    slug: 'temperament-compatibility',
-    resultSlug: 'temperament-compatibility',
+    slug: 'temperaments-compatibility',
+    resultSlug: 'temperaments-compatibility',
     title: 'Compatibilidade de Temperamentos',
     subtitle: 'Como seu estilo combina com outros perfis',
     description: 'Questionario curto para avaliar afinidades de temperamento.',

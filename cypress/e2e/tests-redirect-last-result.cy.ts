@@ -7,7 +7,7 @@ describe('tests page last-result redirect', () => {
   it('redirects to the last result with actor key', () => {
     const sessionId = `result-melancholic-redirect-${Date.now()}`;
     const clientId = `e2e-client-redirect-${Date.now()}`;
-    const slug = 'temperamentos-classicos';
+    const slug = 'temperaments';
 
     cy.fixture('result-temperaments-melancholic.json').then((fixtureReport) => {
       cy.intercept('GET', `**/api/results/${sessionId}*`, {

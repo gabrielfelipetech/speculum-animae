@@ -1,4 +1,4 @@
-﻿{
+{
   "common": {
     "brand": "Speculum Animae",
     "actions": {
@@ -24,10 +24,11 @@
   "shome": {
     "kicker": "Speculum Animae",
     "title": "Testes de personalidade, temperamento e virtudes em um só lugar.",
-    "description": "Comece pelo teste das 12 camadas da personalidade ou explore outros instrumentos, como o teste de temperamentos clássicos. Mais testes serão adicionados conforme o projeto evoluir.",
+    "description": "Escolha entre três testes principais: 12 camadas da personalidade, temperamentos clássicos e compatibilidade de temperamentos.",
     "sections": {
       "coreTests": "Testes principais",
       "otherTests": "Outros testes",
+      "availableTests": "Testes disponíveis",
       "articlesTitle": "Artigos",
       "articlesCardTitle": "Leituras para aprofundar sua jornada",
       "articlesCardDescription": "Explore artigos sobre personalidade, temperamentos, virtudes e relacionamentos."

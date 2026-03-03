@@ -37,7 +37,7 @@ export const defaultSummaryRules: SummaryRule[] = [
 export const likertTests: TestConfigInput[] = [
   {
     id: 'twelve-layers',
-    slug: '12-camadas',
+    slug: 'twelve-layers',
     resultSlug: 'twelve-layers',
     title: '12 Camadas da Personalidade',
     subtitle: 'Modelo inspirado em Olavo de Carvalho',

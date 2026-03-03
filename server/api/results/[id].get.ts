@@ -3,9 +3,7 @@ import {
   serverSupabaseClient,
 } from '#supabase/server';
 import type { AnyReport } from '~/types/results';
-import { buildTwelveLayersReport } from '../report-builders/twelveLayers';
-import { buildTemperamentsReport } from '../report-builders/temperaments';
-import { buildAssessmentReport } from '../report-builders/assessments';
+import { buildReportFromStoredResult } from '../report-builders/dispatch';
 import type { StoredResult } from '../results.post';
 import { resolveUserId } from '../../utils/resolveUserId';
 import { withCriticalApiLogging } from '../../utils/bugsnag';
@@ -126,17 +124,13 @@ export default defineEventHandler(async (event) => {
       });
     }
 
-    let report: AnyReport;
+    const report: AnyReport | null = buildReportFromStoredResult(entry);
 
-    switch (entry.slug) {
-      case 'twelve-layers':
-        report = buildTwelveLayersReport(entry);
-        break;
-      case 'temperaments':
-        report = buildTemperamentsReport(entry);
-        break;
-      default:
-        report = buildAssessmentReport(entry);
+    if (!report) {
+      throw createError({
+        statusCode: 404,
+        message: 'Resultados desse teste nao estao disponiveis.',
+      });
     }
 
     return report;

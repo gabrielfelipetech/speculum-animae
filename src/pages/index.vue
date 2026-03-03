@@ -16,33 +16,17 @@
 
     <section class="space-y-4">
       <h2 class="text-sm font-semibold text-slate-700 dark:text-slate-200">
-        {{ t('shome.sections.coreTests') }}
+        {{ t('shome.sections.availableTests') }}
       </h2>
 
       <div class="grid gap-4 md:grid-cols-2">
         <div
-          v-for="(test, index) in coreTests"
+          v-for="(test, index) in availableTests"
           :key="test.id"
           class="reveal"
           v-reveal="index * 80"
         >
           <TestCard :test="test" variant="core" />
-        </div>
-      </div>
-    </section>
-    <section v-if="otherTests.length" class="space-y-4">
-      <h2 class="text-sm font-semibold text-slate-700 dark:text-slate-200">
-        {{ t('shome.sections.otherTests') }}
-      </h2>
-
-      <div class="grid gap-4 md:grid-cols-2">
-        <div
-          v-for="(test, index) in otherTests"
-          :key="test.id"
-          class="reveal"
-          v-reveal="index * 80"
-        >
-          <TestCard :test="test" variant="other" />
         </div>
       </div>
     </section>
@@ -102,13 +86,7 @@ useSeoMeta(() => ({
 
 const allLikertTests = allTests.likert as TestConfig[];
 
-const coreTests = computed(() =>
-  allLikertTests.filter((test) => test.category === 'core'),
-);
-
-const otherTests = computed(() =>
-  allLikertTests.filter((test) => test.category !== 'core'),
-);
+const availableTests = computed(() => allLikertTests.slice());
 
 const globalFaq = getGlobalFaq();
 

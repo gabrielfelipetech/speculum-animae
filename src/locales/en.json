@@ -1,4 +1,4 @@
-﻿{
+{
   "common": {
     "brand": "Speculum Animae",
     "actions": {
@@ -24,10 +24,11 @@
   "shome": {
     "kicker": "Speculum Animae",
     "title": "Personality, temperament, and virtue tests in one place.",
-    "description": "Start with the 12 layers of personality test or explore other instruments, like the classic temperaments test. More tests will be added as the project evolves.",
+    "description": "Choose between three core tests: 12 layers of personality, classic temperaments, and temperaments compatibility.",
     "sections": {
       "coreTests": "Core tests",
       "otherTests": "Other tests",
+      "availableTests": "Available tests",
       "articlesTitle": "Articles",
       "articlesCardTitle": "Readings to deepen your journey",
       "articlesCardDescription": "Explore articles about personality, temperaments, virtues, and relationships."

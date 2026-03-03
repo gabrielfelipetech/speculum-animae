@@ -40,7 +40,7 @@ export const defaultSummaryRules: SummaryRule[] = [
 
 export const temperamentsClassicTest: TestConfigInput = {
   id: 'temperaments-classic',
-  slug: 'temperamentos-classicos',
+  slug: 'temperaments',
   resultSlug: 'temperaments',
   title: 'Temperamentos Clássicos',
   subtitle: 'Colérico, Melancólico, Sanguíneo e Fleumático',

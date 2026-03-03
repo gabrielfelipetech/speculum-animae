@@ -64,7 +64,15 @@ export default defineNuxtConfig({
 
   sitemap: {
     includeAppSources: false,
-    urls: ['/', '/testes/12-camadas', '/testes/temperamentos-classicos', '/artigos', '/planos', ...articleUrls],
+    urls: [
+      '/',
+      '/testes/twelve-layers',
+      '/testes/temperaments',
+      '/testes/temperaments-compatibility',
+      '/artigos',
+      '/planos',
+      ...articleUrls,
+    ],
     exclude: ['/resultados/**', '/testes/historico', '/auth/**', '/api/**'],
   },
 

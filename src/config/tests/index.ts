@@ -5,39 +5,47 @@ import { likertTests } from './likert';
 import { temperamentLikertTests } from './temperaments';
 import { additionalTests } from './additional';
 
-const RESULT_KIND_BY_SLUG: Record<string, ReportKind> = {
-  '12-camadas': 'twelveLayers',
+export const ENABLED_TEST_SLUGS = [
+  'temperaments',
+  'temperaments-compatibility',
+  'twelve-layers',
+] as const;
+
+export type EnabledTestSlug = (typeof ENABLED_TEST_SLUGS)[number];
+
+export const LEGACY_TEST_SLUG_REDIRECTS: Record<string, EnabledTestSlug> = {
+  '12-camadas': 'twelve-layers',
   'temperamentos-classicos': 'temperaments',
-  'love-languages': 'loveLanguages',
-  'attachment-styles': 'attachment',
-  'conflict-communication': 'conflictCommunication',
-  'jealousy-boundaries': 'jealousyBoundaries',
-  'temperament-compatibility': 'temperamentCompatibility',
-  'big-five': 'bigFive',
-  disc: 'disc',
-  'self-sabotage': 'selfSabotage',
-  procrastination: 'procrastination',
-  'decision-making': 'decisionMaking',
-  'learning-style-practice': 'learningStyle',
-  'study-focus-attention': 'studyFocus',
-  'study-habits': 'studyHabits',
-  metacognition: 'metacognition',
-  'work-values': 'workValues',
-  motivators: 'motivators',
-  'leadership-style': 'leadershipStyle',
-  'teamwork-collaboration': 'teamwork',
-  'anxiety-triggers': 'anxietyTriggers',
-  'burnout-stress': 'burnoutStress',
-  'habits-consistency': 'habitsConsistency',
-  'sleep-energy': 'sleepEnergy',
-  archetypes: 'archetypes',
-  'self-esteem': 'selfEsteem',
-  'emotional-intelligence': 'emotionalIntelligence',
+  'temperament-compatibility': 'temperaments-compatibility',
 };
+
+const RESULT_KIND_BY_SLUG: Record<EnabledTestSlug, ReportKind> = {
+  'twelve-layers': 'twelveLayers',
+  temperaments: 'temperaments',
+  'temperaments-compatibility': 'temperamentCompatibility',
+};
+
+const ENABLED_SLUG_SET = new Set<string>(ENABLED_TEST_SLUGS);
+const ENABLED_RESULT_SLUG_SET = new Set<string>(ENABLED_TEST_SLUGS);
+
+export function isEnabledTestSlug(slug: string): slug is EnabledTestSlug {
+  return ENABLED_SLUG_SET.has(slug);
+}
+
+export function getCanonicalTestSlug(slug: string): string {
+  return LEGACY_TEST_SLUG_REDIRECTS[slug] ?? slug;
+}
+
+export function resolveEnabledTestSlug(slug: string): EnabledTestSlug | null {
+  const canonical = getCanonicalTestSlug(slug);
+  return isEnabledTestSlug(canonical) ? canonical : null;
+}
 
 function normalizeTestConfig(test: TestConfigInput): TestConfig {
   const questionSet = test.questionSet ?? test.groups ?? [];
-  const kind = test.kind ?? RESULT_KIND_BY_SLUG[test.slug];
+  const kind =
+    test.kind ??
+    (isEnabledTestSlug(test.slug) ? RESULT_KIND_BY_SLUG[test.slug] : undefined);
   if (!kind) {
     throw new Error(`Missing report kind for test ${test.slug}`);
   }
@@ -54,7 +62,9 @@ export const allLikertTests: TestConfig[] = [
   ...likertTests,
   ...temperamentLikertTests,
   ...additionalTests,
-].map(normalizeTestConfig);
+]
+  .filter((test) => ENABLED_RESULT_SLUG_SET.has(test.resultSlug))
+  .map(normalizeTestConfig);
 
 export const allTests = {
   likert: allLikertTests,

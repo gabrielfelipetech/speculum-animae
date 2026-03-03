@@ -5,10 +5,21 @@ type FaqPayload = FaqData;
 
 const payload = faqData as unknown as FaqPayload;
 
+const FAQ_SLUG_ALIASES: Record<string, string> = {
+  'twelve-layers': '12-camadas',
+  temperaments: 'temperamentos-classicos',
+  'temperaments-compatibility': 'temperament-compatibility',
+};
+
 export function getGlobalFaq(): FaqItem[] {
   return payload.global.slice();
 }
 
 export function getFaqByTestSlug(slug: string): FaqItem[] {
-  return payload.byTest[slug]?.slice() ?? [];
+  const direct = payload.byTest[slug];
+  if (direct) return direct.slice();
+
+  const alias = FAQ_SLUG_ALIASES[slug];
+  if (!alias) return [];
+  return payload.byTest[alias]?.slice() ?? [];
 }

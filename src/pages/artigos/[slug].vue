@@ -114,14 +114,14 @@ const relatedArticles = computed(() =>
 
 const TEST_LINKS: Record<string, { slug: string; title: string; href: string }> = {
   'temperamentos-classicos': {
-    slug: 'temperamentos-classicos',
+    slug: 'temperaments',
     title: 'Teste de temperamentos classicos',
-    href: '/testes/temperamentos-classicos?fresh=1',
+    href: '/testes/temperaments?fresh=1',
   },
   '12-camadas': {
-    slug: '12-camadas',
+    slug: 'twelve-layers',
     title: 'Teste das 12 camadas',
-    href: '/testes/12-camadas?fresh=1',
+    href: '/testes/twelve-layers?fresh=1',
   },
 };
 

@@ -392,6 +392,10 @@ const REPORT_DEFINITIONS: Record<
     kind: 'temperamentCompatibility',
     build: buildTemperamentCompatibilityReport,
   },
+  'temperaments-compatibility': {
+    kind: 'temperamentCompatibility',
+    build: buildTemperamentCompatibilityReport,
+  },
   'big-five': { kind: 'bigFive', build: buildBigFiveReport },
   disc: { kind: 'disc', build: buildDiscReport },
   'self-sabotage': { kind: 'selfSabotage', build: buildSelfSabotageReport },

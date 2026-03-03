@@ -6,6 +6,7 @@ import { withCriticalApiLogging } from '../utils/bugsnag';
 export type ReportSlug =
   | 'twelve-layers'
   | 'temperaments'
+  | 'temperaments-compatibility'
   | 'love-languages'
   | 'attachment-styles'
   | 'conflict-communication'
@@ -32,38 +33,33 @@ export type ReportSlug =
   | 'self-esteem'
   | 'emotional-intelligence';
 
-const REPORT_SLUGS: ReportSlug[] = [
-  'twelve-layers',
-  'temperaments',
-  'love-languages',
-  'attachment-styles',
-  'conflict-communication',
-  'jealousy-boundaries',
-  'temperament-compatibility',
-  'big-five',
-  'disc',
-  'self-sabotage',
-  'procrastination',
-  'decision-making',
-  'learning-style-practice',
-  'study-focus-attention',
-  'study-habits',
-  'metacognition',
-  'work-values',
-  'motivators',
-  'leadership-style',
-  'teamwork-collaboration',
-  'anxiety-triggers',
-  'burnout-stress',
-  'habits-consistency',
-  'sleep-energy',
-  'archetypes',
-  'self-esteem',
-  'emotional-intelligence',
-];
+type AllowedIncomingReportSlug =
+  | 'twelve-layers'
+  | 'temperaments'
+  | 'temperaments-compatibility'
+  | 'temperament-compatibility';
 
-function isValidReportSlug(value: string): value is ReportSlug {
-  return REPORT_SLUGS.includes(value as ReportSlug);
+type CanonicalReportSlug =
+  | 'twelve-layers'
+  | 'temperaments'
+  | 'temperaments-compatibility';
+
+const CANONICAL_RESULT_SLUG_BY_INPUT: Record<
+  AllowedIncomingReportSlug,
+  CanonicalReportSlug
+> = {
+  'twelve-layers': 'twelve-layers',
+  temperaments: 'temperaments',
+  'temperaments-compatibility': 'temperaments-compatibility',
+  'temperament-compatibility': 'temperaments-compatibility',
+};
+
+function normalizeIncomingReportSlug(value: string): CanonicalReportSlug | null {
+  const normalized =
+    CANONICAL_RESULT_SLUG_BY_INPUT[
+      value as keyof typeof CANONICAL_RESULT_SLUG_BY_INPUT
+    ];
+  return normalized ?? null;
 }
 
 export interface StoredResult {
@@ -95,15 +91,15 @@ export default defineEventHandler(async (event) => {
     const body = await readBody<{
       sessionId: string;
       clientId?: string | null;
-      slug: ReportSlug;
+      slug: string;
       results: { groupId: string; name: string; average: number }[];
       topSummaries?: StoredResult['topSummaries'];
       meta?: StoredResult['meta'];
     }>(event);
 
-    const slug = body.slug;
+    const slug = normalizeIncomingReportSlug(body.slug);
 
-    if (!isValidReportSlug(slug)) {
+    if (!slug) {
       throw createError({
         statusCode: 400,
         message: 'slug invalido',

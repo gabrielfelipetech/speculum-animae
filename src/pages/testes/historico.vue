@@ -43,10 +43,10 @@
           <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <div class="space-y-1">
               <p class="text-[0.65rem] font-semibold uppercase tracking-[0.16em] text-slate-400">
-                {{ labelBySlug(item.slug) }}
+                {{ labelBySlug(item.normalizedSlug) }}
               </p>
               <p class="text-sm font-semibold text-slate-900 dark:text-slate-50">
-                {{ item.meta?.title || defaultTitle(item.slug) }}
+                {{ item.meta?.title || defaultTitle(item.normalizedSlug) }}
               </p>
               <p class="text-[0.7rem] text-slate-500 dark:text-slate-400">
                 {{ formatDate(item.timestamp) }}
@@ -87,6 +87,10 @@ interface HistoryItem {
   };
 }
 
+interface VisibleHistoryItem extends HistoryItem {
+  normalizedSlug: string;
+}
+
 type MyResultsResponse = { items: HistoryItem[] };
 
 useSeoMeta({
@@ -125,7 +129,30 @@ onMounted(() => {
   void refresh();
 });
 
-const items = computed(() => data.value?.items ?? []);
+const ALLOWED_HISTORY_SLUGS = new Set<string>([
+  'temperaments',
+  'temperaments-compatibility',
+  'twelve-layers',
+  'temperament-compatibility',
+]);
+
+const LEGACY_RESULT_SLUG_ALIASES: Record<string, string> = {
+  'temperament-compatibility': 'temperaments-compatibility',
+};
+
+function normalizeHistorySlug(slug: string): string {
+  return LEGACY_RESULT_SLUG_ALIASES[slug] ?? slug;
+}
+
+const items = computed<VisibleHistoryItem[]>(() =>
+  (data.value?.items ?? [])
+    .filter((item) => ALLOWED_HISTORY_SLUGS.has(item.slug))
+    .map((item) => ({
+      ...item,
+      normalizedSlug: normalizeHistorySlug(item.slug),
+    })),
+);
+
 const testCatalog = allTests.likert as TestConfig[];
 const testByResultSlug = computed(() => {
   const map = new Map<string, TestConfig>();

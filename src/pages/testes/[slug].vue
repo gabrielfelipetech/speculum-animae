@@ -1,19 +1,6 @@
-﻿<template>
+<template>
   <main class="mx-auto max-w-4xl px-4 py-8">
-    <div v-if="!testConfig">
-      <h1 class="font-display text-2xl tracking-tight">
-        Teste não encontrado
-      </h1>
-      <p class="mt-2 text-sm text-slate-600 dark:text-slate-300">
-        Não encontramos nenhum teste com esse endereço. Verifique se o link
-        está correto ou volte para a página inicial.
-      </p>
-      <BaseButton type="button" class="mt-4" @click="goHome">
-        Voltar para a página inicial
-      </BaseButton>
-    </div>
-
-    <div v-else class="space-y-10">
+    <div class="space-y-10">
       <LikertTestView :config="testConfig" :fresh="isFresh" />
 
       <RelatedArticles
@@ -34,22 +21,63 @@
 </template>
 
 <script setup lang="ts">
-import { useHead, useRoute, useRouter, useSeoMeta } from '#imports';
-import { getTestBySlug } from '~/config/tests';
+import { computed, onMounted, ref } from 'vue';
+import {
+  createError,
+  navigateTo,
+  useHead,
+  useRoute,
+  useSeoMeta,
+} from '#imports';
+import {
+  getCanonicalTestSlug,
+  getTestBySlug,
+  isEnabledTestSlug,
+  type EnabledTestSlug,
+} from '~/config/tests';
 import { getAllArticles } from '~/data/articles';
 import { getFaqByTestSlug } from '~/data/faq';
 import { buildFaqSchema } from '~/utils/seo/faqSchema';
 import RelatedArticles from '~/components/articles/RelatedArticles.vue';
 import FaqSection from '~/components/faq/FaqSection.vue';
 import LikertTestView from '~/components/tests/LikertTestView.vue';
-import BaseButton from '~/components/base/BaseButton.vue';
-import { computed, onMounted, ref } from 'vue';
 import { useLastResultRedirect } from '~/composables/useLastResultRedirect';
 
 const route = useRoute();
-const router = useRouter();
 
-const slug = computed(() => String(route.params.slug || ''));
+definePageMeta({
+  key: (currentRoute) => String(currentRoute.params.slug || ''),
+});
+
+const requestedSlug = String(route.params.slug || '');
+const canonicalSlug = getCanonicalTestSlug(requestedSlug);
+
+if (requestedSlug !== canonicalSlug) {
+  await navigateTo(
+    {
+      path: `/testes/${canonicalSlug}`,
+      query: route.query,
+    },
+    { redirectCode: 302 },
+  );
+}
+
+if (!isEnabledTestSlug(canonicalSlug)) {
+  throw createError({
+    statusCode: 404,
+    statusMessage: 'Test not found',
+  });
+}
+
+const slug: EnabledTestSlug = canonicalSlug;
+const testConfig = getTestBySlug(slug);
+
+if (!testConfig) {
+  throw createError({
+    statusCode: 404,
+    statusMessage: 'Test not found',
+  });
+}
 
 const isFresh = computed(() => {
   const value = route.query.fresh;
@@ -57,9 +85,7 @@ const isFresh = computed(() => {
   return value === '1';
 });
 
-const testConfig = computed(() => getTestBySlug(slug.value));
 const { tryRedirectToLastResult } = useLastResultRedirect();
-
 const didRedirect = ref(false);
 const attemptedRedirect = ref(false);
 
@@ -67,12 +93,11 @@ async function tryInitialLastResultRedirect(): Promise<void> {
   if (!import.meta.client) return;
   if (didRedirect.value || attemptedRedirect.value) return;
   if (isFresh.value) return;
-  if (!testConfig.value) return;
 
   attemptedRedirect.value = true;
 
   try {
-    const redirected = await tryRedirectToLastResult(slug.value);
+    const redirected = await tryRedirectToLastResult(slug);
     didRedirect.value = redirected;
   } catch {
     // Keep the runner available if redirect fails.
@@ -84,51 +109,50 @@ onMounted(() => {
   void tryInitialLastResultRedirect();
 });
 
-type PublicSlug = '12-camadas' | 'temperamentos-classicos';
-
 type SeoPayload = {
   title: string;
   description: string;
 };
 
-const SEO_BY_SLUG: Record<PublicSlug, SeoPayload> = {
-  '12-camadas': {
+const SEO_BY_SLUG: Record<EnabledTestSlug, SeoPayload> = {
+  'twelve-layers': {
     title: 'Teste das 12 camadas da personalidade',
     description:
-      'Explore suas camadas internas e descubra padrões de personalidade com perguntas guiadas.',
+      'Explore suas camadas internas e descubra padroes de personalidade com perguntas guiadas.',
   },
-  'temperamentos-classicos': {
-    title: 'Teste dos temperamentos clássicos',
+  temperaments: {
+    title: 'Teste dos temperamentos classicos',
     description:
-      'Identifique seu temperamento dominante e como ele influencia suas escolhas diárias.',
+      'Identifique seu temperamento dominante e como ele influencia suas escolhas diarias.',
+  },
+  'temperaments-compatibility': {
+    title: 'Teste de compatibilidade de temperamentos',
+    description:
+      'Veja afinidades de estilo relacional e pontos de ajuste para convivencias mais harmoniosas.',
   },
 };
 
-const TEST_CATEGORY_BY_SLUG: Record<PublicSlug, string> = {
-  '12-camadas': 'personalidade',
-  'temperamentos-classicos': 'temperamentos',
+const TEST_CATEGORY_BY_SLUG: Record<EnabledTestSlug, string> = {
+  'twelve-layers': 'personalidade',
+  temperaments: 'temperamentos',
+  'temperaments-compatibility': 'relacionamentos',
 };
 
-
-const faqItems = computed(() => getFaqByTestSlug(slug.value));
+const faqItems = computed(() => getFaqByTestSlug(slug));
 const relatedArticles = computed(() => {
-  if (!isPublicSlug(slug.value)) return [];
-  const category = TEST_CATEGORY_BY_SLUG[slug.value];
-  return getAllArticles().filter((article) => article.category === category).slice(0, 4);
+  const category = TEST_CATEGORY_BY_SLUG[slug];
+  return getAllArticles()
+    .filter((article) => article.category === category)
+    .slice(0, 4);
 });
 
 const seoData = computed<SeoPayload>(() => {
-  if (isPublicSlug(slug.value)) return SEO_BY_SLUG[slug.value];
-  if (testConfig.value) {
-    return {
-      title: testConfig.value.title,
-      description: testConfig.value.description,
-    };
-  }
-  return {
-    title: 'Teste não encontrado',
-    description: 'Não encontramos nenhum teste com esse endereço.',
-  };
+  return (
+    SEO_BY_SLUG[slug] ?? {
+      title: testConfig.title,
+      description: testConfig.description,
+    }
+  );
 });
 
 useSeoMeta(() => ({
@@ -147,12 +171,4 @@ useHead(() => {
     ],
   };
 });
-
-function isPublicSlug(value: string): value is PublicSlug {
-  return value === '12-camadas' || value === 'temperamentos-classicos';
-}
-
-function goHome(): void {
-  router.push('/');
-}
 </script>
