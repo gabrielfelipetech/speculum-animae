@@ -9,7 +9,19 @@ function runStep(args, label) {
   const result = spawnSync(npmCommand, args, {
     stdio: 'inherit',
     env: process.env,
+    shell: isWindows,
   })
+
+  if (result.error) {
+    console.error(`[netlify-build] ${label} failed to start: ${result.error.message}`)
+    return false
+  }
+
+  if (result.status !== 0) {
+    console.error(
+      `[netlify-build] ${label} failed with exit code ${result.status ?? 'unknown'}`,
+    )
+  }
 
   return result.status === 0
 }
