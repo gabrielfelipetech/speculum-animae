@@ -1,9 +1,7 @@
-// server/api/results/[id]/pdf.get.ts
 import { serverSupabaseClient } from '#supabase/server';
-import { sendStream, type H3Event } from 'h3';
-import PDFDocument from 'pdfkit';
+import type { H3Event } from 'h3';
 import type { StoredResult } from '../../results.post';
-import { buildTemperamentsPdfContent } from '../../report-builders/temperamentsPdf';
+import { generateTemperamentsPdfBinary } from '../../report-builders/temperamentsPdfRender';
 import { resolveUserId } from '../../../utils/resolveUserId';
 import { withCriticalApiLogging } from '../../../utils/bugsnag';
 
@@ -28,13 +26,12 @@ async function loadStoredResult(
   id: string,
   access: AccessContext,
 ): Promise<StoredResult | null> {
-  // usuário logado (pode ser null)
   const { userId, clientId } = access;
 
   if (!userId && !clientId) {
     throw createError({
       statusCode: 400,
-      message: 'clientId nao informado',
+      message: 'clientId not provided',
     });
   }
 
@@ -51,7 +48,6 @@ async function loadStoredResult(
     return Boolean(clientId && storedClientId && storedClientId === clientId);
   };
 
-  // 1) tenta pelo Supabase
   try {
     const supabase = await serverSupabaseClient(event);
 
@@ -65,7 +61,7 @@ async function loadStoredResult(
       if (!canAccess(data.user_id, data.client_id)) {
         throw createError({
           statusCode: 403,
-          message: 'Você não tem permissão para ver estes resultados.',
+          message: 'You do not have permission to access this report.',
         });
       }
 
@@ -83,19 +79,12 @@ async function loadStoredResult(
     }
 
     if (error) {
-      console.error(
-        '[Supabase] erro ao buscar resultado para PDF, fallback storage',
-        error,
-      );
+      console.error('[Supabase] failed to load PDF result, fallback to storage', error);
     }
-  } catch (err) {
-    console.error(
-      '[Supabase] erro inesperado ao buscar resultado para PDF',
-      err,
-    );
+  } catch (error) {
+    console.error('[Supabase] unexpected PDF read error, fallback to storage', error);
   }
 
-  // 2) fallback: storage local
   const storage = useStorage<StoredResult[]>('results');
   const all = (await storage.getItem('items')) ?? [];
   const entry = all.find((item) => item.id === id) ?? null;
@@ -105,28 +94,11 @@ async function loadStoredResult(
   if (!canAccess(entry.userId, entry.clientId)) {
     throw createError({
       statusCode: 403,
-      message: 'Você não tem permissão para ver estes resultados.',
+      message: 'You do not have permission to access this report.',
     });
   }
 
   return entry;
-}
-
-function addSectionTitle(doc: PDFKit.PDFDocument, text: string) {
-  doc.moveDown(1.2);
-  doc.fontSize(14).font('Helvetica-Bold').text(text);
-  doc.moveDown(0.3);
-  doc.fontSize(11).font('Helvetica');
-}
-
-function addBulletList(doc: PDFKit.PDFDocument, items: string[]) {
-  items.forEach((item) => {
-    doc.text(`• ${item}`, {
-      indent: 15,
-      align: 'justify',
-    });
-    doc.moveDown(0.1);
-  });
 }
 
 export default defineEventHandler(async (event) => {
@@ -135,166 +107,41 @@ export default defineEventHandler(async (event) => {
   return await withCriticalApiLogging(event, ctx, async () => {
     const id = getRouterParam(event, 'id');
 
-  if (!id) {
-    throw createError({
-      statusCode: 400,
-      message: 'ID de sessão não informado.',
-    });
-  }
+    if (!id) {
+      throw createError({
+        statusCode: 400,
+        message: 'Session id not provided.',
+      });
+    }
 
     const query = getQuery(event);
     const clientId = typeof query.clientId === 'string' ? query.clientId : null;
     const authUserId = await resolveUserId(event);
     ctx.authUserId = authUserId;
-    const userId = authUserId;
 
-    const entry = await loadStoredResult(event, id, { userId, clientId });
-
-  if (!entry) {
-    throw createError({
-      statusCode: 404,
-      message: 'Resultados não encontrados para geração de PDF.',
+    const entry = await loadStoredResult(event, id, {
+      userId: authUserId,
+      clientId,
     });
-  }
 
-  if (entry.slug !== 'temperaments') {
-    throw createError({
-      statusCode: 400,
-      message:
-        'Relatório PDF disponível apenas para o teste de temperamentos neste momento.',
-    });
-  }
+    if (!entry) {
+      throw createError({
+        statusCode: 404,
+        message: 'Results not found for PDF generation.',
+      });
+    }
 
-  const content = buildTemperamentsPdfContent(entry);
+    if (entry.slug !== 'temperaments') {
+      throw createError({
+        statusCode: 400,
+        message: 'PDF report is available only for temperaments.',
+      });
+    }
 
-  setHeader(event, 'Content-Type', 'application/pdf');
-  setHeader(
-    event,
-    'Content-Disposition',
-    `attachment; filename="relatorio-temperamentos-${id}.pdf"`,
-  );
+    const { fileName, buffer } = await generateTemperamentsPdfBinary(entry);
+    setHeader(event, 'Content-Type', 'application/pdf');
+    setHeader(event, 'Content-Disposition', `inline; filename="${fileName}"`);
 
-  const doc = new PDFDocument({
-    size: 'A4',
-    margin: 50,
-  });
-
-  const stream = doc as unknown as NodeJS.ReadableStream;
-
-  // CAPA
-  doc.font('Helvetica-Bold')
-    .fontSize(18)
-    .text('Relatório completo de temperamentos', { align: 'center' });
-
-  doc.moveDown(0.5);
-  doc.fontSize(12).font('Helvetica');
-  doc.text(
-    entry.meta?.title ??
-      'Temperamentos Clássicos (Colérico, Melancólico, Sanguíneo e Fleumático)',
-    { align: 'center' },
-  );
-
-  doc.moveDown(0.5);
-  doc.fontSize(9).text(`ID da sessão: ${entry.id}`, { align: 'center' });
-  doc.moveDown(2);
-
-  // 1. Visão geral
-  addSectionTitle(doc, '1. Visão geral dos resultados');
-
-  content.resultsOrdered.forEach((r) => {
-    doc.text(`${r.name}: média ${r.average.toFixed(2)} / 5`, {
-      align: 'left',
-    });
-  });
-
-  // 2. Principal
-  addSectionTitle(
-    doc,
-    `2. Temperamento principal: ${content.mainProfile.label}`,
-  );
-
-  doc.text(content.mainProfile.overview, { align: 'justify' });
-
-  addSectionTitle(doc, '2.1 Forças e virtudes-chave');
-  addBulletList(doc, content.mainProfile.strengths);
-
-  addSectionTitle(doc, '2.2 Riscos típicos e pontos de atenção');
-  addBulletList(doc, content.mainProfile.risks);
-
-  addSectionTitle(doc, '2.3 No trabalho e na vocação profissional');
-  addBulletList(doc, content.mainProfile.work);
-
-  addSectionTitle(doc, '2.4 Nos relacionamentos afetivos e amizades');
-  addBulletList(doc, content.mainProfile.relationships);
-
-  addSectionTitle(doc, '2.5 Na família e na vida doméstica');
-  addBulletList(doc, content.mainProfile.family);
-
-  addSectionTitle(doc, '2.6 Na vida espiritual');
-  addBulletList(doc, content.mainProfile.spiritual);
-
-  // 3. Secundário + combinação
-  if (content.secondary && content.secondaryProfile) {
-    doc.addPage();
-
-    addSectionTitle(
-      doc,
-      `3. Temperamento secundário: ${content.secondaryProfile.label}`,
-    );
-
-    doc.text(content.secondaryProfile.overview, { align: 'justify' });
-
-    addSectionTitle(doc, '3.1 Forças específicas desse temperamento');
-    addBulletList(doc, content.secondaryProfile.strengths);
-
-    addSectionTitle(doc, '3.2 Riscos e desequilíbrios mais comuns');
-    addBulletList(doc, content.secondaryProfile.risks);
-
-    addSectionTitle(
-      doc,
-      '3.3 Trabalho, decisões de carreira e estilo de execução',
-    );
-    addBulletList(doc, content.secondaryProfile.work);
-
-    addSectionTitle(
-      doc,
-      '3.4 Dinâmica afetiva: como esse temperamento se expressa nos vínculos',
-    );
-    addBulletList(doc, content.secondaryProfile.relationships);
-
-    addSectionTitle(
-      doc,
-      '3.5 Papel na família, no casamento e na educação dos filhos',
-    );
-    addBulletList(doc, content.secondaryProfile.family);
-
-    addSectionTitle(doc, '3.6 Dinâmica espiritual desse temperamento');
-    addBulletList(doc, content.secondaryProfile.spiritual);
-
-    doc.addPage();
-    addSectionTitle(
-      doc,
-      `4. Como a combinação ${content.mainProfile.label} + ${content.secondaryProfile.label} se manifesta`,
-    );
-
-    doc.text(
-      `Sua combinação dominante é formada por ${content.mainProfile.label} (principal) e ${content.secondaryProfile.label} (secundário). ` +
-        'Na prática, isso significa que o modo como você reage rapidamente segue o padrão do temperamento principal, ' +
-        'enquanto o secundário colore o estilo, a sensibilidade e o ritmo com que você vive essas mesmas reações.',
-      { align: 'justify' },
-    );
-
-    doc.moveDown(0.8);
-    doc.text(
-      'O temperamento não é uma sentença nem uma desculpa, mas um ponto de partida. ' +
-        'A maturidade consiste em reconhecer seus padrões espontâneos, agradecer pelas forças que você recebeu ' +
-        'e trabalhar com paciência nas áreas frágeis, integrando razão, vontade e afetividade.',
-      { align: 'justify' },
-    );
-  }
-
-  doc.end();
-
-    return sendStream(event, stream);
+    return buffer;
   });
 });

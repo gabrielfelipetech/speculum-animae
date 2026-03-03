@@ -44,14 +44,15 @@
               <span class="font-medium text-slate-700 dark:text-slate-200">
                 {{ score.label }}
               </span>
-              <span class="text-slate-500 dark:text-slate-400">
-                {{ score.value.toFixed(1) }} / 10
-              </span>
+              <div class="text-right text-slate-500 dark:text-slate-400">
+                <p>Media (0-10): {{ score.base10.toFixed(2) }}</p>
+                <p>Media (escala 1-7): {{ score.source.toFixed(2) }}</p>
+              </div>
             </div>
             <div class="h-2 rounded-full bg-slate-200/80 dark:bg-slate-800/80">
               <div
                 class="h-2 rounded-full bg-emerald-500 dark:bg-emerald-400"
-                :style="{ width: `${(score.value / 10) * 100}%` }"
+                :style="{ width: `${(score.base10 / 10) * 100}%` }"
               />
             </div>
           </div>
@@ -164,7 +165,7 @@
 import { computed, onMounted, ref } from 'vue'
 import { useRouter } from '#app'
 import { useSupabaseUser } from '#imports'
-import type { TemperamentReport, GraphPoint } from '~/types/results'
+import type { TemperamentReport } from '~/types/results'
 import { useReveal } from '~/composables/useReveal'
 import ResultsSection from '~/components/results/ResultsSection.vue'
 import ResultsSidebarLink from '~/components/results/ResultsSidebarLink.vue'
@@ -173,6 +174,16 @@ import SkeletonBlock from '~/components/base/SkeletonBlock.vue'
 import { getOrCreateClientId } from '~/utils/clientId'
 import { clearLastResultId } from '~/utils/testLastResult'
 import { buildClientActorKey, buildUserActorKey } from '~/utils/actorKey'
+import {
+  TEMPERAMENT_SOURCE_SCALE,
+  normalizeScaleValue,
+} from '~/shared/engine/scoring'
+
+type TemperamentGraphPoint = {
+  label: string
+  source: number
+  base10: number
+}
 
 const props = defineProps<{
   report: TemperamentReport
@@ -231,14 +242,7 @@ function handleRetake(): void {
   router.push({ path: `/testes/${testSlug.value}`, query: { fresh: '1' } })
 }
 
-function toZeroTenScale(value: number): number {
-  const clamped = Math.max(1, Math.min(value, 7))
-  const normalized = (clamped - 1) / (7 - 1)
-  const converted = normalized * 10
-  return Number(converted.toFixed(1))
-}
-
-const graphPoints = computed<GraphPoint[]>(() => {
+const graphPoints = computed<TemperamentGraphPoint[]>(() => {
   const all: { label: string; value: number }[] = []
 
   all.push({
@@ -253,10 +257,18 @@ const graphPoints = computed<GraphPoint[]>(() => {
     })
   }
 
-  return all.map((item) => ({
-    label: item.label,
-    value: toZeroTenScale(item.value),
-  }))
+  return all.map((item) => {
+    const normalized = normalizeScaleValue(
+      item.value,
+      TEMPERAMENT_SOURCE_SCALE,
+    )
+
+    return {
+      label: item.label,
+      source: normalized.source,
+      base10: normalized.base10,
+    }
+  })
 })
 </script>
 
