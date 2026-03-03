@@ -4,6 +4,7 @@ import {
   getPremiumTemperamentText,
   isTemperamentId,
   type TemperamentId,
+  type TemperamentPremiumText,
 } from '../../texts/premiumTemperaments';
 import {
   TEMPERAMENT_SOURCE_SCALE,
@@ -143,19 +144,63 @@ function dedupeChecklist(items: string[]): string[] {
   return unique;
 }
 
+export const PREMIUM_CONTENT_UNAVAILABLE_PLACEHOLDER =
+  'Conteudo premium temporariamente indisponivel. Tente novamente mais tarde.';
+
+function buildPremiumFallback(temperament: TemperamentId): TemperamentPremiumText {
+  return {
+    temperament,
+    overview: PREMIUM_CONTENT_UNAVAILABLE_PLACEHOLDER,
+    strengths: PREMIUM_CONTENT_UNAVAILABLE_PLACEHOLDER,
+    risks: PREMIUM_CONTENT_UNAVAILABLE_PLACEHOLDER,
+    practices: PREMIUM_CONTENT_UNAVAILABLE_PLACEHOLDER,
+    work: PREMIUM_CONTENT_UNAVAILABLE_PLACEHOLDER,
+    relationships: PREMIUM_CONTENT_UNAVAILABLE_PLACEHOLDER,
+    checklist: [PREMIUM_CONTENT_UNAVAILABLE_PLACEHOLDER],
+    weaknesses: PREMIUM_CONTENT_UNAVAILABLE_PLACEHOLDER,
+    career: PREMIUM_CONTENT_UNAVAILABLE_PLACEHOLDER,
+  };
+}
+
+function safeGetPremiumTemperamentText(
+  temperament: TemperamentId,
+): TemperamentPremiumText {
+  try {
+    return getPremiumTemperamentText(temperament);
+  } catch (error) {
+    console.error(
+      `[temperamentsPdf] failed to load premium text for "${temperament}". Falling back to placeholder.`,
+      error,
+    );
+    return buildPremiumFallback(temperament);
+  }
+}
+
+function ensureParagraphs(text: string): string[] {
+  const paragraphs = splitParagraphs(text);
+  if (paragraphs.length > 0) {
+    return paragraphs;
+  }
+
+  const fallback = firstSentence(text).trim();
+  return fallback ? [fallback] : [PREMIUM_CONTENT_UNAVAILABLE_PLACEHOLDER];
+}
+
 function buildProfile(temperament: TemperamentId): TemperamentProfile {
-  const premium = getPremiumTemperamentText(temperament);
+  const premium = safeGetPremiumTemperamentText(temperament);
 
   return {
     label: TEMPERAMENT_LABELS[temperament],
     overview: premium.overview,
-    strengths: splitParagraphs(premium.strengths),
-    risks: splitParagraphs(premium.risks),
-    work: splitParagraphs(premium.work),
-    relationships: splitParagraphs(premium.relationships),
-    family: splitParagraphs(premium.relationships),
-    spiritual: splitParagraphs(premium.practices),
-    examen: premium.checklist,
+    strengths: ensureParagraphs(premium.strengths),
+    risks: ensureParagraphs(premium.risks),
+    work: ensureParagraphs(premium.work),
+    relationships: ensureParagraphs(premium.relationships),
+    family: ensureParagraphs(premium.relationships),
+    spiritual: ensureParagraphs(premium.practices),
+    examen: premium.checklist.length
+      ? premium.checklist
+      : [PREMIUM_CONTENT_UNAVAILABLE_PLACEHOLDER],
   };
 }
 

@@ -10,6 +10,7 @@ import {
   getPremiumTemperamentText,
   isTemperamentId,
   type TemperamentId,
+  type TemperamentPremiumText,
 } from '../../texts/premiumTemperaments';
 
 function resolveTemperamentId(score?: TemperamentScore): TemperamentId | null {
@@ -44,6 +45,38 @@ function withPremiumNarrative(
   return [...freeBlocks, premiumBlock];
 }
 
+export const PREMIUM_CONTENT_UNAVAILABLE_PLACEHOLDER =
+  'Conteudo premium temporariamente indisponivel. Tente novamente mais tarde.';
+
+function buildPremiumFallback(temperament: TemperamentId): TemperamentPremiumText {
+  return {
+    temperament,
+    overview: PREMIUM_CONTENT_UNAVAILABLE_PLACEHOLDER,
+    strengths: PREMIUM_CONTENT_UNAVAILABLE_PLACEHOLDER,
+    risks: PREMIUM_CONTENT_UNAVAILABLE_PLACEHOLDER,
+    practices: PREMIUM_CONTENT_UNAVAILABLE_PLACEHOLDER,
+    work: PREMIUM_CONTENT_UNAVAILABLE_PLACEHOLDER,
+    relationships: PREMIUM_CONTENT_UNAVAILABLE_PLACEHOLDER,
+    checklist: [PREMIUM_CONTENT_UNAVAILABLE_PLACEHOLDER],
+    weaknesses: PREMIUM_CONTENT_UNAVAILABLE_PLACEHOLDER,
+    career: PREMIUM_CONTENT_UNAVAILABLE_PLACEHOLDER,
+  };
+}
+
+function safeGetPremiumTemperamentText(
+  temperament: TemperamentId,
+): TemperamentPremiumText {
+  try {
+    return getPremiumTemperamentText(temperament);
+  } catch (error) {
+    console.error(
+      `[temperaments] failed to load premium text for "${temperament}". Falling back to placeholder.`,
+      error,
+    );
+    return buildPremiumFallback(temperament);
+  }
+}
+
 export function buildTemperamentsReport(entry: StoredResult): TemperamentReport {
   const normalizedScores = entry.results
     .filter((result) => isTemperamentId(result.groupId))
@@ -67,9 +100,9 @@ export function buildTemperamentsReport(entry: StoredResult): TemperamentReport 
 
   const secondaryId = resolveTemperamentId(secondary);
 
-  const primaryPremium = getPremiumTemperamentText(primaryId);
+  const primaryPremium = safeGetPremiumTemperamentText(primaryId);
   const secondaryPremium = secondaryId
-    ? getPremiumTemperamentText(secondaryId)
+    ? safeGetPremiumTemperamentText(secondaryId)
     : null;
 
   const overallBlocks = withPremiumNarrative(

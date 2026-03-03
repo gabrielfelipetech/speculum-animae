@@ -1,4 +1,4 @@
-﻿import { readdirSync, readFileSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 
 export type TemperamentId =
@@ -205,6 +205,7 @@ const RISK_SIGNAL_KEYWORDS = [
 
 const INLINE_SOURCE_REGEX =
   /\b(?:https?:\/\/)?(?:www\.)?[a-z0-9-]+(?:\.[a-z0-9-]+)+(?:\/\S*)?\b/gi;
+const HASH_UNICODE_PATTERN = /#u([0-9a-f]{4})/gi;
 const COMBINING_MARKS_REGEX = /[\u0300-\u036f]/g;
 const MULTI_SPACES_REGEX = /\s{2,}/g;
 const DOMAIN_ONLY_REGEX =
@@ -223,9 +224,14 @@ const COMBINATION_SECTION_MARKERS = [
   'matriz comparativa',
   'blends',
 ];
+const PREMIUM_TEXTS_DIR_ENV_KEY = 'SA_PREMIUM_TEXTS_DIR';
 
-function normalizeForMatch(value: string): string {
-  return value
+export function normalizeForMatch(value: string): string {
+  const decodedHashUnicode = value.replace(HASH_UNICODE_PATTERN, (_, hex: string) =>
+    String.fromCharCode(Number.parseInt(hex, 16)),
+  );
+
+  return decodedHashUnicode
     .normalize('NFD')
     .replace(COMBINING_MARKS_REGEX, '')
     .toLowerCase();
@@ -632,8 +638,42 @@ function pickFallbackText(
   return GENERIC_SECTION_FALLBACK;
 }
 
+function resolveAssetDirCandidates(): string[] {
+  const envPath = process.env[PREMIUM_TEXTS_DIR_ENV_KEY]?.trim();
+  const cwd = process.cwd();
+  const candidates = [
+    envPath,
+    join(cwd, 'src', 'assets', 'texts'),
+    join(cwd, 'assets', 'texts'),
+    join(cwd, '.output', 'server', 'assets', 'texts'),
+  ].filter((candidate): candidate is string => Boolean(candidate));
+
+  return [...new Set(candidates)];
+}
+
+function isExistingDirectory(path: string): boolean {
+  if (!existsSync(path)) {
+    return false;
+  }
+
+  try {
+    return statSync(path).isDirectory();
+  } catch {
+    return false;
+  }
+}
+
 function resolveAssetsDir(): string {
-  return join(process.cwd(), 'src', 'assets', 'texts');
+  const candidates = resolveAssetDirCandidates();
+  const assetsDir = candidates.find(isExistingDirectory);
+
+  if (!assetsDir) {
+    throw new Error(
+      `Premium temperament texts directory not found. Checked: ${candidates.join(', ')}`,
+    );
+  }
+
+  return assetsDir;
 }
 
 function resolveFilePath(temperament: TemperamentId): string {
@@ -647,7 +687,7 @@ function resolveFilePath(temperament: TemperamentId): string {
 
   if (!fileName) {
     throw new Error(
-      `Missing premium text file for temperament "${temperament}" in src/assets/texts.`,
+      `Missing premium text file for temperament "${temperament}" in "${assetsDir}".`,
     );
   }
 
@@ -716,5 +756,4 @@ export function getPremiumTemperamentText(
   PREMIUM_TEXT_CACHE[temperament] = built;
   return built;
 }
-
 

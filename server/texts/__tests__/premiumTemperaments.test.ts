@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   getPremiumTemperamentText,
+  normalizeForMatch,
   type TemperamentId,
 } from '../premiumTemperaments';
 
@@ -12,6 +13,12 @@ const TEMPERAMENT_IDS: TemperamentId[] = [
 ];
 
 describe('premium temperament texts loader', () => {
+  it('normalizes #U00xxxx sequences before accent folding', () => {
+    const normalized = normalizeForMatch('Temperamento Col#U00e9rico.txt');
+
+    expect(normalized).toContain('colerico');
+  });
+
   it.each(TEMPERAMENT_IDS)('loads and normalizes %s text', (temperament) => {
     const text = getPremiumTemperamentText(temperament);
 
