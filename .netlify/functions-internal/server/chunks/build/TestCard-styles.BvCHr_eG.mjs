@@ -1,0 +1,8 @@
+const TestCard_vue_vue_type_style_index_0_scoped_16eaeead_lang = '@keyframes rainbow-shift-16eaeead{0%{background-position:0 50%}to{background-position:200% 50%}}.rainbow-cta[data-v-16eaeead]{border-radius:8px;isolation:isolate;padding:2px;position:relative}.rainbow-cta[data-v-16eaeead]:before{animation:rainbow-shift-16eaeead 5.2s linear infinite;background:linear-gradient(90deg,#00f5ff,#00ff6a,#ffe600,#ff7a00,#ff00c8,#7a5cff,#00f5ff);background-size:300% 300%;inset:0;z-index:-1}.rainbow-cta[data-v-16eaeead]:after,.rainbow-cta[data-v-16eaeead]:before{border-radius:inherit;content:"";position:absolute}.rainbow-cta[data-v-16eaeead]:after{animation:rainbow-shift-16eaeead 2.2s linear infinite;background:inherit;background-size:300% 300%;filter:blur(10px);inset:-6px;opacity:.45;z-index:-2}.rainbow-cta__inner[data-v-16eaeead]{align-items:center;background:var(--cta-fill);border-radius:inherit;box-shadow:0 1px 2px #00000014;color:var(--cta-text);display:inline-flex;justify-content:center;padding:7px 10px;transition:transform .12s ease;white-space:nowrap}.rainbow-cta:active .rainbow-cta__inner[data-v-16eaeead]{transform:translateY(1px)}.rainbow-cta[data-v-16eaeead]{--cta-fill:hsla(0,0%,100%,.92);--cta-text:#0f172a}html.dark{--cta-fill:rgba(15,23,42,.92);--cta-text:#f8fafc}@media(prefers-reduced-motion:reduce){.rainbow-cta[data-v-16eaeead]:after,.rainbow-cta[data-v-16eaeead]:before{animation:none}}';
+
+const TestCardStyles_BvCHr_eG = [
+  TestCard_vue_vue_type_style_index_0_scoped_16eaeead_lang
+];
+
+export { TestCardStyles_BvCHr_eG as default };
+//# sourceMappingURL=TestCard-styles.BvCHr_eG.mjs.map

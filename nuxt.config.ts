@@ -1,6 +1,5 @@
 ﻿// nuxt.config.ts
-import { cpSync, existsSync, mkdirSync, readFileSync } from 'node:fs'
-import { resolve } from 'node:path'
+import { readFileSync } from 'node:fs'
 import { defineNuxtConfig } from 'nuxt/config'
 
 type ArticleManifest = {
@@ -14,11 +13,13 @@ const manifestRaw = readFileSync(
 
 const manifest = JSON.parse(manifestRaw) as ArticleManifest
 const articleUrls = manifest.articles.map((article) => `/artigos/${article.slug}`)
+const isNetlifyBuild = process.env.NETLIFY === 'true'
 
 export default defineNuxtConfig({
   srcDir: 'src/',
   compatibilityDate: '2026-01-14',
   nitro: {
+    ...(isNetlifyBuild ? { preset: 'netlify' } : {}),
     serverAssets: [
       {
         dir: './src/assets/texts',
@@ -26,19 +27,6 @@ export default defineNuxtConfig({
         pattern: '**/*.txt',
       },
     ],
-    hooks: {
-      compiled(nitro) {
-        const sourceDir = resolve(nitro.options.rootDir, 'src', 'assets', 'texts')
-        const outputDir = resolve(nitro.options.output.serverDir, 'assets', 'texts')
-
-        if (!existsSync(sourceDir)) {
-          return
-        }
-
-        mkdirSync(outputDir, { recursive: true })
-        cpSync(sourceDir, outputDir, { recursive: true, force: true })
-      },
-    },
   },
   modules: [
     '@nuxtjs/tailwindcss',

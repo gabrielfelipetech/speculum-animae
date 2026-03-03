@@ -1,0 +1,8 @@
+const BaseButton_vue_vue_type_style_index_0_scoped_88f55c7c_lang = ".btn-base[data-v-88f55c7c]{align-items:center;border:1px solid transparent;border-radius:.5rem;box-shadow:0 1px 2px #00000014;display:inline-flex;font-size:.875rem;font-weight:500;gap:.5rem;justify-content:center;outline:none;padding:.5rem 1rem;transition:transform .12s ease,background-color .12s ease,filter .12s ease}.btn-base[data-v-88f55c7c]:focus-visible{box-shadow:0 0 0 2px #6366f18c,0 0 0 4px #ffffffd9}html.dark{box-shadow:0 0 0 2px #fbbf248c,0 0 0 4px #0f172ae6}.btn-base[data-v-88f55c7c]:disabled{cursor:not-allowed;opacity:.6}.btn-base[data-v-88f55c7c]:active:not(:disabled){transform:translateY(1px)}.btn-solid[data-v-88f55c7c]{background:#4f46e5;color:#fff}.btn-solid[data-v-88f55c7c]:hover:not(:disabled){filter:brightness(.95)}html.dark{background:#fbbf24;color:#0f172a}html.dark{filter:brightness(1.02)}.btn-gradient[data-v-88f55c7c]{animation:btnShift-88f55c7c 4.5s linear infinite;background:linear-gradient(90deg,#00f5ff,#00ff6a,#ffe600,#ff7a00,#ff00c8,#7a5cff,#00f5ff);background-size:300% 300%;border-radius:.75rem;padding:2px;position:relative}.btn-gradient__inner[data-v-88f55c7c]{align-items:center;background:#ffffffeb;border-radius:.65rem;color:#0f172a;display:inline-flex;gap:.5rem;height:100%;justify-content:center;padding:.5rem 1rem;width:100%}html.dark{background:#0f172aeb;color:#f8fafc}@keyframes btnShift-88f55c7c{0%{background-position:0 50%}to{background-position:200% 50%}}@media(prefers-reduced-motion:reduce){.btn-gradient[data-v-88f55c7c]{animation:none}}";
+
+const BaseButtonStyles_C7d_O847 = [
+  BaseButton_vue_vue_type_style_index_0_scoped_88f55c7c_lang
+];
+
+export { BaseButtonStyles_C7d_O847 as default };
+//# sourceMappingURL=BaseButton-styles.C7d_O847.mjs.map

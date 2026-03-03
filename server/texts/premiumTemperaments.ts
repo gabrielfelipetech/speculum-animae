@@ -645,6 +645,10 @@ function resolveAssetDirCandidates(): string[] {
     envPath,
     join(cwd, 'src', 'assets', 'texts'),
     join(cwd, 'assets', 'texts'),
+    join(cwd, '.netlify', 'functions-internal', 'server', 'assets', 'texts'),
+    join(cwd, '.netlify', 'functions', 'server', 'assets', 'texts'),
+    join(cwd, 'dist', 'server', 'assets', 'texts'),
+    join(cwd, 'dist', 'assets', 'texts'),
     join(cwd, '.output', 'server', 'assets', 'texts'),
   ].filter((candidate): candidate is string => Boolean(candidate));
 
