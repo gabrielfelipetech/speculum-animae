@@ -1,5 +1,5 @@
 [build]
-  command = "npm ci --include=dev && (npm rebuild better-sqlite3 --build-from-source || npm i better-sqlite3 --build-from-source) && npm run build"
+  command = "node scripts/netlify-build.mjs"
   publish = "dist"
 
 [build.environment]
