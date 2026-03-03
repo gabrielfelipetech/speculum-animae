@@ -2,6 +2,8 @@ import { serverSupabaseClient } from '#supabase/server';
 import type { H3Event } from 'h3';
 import type { StoredResult } from '../../results.post';
 import { generateTemperamentsPdfBinary } from '../../report-builders/temperamentsPdfRender';
+import { generateTwelveLayersPdfBinary } from '../../report-builders/twelveLayersPdfRender';
+import { generateTemperamentsCompatibilityPdfBinary } from '../../report-builders/temperamentsCompatibilityPdfRender';
 import { resolveUserId } from '../../../utils/resolveUserId';
 import { withCriticalApiLogging } from '../../../utils/bugsnag';
 
@@ -131,14 +133,21 @@ export default defineEventHandler(async (event) => {
       });
     }
 
-    if (entry.slug !== 'temperaments') {
-      throw createError({
-        statusCode: 400,
-        message: 'PDF report is available only for temperaments.',
-      });
-    }
+    const { fileName, buffer } =
+      entry.slug === 'temperaments'
+        ? await generateTemperamentsPdfBinary(entry)
+        : entry.slug === 'twelve-layers'
+          ? await generateTwelveLayersPdfBinary(entry)
+          : entry.slug === 'temperaments-compatibility' ||
+              entry.slug === 'temperament-compatibility'
+            ? await generateTemperamentsCompatibilityPdfBinary(entry)
+            : (() => {
+                throw createError({
+                  statusCode: 400,
+                  message: 'PDF report not available for this test.',
+                });
+              })();
 
-    const { fileName, buffer } = await generateTemperamentsPdfBinary(entry);
     setHeader(event, 'Content-Type', 'application/pdf');
     setHeader(event, 'Content-Disposition', `inline; filename="${fileName}"`);
 

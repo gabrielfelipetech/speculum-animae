@@ -39,6 +39,13 @@ function createAndOpenResult(
 
   cy.contains(/Resultado indispon/i).should('not.exist');
   cy.get('h1', { timeout: 15000 }).should('exist');
+  cy.get('body')
+    .invoke('text')
+    .then((text) => {
+      expect(text).to.not.match(/1-7/);
+      expect(text).to.not.match(/\/\s*7/);
+      expect(text).to.not.match(/\/\s*5/);
+    });
 }
 
 describe('smoke three enabled tests', () => {
@@ -100,10 +107,10 @@ describe('smoke three enabled tests', () => {
       slug: 'temperaments-compatibility',
       title: 'Compatibilidade de Temperamentos',
       results: [
-        { groupId: 'dialogue', name: 'Dialogo', average: 6.2 },
-        { groupId: 'alignment', name: 'Alinhamento', average: 5.7 },
-        { groupId: 'boundaries', name: 'Limites', average: 4.9 },
-        { groupId: 'friction', name: 'Atrito', average: 3.6 },
+        { groupId: 'choleric', name: 'Colerico', average: 6.2 },
+        { groupId: 'sanguine', name: 'Sanguineo', average: 5.7 },
+        { groupId: 'phlegmatic', name: 'Fleumatico', average: 4.9 },
+        { groupId: 'melancholic', name: 'Melancolico', average: 3.6 },
       ],
     });
   });

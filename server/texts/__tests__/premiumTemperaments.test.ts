@@ -43,6 +43,22 @@ describe('premium temperament texts loader', () => {
     expect(unique.size).toBe(sections.length);
   });
 
+  it.each(TEMPERAMENT_IDS)(
+    'removes combination-pair sentences from %s sections',
+    (temperament) => {
+      const text = getPremiumTemperamentText(temperament);
+      const comboPattern =
+        /(coler|sanguin|melancol|fleumat|flegmat)\s*[-–]\s*(coler|sanguin|melancol|fleumat|flegmat)/i;
+
+      expect(comboPattern.test(text.overview)).toBe(false);
+      expect(comboPattern.test(text.strengths)).toBe(false);
+      expect(comboPattern.test(text.risks)).toBe(false);
+      expect(comboPattern.test(text.practices)).toBe(false);
+      expect(comboPattern.test(text.work)).toBe(false);
+      expect(comboPattern.test(text.relationships)).toBe(false);
+    },
+  );
+
   it('memoizes entries per temperament after first load', () => {
     const first = getPremiumTemperamentText('choleric');
     const second = getPremiumTemperamentText('choleric');

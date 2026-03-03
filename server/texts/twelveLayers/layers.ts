@@ -1,4 +1,4 @@
-// server/texts/twelveLayers/layers.ts
+﻿// server/texts/twelveLayers/layers.ts
 export interface LayerScore {
   groupId: string;
   name: string;
@@ -15,10 +15,10 @@ export function listNames(items: { name: string }[]): string {
 }
 
 export function intensityLabel(score: number): string {
-  if (score >= 6) return 'muito alta';
-  if (score >= 5) return 'alta';
-  if (score >= 4) return 'moderada';
-  if (score >= 3) return 'equilibrada';
+  if (score >= 8) return 'muito alta';
+  if (score >= 6.5) return 'alta';
+  if (score >= 5) return 'moderada';
+  if (score >= 3.5) return 'equilibrada';
   if (score >= 2) return 'baixa';
   return 'muito baixa';
 }
@@ -35,39 +35,39 @@ export const LAYER_TEXTS = {
     const fortes = listNames(top3);
     const fracas = listNames(bottom3);
     return (
-      `Este retrato foi construído a partir das suas respostas no teste das 12 camadas. ` +
-      `As camadas que aparecem com mais força em você são ${fortes}. ` +
-      `Já as que exigem mais atenção e cuidado são ${fracas}.`
+      `Este retrato foi construÃ­do a partir das suas respostas no teste das 12 camadas. ` +
+      `As camadas que aparecem com mais forÃ§a em vocÃª sÃ£o ${fortes}. ` +
+      `JÃ¡ as que exigem mais atenÃ§Ã£o e cuidado sÃ£o ${fracas}.`
     );
   },
 
   buildIntro(top3: LayerScore[], bottom3: LayerScore[]): string {
     return (
-      `As 12 camadas da personalidade funcionam como doze lentes pelas quais você enxerga a si mesmo, ` +
-      `as pessoas e o mundo. Em você, as camadas ${listNames(
+      `As 12 camadas da personalidade funcionam como doze lentes pelas quais vocÃª enxerga a si mesmo, ` +
+      `as pessoas e o mundo. Em vocÃª, as camadas ${listNames(
         top3,
-      )} aparecem como fontes claras de energia, iniciativa e motivação. ` +
-      `São dimensões em que você sente mais segurança para agir e tomar decisões, mesmo em contextos de pressão.\n\n` +
+      )} aparecem como fontes claras de energia, iniciativa e motivaÃ§Ã£o. ` +
+      `SÃ£o dimensÃµes em que vocÃª sente mais seguranÃ§a para agir e tomar decisÃµes, mesmo em contextos de pressÃ£o.\n\n` +
       `Por outro lado, camadas como ${listNames(
         bottom3,
-      )} aparecem mais frágeis ou silenciosas. Elas não são defeitos, mas áreas em que você tende a sentir ` +
-      `menos espontaneidade ou confiança. Quando a vida exige demais dessas dimensões, é comum surgir cansaso, ` +
-      `procrastinação ou sensação de inadequação.`
+      )} aparecem mais frÃ¡geis ou silenciosas. Elas nÃ£o sÃ£o defeitos, mas Ã¡reas em que vocÃª tende a sentir ` +
+      `menos espontaneidade ou confianÃ§a. Quando a vida exige demais dessas dimensÃµes, Ã© comum surgir cansaso, ` +
+      `procrastinaÃ§Ã£o ou sensaÃ§Ã£o de inadequaÃ§Ã£o.`
     );
   },
 
   buildShadow(top3: LayerScore[], bottom3: LayerScore[]): string {
     return (
-      `Todo ponto forte, se não é bem integrado, pode virar ponto cego. ` +
+      `Todo ponto forte, se nÃ£o Ã© bem integrado, pode virar ponto cego. ` +
       `Quando as camadas ${listNames(
         top3,
-      )} ficam desproporcionais, você pode exagerar justamente nas qualidades que mais admira em si mesmo: ` +
+      )} ficam desproporcionais, vocÃª pode exagerar justamente nas qualidades que mais admira em si mesmo: ` +
       `firmeza que vira rigidez, liberdade que vira fuga de compromissos, sensibilidade que vira drama, ` +
-      `inteligência que vira ironia.\n\n` +
+      `inteligÃªncia que vira ironia.\n\n` +
       `As camadas mais fracas (${listNames(
         bottom3,
-      )}) costumam ficar na “sombra”: você evita situações que as exigem, ou reage com defensividade quando alguém ` +
-      `toca nesses pontos. Reconhecer essas sombras é o início de um crescimento realmente adulto.`
+      )}) costumam ficar na â€œsombraâ€: vocÃª evita situaÃ§Ãµes que as exigem, ou reage com defensividade quando alguÃ©m ` +
+      `toca nesses pontos. Reconhecer essas sombras Ã© o inÃ­cio de um crescimento realmente adulto.`
     );
   },
 
@@ -76,11 +76,11 @@ export const LAYER_TEXTS = {
       .map((layer) => {
         const level = intensityLabel(layer.average);
         return (
-          `• ${layer.name}: aparece em você com intensidade ${level} ` +
-          `(média ${layer.average.toFixed(
+          `â€¢ ${layer.name}: aparece em vocÃª com intensidade ${level} ` +
+          `(mÃ©dia ${layer.average.toFixed(
             2,
-          )} na escala de 1 a 7). Essa camada tende a ser uma das primeiras a se manifestar ` +
-          `quando você precisa tomar decisões importantes, lidar com conflitos ou iniciar projetos.`
+          )} na escala de 0 a 10). Essa camada tende a ser uma das primeiras a se manifestar ` +
+          `quando vocÃª precisa tomar decisÃµes importantes, lidar com conflitos ou iniciar projetos.`
         );
       })
       .join('\n');
@@ -91,11 +91,12 @@ export const LAYER_TEXTS = {
       .map((layer) => {
         const level = intensityLabel(layer.average);
         return (
-          `• ${layer.name}: surge com intensidade ${level}. ` +
-          `Nessa dimensão você tende a sentir mais insegurança, cansaço ou resistência interior. ` +
-          `Quando um ambiente exige demais dessa camada, sua energia costuma baixar mais rápido.`
+          `â€¢ ${layer.name}: surge com intensidade ${level}. ` +
+          `Nessa dimensÃ£o vocÃª tende a sentir mais inseguranÃ§a, cansaÃ§o ou resistÃªncia interior. ` +
+          `Quando um ambiente exige demais dessa camada, sua energia costuma baixar mais rÃ¡pido.`
         );
       })
       .join('\n');
   },
 };
+

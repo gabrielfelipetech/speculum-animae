@@ -1,30 +1,21 @@
+import { buildTemperamentsResultPayload } from '../support/temperaments-fixtures';
+
 describe('temperaments pdf endpoint', () => {
   beforeEach(() => {
     cy.clearCookies();
     cy.clearLocalStorage();
   });
 
-  it('returns a valid PDF response', () => {
+  it('returns valid headers, filename without uuid and normalized content', () => {
     const runId = Date.now();
-    const sessionId = `result-melancholic-pdf-${runId}`;
+    const sessionId = `result-temperaments-pdf-${runId}`;
     const clientId = `e2e-client-pdf-${runId}`;
+    const payload = buildTemperamentsResultPayload('sanguine', 'choleric');
 
     cy.request('POST', '/api/results', {
       sessionId,
       clientId,
-      slug: 'temperaments',
-      results: [
-        { groupId: 'phlegmatic', name: 'Fleumatico', average: 6.2 },
-        { groupId: 'melancholic', name: 'Melancolico', average: 5.1 },
-        { groupId: 'sanguine', name: 'Sanguineo', average: 4.0 },
-        { groupId: 'choleric', name: 'Colerico', average: 3.4 }
-      ],
-      topSummaries: [],
-      meta: {
-        title: 'Temperamentos',
-        subtitle: 'Resultado para PDF',
-        groupsLabel: 'Bloco'
-      },
+      ...payload,
     }).its('status').should('eq', 200);
 
     cy.request({
@@ -33,8 +24,15 @@ describe('temperaments pdf endpoint', () => {
       failOnStatusCode: false,
     }).then((response) => {
       expect(response.status).to.eq(200);
-      expect(response.headers['content-type']).to.contain('application/pdf');
+      expect(String(response.headers['content-type'])).to.contain('application/pdf');
       expect(response.body.length).to.be.greaterThan(80_000);
+
+      const disposition = String(response.headers['content-disposition'] ?? '');
+      expect(disposition).to.contain('inline');
+      expect(disposition).to.contain(
+        'filename="relatorio-temperamentos-sanguineo-colerico.pdf"',
+      );
+      expect(disposition).to.not.match(/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}/i);
 
       const base64 = Cypress.Buffer.from(response.body, 'binary').toString('base64');
       cy.task('parsePdfText', { base64 }).then((parsed) => {

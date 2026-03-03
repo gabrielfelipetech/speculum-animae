@@ -6,7 +6,9 @@ export type DimensionLevel = 'low' | 'medium' | 'high';
 export type DimensionScore = {
   key: string;
   label: string;
+  // Always normalized to base 0-10 for display.
   raw: number;
+  // Percentage helper for bars (0-100).
   normalized: number;
   level: DimensionLevel;
 };
@@ -43,7 +45,8 @@ export type ReportBlock = ResultBlock & {
 };
 export type GraphPoint = {
   label: string;
-  value: number; 
+  // Always normalized to base 0-10 for display.
+  value: number;
 };
 
 /* ---------- 12 Camadas ---------- */
@@ -83,6 +86,7 @@ export interface TemperamentReport {
   kind: 'temperaments';
   sessionId: string;
   temperament: {
+    scores: TemperamentScore[];
     primary: TemperamentScore;
     secondary?: TemperamentScore;
   };

@@ -7,6 +7,7 @@ import type {
   ReportBlock,
   ReportSection,
 } from '~/types/results';
+import { normalizeAvgTo0to10 } from '../../../src/shared/engine/scoring';
 
 type StoredResultGroup = StoredResult['results'][number];
 
@@ -29,29 +30,26 @@ const DISCLAIMER_BY_KIND: Partial<Record<AssessmentReportKind, string>> = {
     'Este teste nao substitui avaliacao profissional. Se o sofrimento for intenso, procure ajuda especializada.',
 };
 
-function clampScore(value: number): number {
-  return Math.min(7, Math.max(1, value));
+function normalizeScorePercent(rawBase10: number): number {
+  const clamped = Math.min(10, Math.max(0, rawBase10));
+  return Math.round((clamped / 10) * 100);
 }
 
-function normalizeScore(raw: number): number {
-  const clamped = clampScore(raw);
-  return Math.round(((clamped - 1) / 6) * 100);
-}
-
-function resolveLevel(raw: number): DimensionLevel {
-  const clamped = clampScore(raw);
-  if (clamped >= 5.5) return 'high';
-  if (clamped >= 3.5) return 'medium';
+function resolveLevel(rawBase10: number): DimensionLevel {
+  const clamped = Math.min(10, Math.max(0, rawBase10));
+  if (clamped >= 7) return 'high';
+  if (clamped >= 4) return 'medium';
   return 'low';
 }
 
 function toDimensionScore(item: StoredResultGroup): DimensionScore {
+  const rawBase10 = normalizeAvgTo0to10(item.average, 1, 7);
   return {
     key: item.groupId,
     label: item.name,
-    raw: item.average,
-    normalized: normalizeScore(item.average),
-    level: resolveLevel(item.average),
+    raw: rawBase10,
+    normalized: normalizeScorePercent(rawBase10),
+    level: resolveLevel(rawBase10),
   };
 }
 

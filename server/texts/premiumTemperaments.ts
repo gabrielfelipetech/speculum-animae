@@ -1,4 +1,4 @@
-import { readdirSync, readFileSync } from 'node:fs';
+﻿import { readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
 export type TemperamentId =
@@ -212,8 +212,17 @@ const DOMAIN_ONLY_REGEX =
 const LEADING_BULLET_REGEX = /^[*\-\u2022]\s*/;
 const SHORT_HEADING_MAX_CHARS = 90;
 const SHORT_HEADING_MAX_WORDS = 12;
+const TEMPERAMENT_TOKEN_PATTERN = '(coler|sanguin|melancol|fleumat|flegmat)';
 const GENERIC_SECTION_FALLBACK =
   'Texto premium consolidado a partir do material de referencia deste temperamento, com foco em leitura pratica e aplicacao no dia a dia.';
+const COMBINATION_SECTION_MARKERS = [
+  'perfis combinados',
+  'combinacoes do temperamento',
+  'combinacoes classicas',
+  'analise detalhada das variacoes',
+  'matriz comparativa',
+  'blends',
+];
 
 function normalizeForMatch(value: string): string {
   return value
@@ -283,7 +292,7 @@ function isHeadingLine(line: string): boolean {
   const normalized = normalizeForMatch(trimmed);
   const words = normalized.split(/\s+/).filter(Boolean);
   if (words.length === 0 || words.length > SHORT_HEADING_MAX_WORDS) return false;
-  if (!/^[A-Za-z0-9À-ÿ]/u.test(trimmed)) return false;
+  if (!/^[A-Za-z0-9]/.test(trimmed)) return false;
 
   for (const keywords of Object.values(HEADING_KEYWORDS)) {
     if (keywords.some((keyword) => normalized.includes(keyword))) {
@@ -291,7 +300,7 @@ function isHeadingLine(line: string): boolean {
     }
   }
 
-  return /^[A-ZÀ-Ý0-9]/u.test(trimmed);
+  return /^[A-Z0-9]/.test(trimmed);
 }
 
 function resolveHeadingSection(line: string): SectionKey | null {
@@ -306,6 +315,69 @@ function resolveHeadingSection(line: string): SectionKey | null {
   return null;
 }
 
+function temperamentTokenMatches(value: string): number {
+  const regex = new RegExp(TEMPERAMENT_TOKEN_PATTERN, 'g');
+  const matches = value.match(regex);
+  return matches ? matches.length : 0;
+}
+
+function isPairHeadingLine(line: string, normalized: string): boolean {
+  const canonical = normalized.replace(/–|â€“/g, '-');
+
+  if (!canonical.includes('-')) {
+    return false;
+  }
+
+  if (line.length > 120) {
+    return false;
+  }
+
+  const compactPairCodeRegex =
+    /\b(?:col|san|mel|fle)\s*-\s*(?:col|san|mel|fle)\b/i;
+
+  if (compactPairCodeRegex.test(canonical)) {
+    return true;
+  }
+
+  const words = canonical.split(/\s+/).filter(Boolean);
+  return words.length <= 8 && temperamentTokenMatches(canonical) >= 2;
+}
+
+function isCombinationTransitionLine(line: string): boolean {
+  const normalized = normalizeForMatch(line);
+  const canonical = normalized.replace(/–|â€“/g, '-');
+
+  if (
+    COMBINATION_SECTION_MARKERS.some((marker) => canonical.includes(marker))
+  ) {
+    return true;
+  }
+
+  if (
+    canonical.startsWith('temperamento') &&
+    canonical.includes('combinac') &&
+    canonical.length <= 120
+  ) {
+    return true;
+  }
+
+  return isPairHeadingLine(line, canonical);
+}
+
+function isCombinationSentence(text: string): boolean {
+  const normalized = normalizeForMatch(text);
+
+  if (normalized.includes('-') && temperamentTokenMatches(normalized) >= 2) {
+    return true;
+  }
+
+  if (normalized.includes('combinac') && temperamentTokenMatches(normalized) >= 2) {
+    return true;
+  }
+
+  return false;
+}
+
 function splitSentences(text: string): string[] {
   return text
     .split(/(?<=[.!?])\s+/)
@@ -317,6 +389,18 @@ function sentenceLimit(text: string, maxSentences: number): string {
   const sentences = splitSentences(text);
   if (sentences.length === 0) return normalizeSpaces(text);
   return sentences.slice(0, maxSentences).join(' ');
+}
+
+function stripCombinationSentences(text: string): string {
+  const sentences = splitSentences(text);
+  if (sentences.length === 0) return normalizeSpaces(text);
+
+  const filtered = sentences.filter((sentence) => !isCombinationSentence(sentence));
+  if (filtered.length === 0) {
+    return normalizeSpaces(sentences[0] ?? text);
+  }
+
+  return normalizeSpaces(filtered.join(' '));
 }
 
 function countKeywordMatches(haystack: string, keywords: string[]): number {
@@ -378,6 +462,7 @@ function extractParagraphEntries(rawText: string): ParagraphEntry[] {
   const entries: ParagraphEntry[] = [];
   const paragraphBuffer: string[] = [];
   let activeHeading: SectionKey | null = null;
+  let reachedCombinationSection = false;
 
   const flushParagraph = () => {
     const cleaned = cleanParagraphLines(paragraphBuffer);
@@ -398,12 +483,26 @@ function extractParagraphEntries(rawText: string): ParagraphEntry[] {
   for (const rawLine of lines) {
     const line = rawLine.trim();
 
+    if (reachedCombinationSection) {
+      break;
+    }
+
     if (!line) {
       flushParagraph();
       continue;
     }
 
     if (isNoiseLine(line)) {
+      continue;
+    }
+
+    if (isCombinationTransitionLine(line)) {
+      flushParagraph();
+      // Some source files mention "combinations" in the title itself.
+      // Stop only after collecting enough base temperament paragraphs.
+      if (entries.length >= 8) {
+        reachedCombinationSection = true;
+      }
       continue;
     }
 
@@ -569,12 +668,24 @@ function buildTemperamentText(temperament: TemperamentId): TemperamentPremiumTex
   const relationships = selectSectionText(paragraphs, 'relationships', usedIndexes);
 
   const baseText = {
-    overview: overview || pickFallbackText(paragraphs, [0, 1]),
-    strengths: strengths || pickFallbackText(paragraphs, [1, 0, 2]),
-    risks: risks || pickFallbackText(paragraphs, [2, 3, 1]),
-    practices: practices || pickFallbackText(paragraphs, [3, 2, 4]),
-    work: work || pickFallbackText(paragraphs, [4, 1, 0]),
-    relationships: relationships || pickFallbackText(paragraphs, [5, 2, 1]),
+    overview: stripCombinationSentences(
+      overview || pickFallbackText(paragraphs, [0, 1]),
+    ),
+    strengths: stripCombinationSentences(
+      strengths || pickFallbackText(paragraphs, [1, 0, 2]),
+    ),
+    risks: stripCombinationSentences(
+      risks || pickFallbackText(paragraphs, [2, 3, 1]),
+    ),
+    practices: stripCombinationSentences(
+      practices || pickFallbackText(paragraphs, [3, 2, 4]),
+    ),
+    work: stripCombinationSentences(
+      work || pickFallbackText(paragraphs, [4, 1, 0]),
+    ),
+    relationships: stripCombinationSentences(
+      relationships || pickFallbackText(paragraphs, [5, 2, 1]),
+    ),
   };
 
   return {
@@ -605,3 +716,5 @@ export function getPremiumTemperamentText(
   PREMIUM_TEXT_CACHE[temperament] = built;
   return built;
 }
+
+

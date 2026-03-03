@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import {
   TEMPERAMENT_SOURCE_SCALE,
+  normalizeAvgTo0to10,
+  normalizeTo0to10,
   normalizeScaleValue,
 } from '../normalizeScale';
 
@@ -40,5 +42,36 @@ describe('normalizeScaleValue', () => {
 
     expect(result.source).toBe(4.33);
     expect(result.base10).toBe(5.55);
+  });
+});
+
+describe('normalizeTo0to10', () => {
+  it('maps source minimum to zero', () => {
+    expect(normalizeTo0to10(1, 1, 7)).toBe(0);
+  });
+
+  it('maps source maximum to ten', () => {
+    expect(normalizeTo0to10(7, 1, 7)).toBe(10);
+  });
+
+  it('clamps values outside source range before normalizing', () => {
+    expect(normalizeTo0to10(-5, 1, 7)).toBe(0);
+    expect(normalizeTo0to10(99, 1, 7)).toBe(10);
+  });
+
+  it('keeps consistent rounding', () => {
+    expect(normalizeTo0to10(4.333333, 1, 7)).toBe(5.56);
+  });
+});
+
+describe('normalizeAvgTo0to10', () => {
+  it('normalizes average values with clamp and rounding', () => {
+    expect(
+      normalizeAvgTo0to10(
+        4.333333,
+        TEMPERAMENT_SOURCE_SCALE.min,
+        TEMPERAMENT_SOURCE_SCALE.max,
+      ),
+    ).toBe(5.56);
   });
 });

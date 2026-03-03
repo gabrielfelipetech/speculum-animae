@@ -12,11 +12,17 @@ import {
 import { CAREER_TEXTS } from '../../texts/twelveLayers/career';
 import { GROWTH_TEXTS } from '../../texts/twelveLayers/growth';
 import { REL_TEXTS } from '../../texts/twelveLayers/relationships';
+import { normalizeAvgTo0to10 } from '../../../src/shared/engine/scoring';
 
 export function buildTwelveLayersReport(
   entry: StoredResult,
 ): TwelveLayersReport {
-  const sorted: LayerScore[] = [...entry.results].sort(
+  const normalizedResults: LayerScore[] = entry.results.map((result) => ({
+    ...result,
+    average: normalizeAvgTo0to10(result.average, 1, 7),
+  }));
+
+  const sorted: LayerScore[] = [...normalizedResults].sort(
     (a, b) => b.average - a.average,
   );
 
@@ -51,7 +57,7 @@ export function buildTwelveLayersReport(
     },
   ];
 
-  const graph = entry.results.map((r) => ({
+  const graph = normalizedResults.map((r) => ({
     label: r.name,
     value: r.average,
   }));

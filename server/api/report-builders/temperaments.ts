@@ -1,5 +1,6 @@
 import type { StoredResult } from '../results.post';
 import type { ResultBlock, TemperamentReport } from '~/types/results';
+import { normalizeAvgTo0to10 } from '../../../src/shared/engine/scoring';
 import {
   TEMPERAMENT_TEXTS,
   type TemperamentScore,
@@ -44,8 +45,15 @@ function withPremiumNarrative(
 }
 
 export function buildTemperamentsReport(entry: StoredResult): TemperamentReport {
+  const normalizedScores = entry.results
+    .filter((result) => isTemperamentId(result.groupId))
+    .map((result) => ({
+      ...result,
+      average: normalizeAvgTo0to10(result.average, 1, 7),
+    })) as TemperamentScore[];
+
   const { primary, secondary } = TEMPERAMENT_TEXTS.detectTemperament(
-    entry.results as TemperamentScore[],
+    normalizedScores,
   );
 
   if (!primary) {
@@ -153,7 +161,11 @@ export function buildTemperamentsReport(entry: StoredResult): TemperamentReport 
   return {
     kind: 'temperaments',
     sessionId: entry.id,
-    temperament: { primary, secondary },
+    temperament: {
+      scores: normalizedScores,
+      primary,
+      secondary: secondary ?? undefined,
+    },
     overall: {
       title: TEMPERAMENT_TEXTS.buildTitle(primary, secondary),
       subtitle: TEMPERAMENT_TEXTS.buildSubtitle(primary, secondary),

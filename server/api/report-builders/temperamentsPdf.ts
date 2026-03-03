@@ -8,8 +8,7 @@ import {
 import {
   TEMPERAMENT_SOURCE_SCALE,
   normalizeScaleValue,
-  type ScoreScale,
-} from '../../../src/shared/engine/scoring/normalizeScale';
+} from '../../../src/shared/engine/scoring';
 
 export type GrowthHorizon = 'week' | 'month' | 'quarter';
 
@@ -67,32 +66,32 @@ export const TEMPERAMENT_LABELS: Record<TemperamentId, string> = {
   phlegmatic: 'Fleumatico',
 };
 
-type TemperamentScoreSummary = {
+export type TemperamentScoreSummary = {
   id: TemperamentId;
   name: string;
-  average: number;
   sourceAverage: number;
   base10Average: number;
 };
 
 export interface TemperamentsPdfContent {
-  scale: ScoreScale;
   main: {
     id: TemperamentId;
-    average: number;
     sourceAverage: number;
     base10Average: number;
   };
   secondary: {
     id: TemperamentId;
-    average: number;
     sourceAverage: number;
     base10Average: number;
   } | null;
+  remaining: TemperamentScoreSummary[];
   resultsOrdered: TemperamentScoreSummary[];
   mainProfile: TemperamentProfile;
   secondaryProfile: TemperamentProfile | null;
+  remainingProfiles: TemperamentProfile[];
   integratedReadingParagraphs: string[];
+  sevenDayPlan: string[];
+  thirtyDayPlan: string[];
   finalChecklist: string[];
 }
 
@@ -100,7 +99,7 @@ function splitParagraphs(text: string): string[] {
   return text
     .split(/\n\s*\n+/)
     .map((paragraph) => paragraph.trim())
-    .filter((paragraph) => paragraph.length > 0);
+    .filter((paragraph) => paragraph.length >= 60);
 }
 
 function splitSentences(text: string): string[] {
@@ -164,31 +163,68 @@ function buildIntegratedReadingParagraphs(
   mainProfile: TemperamentProfile,
   secondaryProfile: TemperamentProfile | null,
 ): string[] {
-  const overview = compactSection([mainProfile.overview], 4);
-  const strengths = compactSection(mainProfile.strengths, 3);
-  const risks = compactSection(mainProfile.risks, 2);
-  const work = compactSection(mainProfile.work, 2);
-  const relationships = compactSection(mainProfile.relationships, 2);
-  const practices = compactSection(mainProfile.spiritual, 2);
+  const mainOverview = compactSection([mainProfile.overview], 4);
+  const mainStrengths = compactSection(mainProfile.strengths, 3);
+  const mainRisks = compactSection(mainProfile.risks, 3);
 
   if (!secondaryProfile) {
     return [
-      `No eixo ${mainProfile.label}, ${overview}`,
-      `Na pratica, esse perfil se fortalece quando ${strengths.toLowerCase()} ${work}`,
-      `Os principais pontos de atencao sao ${risks.toLowerCase()} ${relationships} ${practices}`,
+      `O eixo predominante ${mainProfile.label} aparece com consistencia no seu modo de decidir e agir. ${mainOverview}`,
+      `Na pratica, esse perfil tende a se fortalecer quando prioriza ${mainStrengths.toLowerCase()}, mantendo vigilancia sobre ${mainRisks.toLowerCase()}.`,
     ];
   }
 
   const secondaryOverview = compactSection([secondaryProfile.overview], 3);
   const secondaryStrengths = compactSection(secondaryProfile.strengths, 2);
   const secondaryRisks = compactSection(secondaryProfile.risks, 2);
-  const secondaryPractices = compactSection(secondaryProfile.spiritual, 2);
 
   return [
-    `A combinacao ${mainProfile.label}-${secondaryProfile.label} mostra um eixo dominante no principal com modulacao clara do secundario. ${overview}`,
-    `No cotidiano, o principal se expressa por ${strengths.toLowerCase()} enquanto o secundario adiciona ${secondaryStrengths.toLowerCase()}`,
-    `Em contextos de pressao, aparecem riscos complementares: ${risks.toLowerCase()} e ${secondaryRisks.toLowerCase()}`,
-    `A leitura integrada fica mais estavel quando o plano de crescimento combina ${practices.toLowerCase()} com ${secondaryPractices.toLowerCase()} ${secondaryOverview}`,
+    `A combinacao ${mainProfile.label}-${secondaryProfile.label} aponta um eixo dominante no principal e modulacao consistente no secundario. ${mainOverview}`,
+    `No cotidiano, o principal tende a aparecer por meio de ${mainStrengths.toLowerCase()}, enquanto o secundario adiciona ${secondaryStrengths.toLowerCase()}.`,
+    `Em contextos de pressao, surgem riscos complementares: ${mainRisks.toLowerCase()} e ${secondaryRisks.toLowerCase()}.`,
+    `A leitura integrada fica mais estavel quando as praticas do principal sao executadas junto das praticas do secundario, mantendo ritmo e coerencia de longo prazo. ${secondaryOverview}`,
+  ];
+}
+
+function buildSevenDayPlan(
+  mainProfile: TemperamentProfile,
+  secondaryProfile: TemperamentProfile | null,
+): string[] {
+  const base = [
+    `Dia 1: releia o panorama ${mainProfile.label} e escreva 3 forcas praticas para aplicar hoje.`,
+    `Dia 2: selecione 1 risco recorrente de ${mainProfile.label} e defina um gatilho de interrupcao.`,
+    'Dia 3: execute uma acao objetiva de melhoria no trabalho em menos de 30 minutos.',
+    'Dia 4: aplique uma conversa intencional de escuta ativa em um relacionamento importante.',
+    'Dia 5: revise limites de rotina (sono, foco, pausas) para proteger constancia emocional.',
+    'Dia 6: escolha uma pratica espiritual simples e repita em horario fixo.',
+    'Dia 7: consolide aprendizados da semana e ajuste 2 prioridades da semana seguinte.',
+  ];
+
+  if (!secondaryProfile) {
+    return base;
+  }
+
+  return [
+    ...base.slice(0, 3),
+    `Dia 4: aplique um ajuste de convivencia que una ${mainProfile.label} e ${secondaryProfile.label} sem excessos de nenhum lado.`,
+    ...base.slice(4),
+  ];
+}
+
+function buildThirtyDayPlan(
+  mainProfile: TemperamentProfile,
+  secondaryProfile: TemperamentProfile | null,
+): string[] {
+  const focusLabel = secondaryProfile
+    ? `${mainProfile.label}-${secondaryProfile.label}`
+    : mainProfile.label;
+
+  return [
+    `Semana 1 (${focusLabel}): organizar ambiente, rotina e prioridades para reduzir ruido decisorio.`,
+    'Semana 2: consolidar 2 habitos de constancia (agenda semanal + revisao diaria curta).',
+    'Semana 3: praticar 3 conversas objetivas de alinhamento com foco em clareza e caridade.',
+    'Semana 4: revisar indicadores pessoais (energia, foco, conflitos, progresso) e ajustar ciclo.',
+    'Checklist final: manter 1 compromisso de trabalho, 1 de relacao e 1 de crescimento interior por semana.',
   ];
 }
 
@@ -201,8 +237,8 @@ function buildFinalChecklist(
     ...(secondaryProfile?.examen ?? []),
   ]);
 
-  if (base.length >= 5) {
-    return base.slice(0, 5);
+  if (base.length >= 8) {
+    return base.slice(0, 8);
   }
 
   const fallback = [
@@ -213,7 +249,7 @@ function buildFinalChecklist(
     firstSentence(compactSection(mainProfile.spiritual, 1)),
   ].filter((item) => item.length > 0);
 
-  return dedupeChecklist([...base, ...fallback]).slice(0, 5);
+  return dedupeChecklist([...base, ...fallback]).slice(0, 8);
 }
 
 function normalizeResultEntry(
@@ -228,7 +264,6 @@ function normalizeResultEntry(
   return {
     id: entry.groupId,
     name: TEMPERAMENT_LABELS_PT[entry.groupId],
-    average: normalized.source,
     sourceAverage: normalized.source,
     base10Average: normalized.base10,
   };
@@ -240,7 +275,7 @@ export function buildTemperamentsPdfContent(
   const sorted = entry.results
     .map(normalizeResultEntry)
     .filter((result): result is TemperamentScoreSummary => result !== null)
-    .sort((a, b) => b.sourceAverage - a.sourceAverage);
+    .sort((a, b) => b.base10Average - a.base10Average);
 
   if (sorted.length === 0) {
     throw new Error('No temperament scores available to build PDF content.');
@@ -248,32 +283,37 @@ export function buildTemperamentsPdfContent(
 
   const main = sorted[0];
   const secondary = sorted[1] ?? null;
+  const remaining = sorted.slice(2);
   const mainProfile = buildProfile(main.id);
   const secondaryProfile = secondary ? buildProfile(secondary.id) : null;
+  const remainingProfiles = remaining.map((entryScore) =>
+    buildProfile(entryScore.id),
+  );
 
   return {
-    scale: TEMPERAMENT_SOURCE_SCALE,
     main: {
       id: main.id,
-      average: main.average,
       sourceAverage: main.sourceAverage,
       base10Average: main.base10Average,
     },
     secondary: secondary
       ? {
           id: secondary.id,
-          average: secondary.average,
           sourceAverage: secondary.sourceAverage,
           base10Average: secondary.base10Average,
         }
       : null,
+    remaining,
     resultsOrdered: sorted,
     mainProfile,
     secondaryProfile,
+    remainingProfiles,
     integratedReadingParagraphs: buildIntegratedReadingParagraphs(
       mainProfile,
       secondaryProfile,
     ),
+    sevenDayPlan: buildSevenDayPlan(mainProfile, secondaryProfile),
+    thirtyDayPlan: buildThirtyDayPlan(mainProfile, secondaryProfile),
     finalChecklist: buildFinalChecklist(mainProfile, secondaryProfile),
   };
 }

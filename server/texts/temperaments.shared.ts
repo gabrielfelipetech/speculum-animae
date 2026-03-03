@@ -8,10 +8,10 @@ export interface TemperamentScore {
 }
 
 export function intensityLabel(score: number): string {
-  if (score >= 6) return 'muito alta';
-  if (score >= 5) return 'alta';
-  if (score >= 4) return 'moderada';
-  if (score >= 3) return 'equilibrada';
+  if (score >= 8) return 'muito alta';
+  if (score >= 6.5) return 'alta';
+  if (score >= 5) return 'moderada';
+  if (score >= 3.5) return 'equilibrada';
   if (score >= 2) return 'baixa';
   return 'muito baixa';
 }

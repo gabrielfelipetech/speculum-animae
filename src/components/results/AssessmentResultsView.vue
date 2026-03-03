@@ -55,7 +55,7 @@
           Pontuacao por dimensao
         </h2>
         <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">
-          Valores na escala de 1 a 7 para cada dimensao avaliada.
+          Valores na escala de 0 a 10 para cada dimensao avaliada.
         </p>
 
         <div class="mt-4 space-y-3">
@@ -65,7 +65,7 @@
                 {{ point.label }}
               </span>
               <span class="text-slate-500 dark:text-slate-400">
-                {{ point.raw.toFixed(2) }} / 7
+                {{ point.raw.toFixed(2) }} / 10
               </span>
             </div>
             <div class="h-2 rounded-full bg-slate-200/80 dark:bg-slate-800/80">
@@ -105,6 +105,29 @@
         class="reveal"
         v-reveal="sectionDelayBase + sectionDelayStep * index"
       />
+
+      <section
+        v-if="canDownloadPdf"
+        class="rounded-2xl border border-rose-300/70 bg-rose-50/80 p-5 text-sm dark:border-rose-500/40 dark:bg-rose-900/20 reveal"
+        v-reveal="nextStepDelay + 80"
+      >
+        <h2 class="text-base font-semibold text-rose-900 dark:text-rose-100">
+          Relatorio PDF completo
+        </h2>
+        <p class="mt-1 text-xs text-slate-600 dark:text-slate-300">
+          Gere o PDF com analise detalhada e plano pratico de ajustes em escala 0-10.
+        </p>
+        <BaseButton
+          type="button"
+          variant="gradient"
+          class="mt-3 rounded-full"
+          :disabled="isDownloading"
+          @click="downloadPdf"
+        >
+          <span v-if="isDownloading">Gerando PDF...</span>
+          <span v-else>Baixar relatorio completo (PDF)</span>
+        </BaseButton>
+      </section>
 
       <section
         v-if="testSlug"
@@ -183,6 +206,7 @@ const router = useRouter();
 const supabaseUser = useSupabaseUser();
 const report = props.report;
 const theme = props.theme;
+const isDownloading = ref(false);
 const testSlug = computed(() => props.testSlug ?? null);
 const actorKey = computed(() => {
   const userKey = buildUserActorKey(supabaseUser.value?.id ?? null);
@@ -201,6 +225,13 @@ const ids = {
 
 const sidebarSections = computed(() => report.sections ?? []);
 const sectionsCount = computed(() => report.sections?.length ?? 0);
+const canDownloadPdf = computed(
+  () => report.kind === 'temperamentCompatibility',
+);
+const isLoggedIn = computed(() => {
+  const raw = supabaseUser.value?.id;
+  return typeof raw === 'string' && /^[0-9a-f-]{36}$/i.test(raw);
+});
 
 const sectionDelayBase = 400;
 const sectionDelayStep = 80;
@@ -218,5 +249,22 @@ function handleRetake(): void {
   if (!testSlug.value) return;
   clearLastResultId(testSlug.value, actorKey.value);
   router.push({ path: `/testes/${testSlug.value}`, query: { fresh: '1' } });
+}
+
+function downloadPdf(): void {
+  if (!canDownloadPdf.value || isDownloading.value || !import.meta.client) return;
+  isDownloading.value = true;
+
+  const clientId = !isLoggedIn.value ? getOrCreateClientId() : null;
+  if (!isLoggedIn.value && !clientId) {
+    isDownloading.value = false;
+    return;
+  }
+
+  const query = clientId ? `?clientId=${encodeURIComponent(clientId)}` : '';
+  window.location.href = `/api/results/${report.sessionId}/pdf${query}`;
+  setTimeout(() => {
+    isDownloading.value = false;
+  }, 8000);
 }
 </script>

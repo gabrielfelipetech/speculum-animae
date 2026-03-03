@@ -1,21 +1,20 @@
 import { describe, expect, it } from 'vitest';
 import { PDFParse } from 'pdf-parse';
 import type { StoredResult } from '../../results.post';
-import { generateTemperamentsPdfBinary } from '../temperamentsPdfRender';
+import { generateTwelveLayersPdfBinary } from '../twelveLayersPdfRender';
 
 const FIXTURE_RESULT: StoredResult = {
-  id: 'session-pdf-layout',
-  slug: 'temperaments',
+  id: 'session-pdf-twelve-layers',
+  slug: 'twelve-layers',
   userId: null,
   clientId: 'client-layout',
   email: null,
-  results: [
-    { groupId: 'melancholic', name: 'Melancolico', average: 6.6 },
-    { groupId: 'phlegmatic', name: 'Fleumatico', average: 6.1 },
-    { groupId: 'sanguine', name: 'Sanguineo', average: 4.2 },
-    { groupId: 'choleric', name: 'Colerico', average: 3.9 },
-  ],
-  timestamp: '2026-03-02T00:00:00.000Z',
+  results: Array.from({ length: 12 }).map((_, index) => ({
+    groupId: `layer-${index + 1}`,
+    name: `Camada ${index + 1}`,
+    average: 6.8 - index * 0.35,
+  })),
+  timestamp: '2026-03-03T00:00:00.000Z',
 };
 
 function extractPageCount(buffer: Buffer): number {
@@ -23,27 +22,24 @@ function extractPageCount(buffer: Buffer): number {
   const matches = [...text.matchAll(/\/Count\s+(\d+)/g)].map((match) =>
     Number(match[1]),
   );
-
   if (matches.length === 0) return 0;
   return Math.max(...matches);
 }
 
-describe('temperaments pdf layout', () => {
-  it('generates a dense multi-page PDF buffer without source-scale remnants', async () => {
-    const { buffer } = await generateTemperamentsPdfBinary(FIXTURE_RESULT);
+describe('twelve-layers pdf layout', () => {
+  it('generates a 0-10 report with at least six pages', async () => {
+    const { fileName, buffer } = await generateTwelveLayersPdfBinary(FIXTURE_RESULT);
     const pageCount = extractPageCount(buffer);
     const parser = new PDFParse({ data: buffer });
     const parsed = await parser.getText();
     await parser.destroy();
     const extractedText = parsed.text.toLowerCase();
-    console.info(`[temperamentsPdf.layout] bytes=${buffer.length} pages=${pageCount}`);
 
+    expect(fileName).toBe('relatorio-12-camadas.pdf');
     expect(buffer.subarray(0, 5).toString('utf8')).toBe('%PDF-');
-    expect(buffer.length).toBeGreaterThan(80_000);
+    expect(buffer.length).toBeGreaterThan(45_000);
     expect(pageCount).toBeGreaterThanOrEqual(6);
-    expect(pageCount).toBeLessThanOrEqual(30);
     expect(extractedText).not.toContain('escala 1-7');
     expect(extractedText).not.toContain('/ 7');
-    expect(extractedText).not.toContain('media (escala');
   });
 });

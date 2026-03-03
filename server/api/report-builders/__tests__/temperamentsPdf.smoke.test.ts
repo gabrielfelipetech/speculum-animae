@@ -22,7 +22,7 @@ describe('temperaments pdf binary smoke', () => {
     const { fileName, buffer } = await generateTemperamentsPdfBinary(BASE_RESULT);
 
     expect(fileName).toBe('relatorio-temperamentos-sanguineo-colerico.pdf');
-    expect(buffer.length).toBeGreaterThan(1024);
+    expect(buffer.length).toBeGreaterThan(80_000);
     expect(buffer.subarray(0, 5).toString('utf8')).toBe('%PDF-');
   });
 });

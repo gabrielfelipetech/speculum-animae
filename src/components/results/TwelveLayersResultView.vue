@@ -36,7 +36,7 @@
         </h2>
         <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">
           Cada barra representa a intensidade média de uma camada na sua
-          personalidade (escala de 1 a 7).
+          personalidade (escala de 0 a 10).
         </p>
 
         <div class="mt-4 space-y-3">
@@ -46,13 +46,13 @@
                 {{ point.label }}
               </span>
               <span class="text-slate-500 dark:text-slate-400">
-                {{ point.value.toFixed(2) }} / 7
+                {{ point.value.toFixed(2) }} / 10
               </span>
             </div>
             <div class="h-2 rounded-full bg-slate-200/80 dark:bg-slate-800/80">
               <div
                 class="h-2 rounded-full bg-amber-500 dark:bg-amber-400"
-                :style="{ width: `${(point.value / 7) * 100}%` }"
+                :style="{ width: `${(point.value / 10) * 100}%` }"
               />
             </div>
           </div>
@@ -80,8 +80,15 @@
           baseado no seu resultado.
         </p>
 
-        <BaseButton type="button" variant="gradient" class="mt-4 rounded-full">
-          Baixar relatório completo (PDF)
+        <BaseButton
+          type="button"
+          variant="gradient"
+          class="mt-4 rounded-full"
+          :disabled="isDownloading"
+          @click="downloadPdf"
+        >
+          <span v-if="isDownloading">Gerando PDF...</span>
+          <span v-else>Baixar relatório completo (PDF)</span>
         </BaseButton>
       </div>
 
@@ -146,11 +153,16 @@ const props = defineProps<{
 const report = props.report
 const router = useRouter()
 const supabaseUser = useSupabaseUser()
+const isDownloading = ref(false)
 const testSlug = computed(() => props.testSlug ?? null)
 const actorKey = computed(() => {
   const userKey = buildUserActorKey(supabaseUser.value?.id ?? null)
   if (userKey) return userKey
   return buildClientActorKey(getOrCreateClientId())
+})
+const isLoggedIn = computed(() => {
+  const raw = supabaseUser.value?.id
+  return typeof raw === 'string' && /^[0-9a-f-]{36}$/i.test(raw)
 })
 const headerRef = ref<HTMLElement | null>(null)
 const { revealNow } = useReveal()
@@ -170,6 +182,23 @@ function handleRetake(): void {
   if (!testSlug.value) return
   clearLastResultId(testSlug.value, actorKey.value)
   router.push({ path: `/testes/${testSlug.value}`, query: { fresh: '1' } })
+}
+
+function downloadPdf(): void {
+  if (isDownloading.value || !import.meta.client) return
+  isDownloading.value = true
+
+  const clientId = !isLoggedIn.value ? getOrCreateClientId() : null
+  if (!isLoggedIn.value && !clientId) {
+    isDownloading.value = false
+    return
+  }
+
+  const query = clientId ? `?clientId=${encodeURIComponent(clientId)}` : ''
+  window.location.href = `/api/results/${report.sessionId}/pdf${query}`
+  setTimeout(() => {
+    isDownloading.value = false
+  }, 8000)
 }
 </script>
 

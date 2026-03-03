@@ -45,6 +45,8 @@ describe('temperaments premium report', () => {
     cy.get('body').invoke('text').then((text) => {
       const scoreMatches = [...text.matchAll(/Media \(0-10\):\s*([0-9]+(?:\.[0-9]+)?)/g)];
       expect(scoreMatches.length).to.be.greaterThan(0);
+      expect(text).to.not.match(/1-7/);
+      expect(text).to.not.match(/\/\s*5/);
 
       for (const match of scoreMatches) {
         const value = Number(match[1]);

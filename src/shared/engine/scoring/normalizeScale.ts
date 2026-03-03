@@ -28,10 +28,28 @@ export function clampToScale(value: number, scale: ScoreScale): number {
 }
 
 export function toBase10(value: number, scale: ScoreScale): number {
-  if (scale.max <= scale.min) return 0;
-  const clamped = clampToScale(value, scale);
-  const normalized = ((clamped - scale.min) / (scale.max - scale.min)) * 10;
-  return clamp(normalized, 0, 10);
+  return normalizeTo0to10(value, scale.min, scale.max);
+}
+
+export function normalizeTo0to10(
+  value: number,
+  min: number,
+  max: number,
+  decimals = 2,
+): number {
+  if (max <= min) return 0;
+  const clamped = clamp(value, min, max);
+  const normalized = ((clamped - min) / (max - min)) * 10;
+  return round(clamp(normalized, 0, 10), decimals);
+}
+
+export function normalizeAvgTo0to10(
+  avgSource: number,
+  sourceMin: number,
+  sourceMax: number,
+  decimals = 2,
+): number {
+  return normalizeTo0to10(avgSource, sourceMin, sourceMax, decimals);
 }
 
 export function normalizeScaleValue(
@@ -40,6 +58,6 @@ export function normalizeScaleValue(
   decimals = 2,
 ): NormalizedScaleValue {
   const source = round(clampToScale(value, scale), decimals);
-  const base10 = round(toBase10(source, scale), decimals);
+  const base10 = normalizeTo0to10(source, scale.min, scale.max, decimals);
   return { source, base10 };
 }

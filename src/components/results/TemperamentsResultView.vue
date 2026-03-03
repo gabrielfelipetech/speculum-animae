@@ -44,10 +44,9 @@
               <span class="font-medium text-slate-700 dark:text-slate-200">
                 {{ score.label }}
               </span>
-              <div class="text-right text-slate-500 dark:text-slate-400">
-                <p>Media (0-10): {{ score.base10.toFixed(2) }}</p>
-                <p>Media (escala 1-7): {{ score.source.toFixed(2) }}</p>
-              </div>
+              <span class="text-slate-500 dark:text-slate-400">
+                Media (0-10): {{ score.base10.toFixed(2) }}
+              </span>
             </div>
             <div class="h-2 rounded-full bg-slate-200/80 dark:bg-slate-800/80">
               <div
@@ -174,14 +173,9 @@ import SkeletonBlock from '~/components/base/SkeletonBlock.vue'
 import { getOrCreateClientId } from '~/utils/clientId'
 import { clearLastResultId } from '~/utils/testLastResult'
 import { buildClientActorKey, buildUserActorKey } from '~/utils/actorKey'
-import {
-  TEMPERAMENT_SOURCE_SCALE,
-  normalizeScaleValue,
-} from '~/shared/engine/scoring'
 
 type TemperamentGraphPoint = {
   label: string
-  source: number
   base10: number
 }
 
@@ -243,32 +237,19 @@ function handleRetake(): void {
 }
 
 const graphPoints = computed<TemperamentGraphPoint[]>(() => {
-  const all: { label: string; value: number }[] = []
+  const scores = report.temperament.scores?.length
+    ? report.temperament.scores
+    : [
+        report.temperament.primary,
+        ...(report.temperament.secondary ? [report.temperament.secondary] : []),
+      ]
 
-  all.push({
-    label: report.temperament.primary.name,
-    value: report.temperament.primary.average,
-  })
-
-  if (report.temperament.secondary) {
-    all.push({
-      label: report.temperament.secondary.name,
-      value: report.temperament.secondary.average,
-    })
-  }
-
-  return all.map((item) => {
-    const normalized = normalizeScaleValue(
-      item.value,
-      TEMPERAMENT_SOURCE_SCALE,
-    )
-
-    return {
-      label: item.label,
-      source: normalized.source,
-      base10: normalized.base10,
-    }
-  })
+  return [...scores]
+    .sort((a, b) => b.average - a.average)
+    .map((item) => ({
+      label: item.name,
+      base10: item.average,
+    }))
 })
 </script>
 
